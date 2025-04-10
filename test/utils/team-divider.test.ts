@@ -1,6 +1,6 @@
-import { TeamDivider } from '../../utils/team-divider'
-import { tierEnum, rankEnum } from '../../utils/rank'
 import { Player } from '../../utils/player'
+import { rankEnum, tierEnum } from '../../utils/rank'
+import { TeamDivider } from '../../utils/team-divider'
 
 describe('TeamDivider', () => {
   let teamDivider: TeamDivider
