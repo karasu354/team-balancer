@@ -1,9 +1,9 @@
 import {
   calcurateRating,
-  tierEnum,
-  rankEnum,
-  isValidTier,
   isValidRank,
+  isValidTier,
+  rankEnum,
+  tierEnum,
 } from '../../utils/rank'
 
 describe('calcurateRating', () => {

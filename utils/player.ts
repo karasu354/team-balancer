@@ -1,4 +1,4 @@
-import { calcurateRating, tierEnum, rankEnum } from './rank'
+import { calcurateRating, rankEnum, tierEnum } from './rank'
 
 export class Player {
   // サモナー名とタグ名
