@@ -1,5 +1,5 @@
-import { Player } from '../../utils/player'
 import { tierEnum, rankEnum, calcurateRating } from '../../utils/rank'
+import { Player } from '../../utils/player'
 
 describe('Player', () => {
   let player: Player
