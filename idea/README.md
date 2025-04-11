@@ -1,6 +1,19 @@
 ## 構想
 
 使用方法の想定
+https://developer.riotgames.com/
+
+Player0 #JP1がロビーに参加しました。
+Player1 #JP1がロビーに参加しました。
+Player2 #JP1がロビーに参加しました。
+Player3 #JP1がロビーに参加しました。
+Player4 #JP1がロビーに参加しました。
+Player5 #JP1がロビーに参加しました。
+Player6 #JP1がロビーに参加しました。
+Player7 #JP1がロビーに参加しました。
+Player8 #JP1がロビーに参加しました。
+Player9 #JP1がロビーに参加しました。
+https://discord.com/channels/648132459698978816/648135117528629249/1360248923771637770
 
 1. Riot APIのAPIキーを発行し、サイトに登録する。
 2. カスタムの入出ログから全プレイヤーの名前とタグを使ってランクをRiot APIから取得
