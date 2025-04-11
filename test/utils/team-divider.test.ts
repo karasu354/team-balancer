@@ -1,5 +1,5 @@
 import { Player } from '../../utils/player'
-import { TeamDivider } from '../../utils/team-divider'
+import { TeamDivider } from '../../utils/teamDivider'
 
 describe('TeamDivider', () => {
   let teamDivider: TeamDivider

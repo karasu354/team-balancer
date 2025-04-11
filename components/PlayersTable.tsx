@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { Player } from '../utils/player'
-import { TeamDivider } from '../utils/team-divider'
+import { TeamDivider } from '../utils/teamDivider'
 import PlayerCard from './PlayerCard'
 
 interface PlayersTableProps {
