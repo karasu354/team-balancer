@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-import { TeamDivider } from '../utils/team-divider'
+import { TeamDivider } from '../utils/teamDivider'
 
 interface ChatLogInputFormProps {
   teamDivider: TeamDivider
