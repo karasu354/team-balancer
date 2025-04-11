@@ -62,3 +62,49 @@ export function computeDeterminant(matrix: number[][]): number {
 
   return determinant
 }
+
+/**
+ * カスタムマッチのチャットログを解析してプレイヤー名とタグ名を抽出する関数
+ * @param logs 改行コードを含むチャットログの文字列
+ * @returns プレイヤー名とタグ名の二重リスト
+ */
+export function parseChatLogs(logs: string): [string, string][] {
+  const result: [string, string][] = []
+  const lines = logs.split('\n') // 改行で分割
+
+  // 入室ログの正規表現
+  const joinLogRegex = /^(.+?) #(.+?)がロビーに参加しました。$/
+  // 退室ログの正規表現
+  const leaveLogRegex = /^(.+?) #(.+?)がロビーから退出しました。$/
+
+  lines.forEach((line) => {
+    // 文前後の空白を削除
+    const trimmedLine = line.trim()
+
+    // コロンが含まれる場合、そのコロンの前にシャープがない場合は無視
+    const colonIndex = trimmedLine.indexOf(':')
+    if (colonIndex !== -1 && trimmedLine.lastIndexOf('#', colonIndex) === -1)
+      return
+
+    // 入室ログの処理
+    const joinMatch = trimmedLine.match(joinLogRegex)
+    if (joinMatch) {
+      const [, name, tag] = joinMatch
+      result.push([name, tag])
+      return
+    }
+
+    // 退室ログの処理
+    const leaveMatch = trimmedLine.match(leaveLogRegex)
+    if (leaveMatch) {
+      const [, name, tag] = leaveMatch
+      // 退室したプレイヤーを結果から削除
+      const index = result.findIndex(([n, t]) => n === name && t === tag)
+      if (index !== -1) {
+        result.splice(index, 1)
+      }
+    }
+  })
+
+  return result
+}

@@ -1,10 +1,13 @@
 import { Player } from './player'
+import { parseChatLogs } from './utils'
 
 export class TeamDivider {
   private static readonly TEAM_SIZE = 5
   private static readonly TOTAL_PLAYERS = 10
 
-  private players: Player[] = []
+  private players: (Player | null)[] = Array(TeamDivider.TOTAL_PLAYERS).fill(
+    null
+  )
   private teamDivisions: Record<
     number,
     { players: Player[]; ratingDifference: number }
@@ -22,10 +25,11 @@ export class TeamDivider {
    * @param player 追加するプレイヤー
    */
   addPlayer(player: Player): void {
-    if (this.players.length >= TeamDivider.TOTAL_PLAYERS) {
+    const emptyIndex = this.players.findIndex((p) => p === null)
+    if (emptyIndex === -1) {
       throw new Error('Cannot add more players. Maximum limit reached.')
     }
-    this.players.push(player)
+    this.players[emptyIndex] = player
   }
 
   /**
@@ -33,18 +37,53 @@ export class TeamDivider {
    * @param index 削除するプレイヤーのインデックス
    */
   removePlayer(index: number): void {
-    if (index < 0 || index >= this.players.length) {
+    if (
+      index < 0 ||
+      index >= this.players.length ||
+      this.players[index] === null
+    ) {
       throw new Error('Invalid index')
     }
-    this.players.splice(index, 1)
+    this.players.splice(index, 1) // 指定されたプレイヤーを削除
+    this.players.push(null) // 配列の末尾に null を追加してサイズを維持
   }
 
   /**
    * 現在のプレイヤーリストを取得する
    * @returns プレイヤーの配列
    */
-  getPlayers(): Player[] {
+  getPlayers(): (Player | null)[] {
     return [...this.players]
+  }
+
+  /**
+   * チャットログを解析してプレイヤーリストを更新する
+   * @param logs 改行コードを含むチャットログの文字列
+   */
+  getPlayersByLog(logs: string): void {
+    const parsedLogs = parseChatLogs(logs)
+
+    // parsedLogs が空の場合は何もしない
+    if (parsedLogs.length === 0) {
+      return
+    }
+
+    // 既存のプレイヤーリストをクリア
+    this.players = Array(TeamDivider.TOTAL_PLAYERS).fill(null)
+
+    // パースしたログを基にプレイヤーを追加
+    parsedLogs.forEach(([name, tag]) => {
+      try {
+        const player = new Player(name, tag)
+        this.addPlayer(player)
+      } catch (error) {
+        if (error instanceof Error) {
+          console.error(`Failed to add player ${name}#${tag}: ${error.message}`)
+        } else {
+          console.error(`Failed to add player ${name}#${tag}: Unknown error`)
+        }
+      }
+    })
   }
 
   /**
@@ -63,7 +102,10 @@ export class TeamDivider {
    * @returns 分けられる場合は true、それ以外は false
    */
   isDividable(): boolean {
-    return this.players.length === TeamDivider.TOTAL_PLAYERS
+    return (
+      this.players.filter((p) => p !== null).length ===
+      TeamDivider.TOTAL_PLAYERS
+    )
   }
 
   /**
@@ -96,7 +138,7 @@ export class TeamDivider {
     mismatchCount: number
     ratingDifference: number
   } {
-    const shuffledPlayers = [...this.players]
+    const shuffledPlayers = this.players.filter((p): p is Player => p !== null)
     this._shufflePlayers(shuffledPlayers)
 
     let mismatchCount = 0
