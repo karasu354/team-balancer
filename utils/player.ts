@@ -47,6 +47,21 @@ export class Player {
     this.rating = calcurateRating(tier, rank)
   }
 
+  /**
+   * ランクとティアを表示する文字列を取得する
+   * @returns ランク＋ティアの文字列
+   */
+  getDisplayRank(): string {
+    if (
+      this.tier === tierEnum.master ||
+      this.tier === tierEnum.grandmaster ||
+      this.tier === tierEnum.challenger
+    ) {
+      return this.tier
+    }
+    return `${this.tier} ${this.rank}`
+  }
+
   // Getter メソッドを追加して外部からプロパティを参照可能にする
   getName(): string {
     return this.name
