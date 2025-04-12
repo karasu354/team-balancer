@@ -107,7 +107,7 @@ export class TeamDivider {
     this._resetTeamDivisions()
 
     // 5000回チーム分けを試行
-    for (let i = 0; i < 5000; i++) {
+    for (let i = 0; i < 20000; i++) {
       const { players, mismatchCount, ratingDifference } = this._createTeams()
 
       // 希望に合わない人数をキーに辞書を更新
@@ -171,12 +171,29 @@ export class TeamDivider {
    * @returns レーティング差
    */
   private _calculateRatingDifference(players: Player[]): number {
-    const blueTeamRating = players
-      .slice(0, TeamDivider.TEAM_SIZE)
-      .reduce((total, player) => total + player.getRating(), 0)
-    const redTeamRating = players
-      .slice(TeamDivider.TEAM_SIZE)
-      .reduce((total, player) => total + player.getRating(), 0)
-    return Math.abs(blueTeamRating - redTeamRating)
+    const blueTeam = players.slice(0, TeamDivider.TEAM_SIZE)
+    const redTeam = players.slice(TeamDivider.TEAM_SIZE)
+
+    // チーム全体のレート合計の差
+    const blueTeamRating = blueTeam.reduce(
+      (total, player) => total + player.getRating(),
+      0
+    )
+    const redTeamRating = redTeam.reduce(
+      (total, player) => total + player.getRating(),
+      0
+    )
+    const totalRatingDifference = Math.abs(blueTeamRating - redTeamRating)
+
+    // レーンごとのレート差
+    let laneRatingDifference = 0
+    for (let i = 0; i < TeamDivider.TEAM_SIZE; i++) {
+      laneRatingDifference += Math.abs(
+        blueTeam[i].getRating() - redTeam[i].getRating()
+      )
+    }
+
+    // 総合評価として、チーム全体のレート差とレーンごとのレート差を加算
+    return totalRatingDifference + laneRatingDifference
   }
 }

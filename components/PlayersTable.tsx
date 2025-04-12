@@ -17,6 +17,7 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
   onPlayersUpdate,
 }) => {
   const [activeTab, setActiveTab] = useState<'single' | 'bulk'>('single') // タブの状態管理
+  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null) // 編集中のプレイヤー
   const players = teamDivider.getPlayers()
 
   const handleAddPlayer = (
@@ -26,9 +27,16 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
     rank: rankEnum
   ) => {
     try {
-      const newPlayer = new Player(name, tag)
-      newPlayer.setRank(tier, rank) // ティアとランクを設定
-      teamDivider.addPlayer(newPlayer)
+      if (editingPlayer) {
+        // 編集モードの場合、プレイヤー情報を更新
+        editingPlayer.setRank(tier, rank)
+        setEditingPlayer(null) // 編集モードを解除
+      } else {
+        // 新規追加の場合
+        const newPlayer = new Player(name, tag)
+        newPlayer.setRank(tier, rank) // ティアとランクを設定
+        teamDivider.addPlayer(newPlayer)
+      }
       onPlayersUpdate()
     } catch (error) {
       if (error instanceof Error) {
@@ -55,6 +63,11 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
         alert('An unknown error occurred')
       }
     }
+  }
+
+  const handleEditPlayer = (player: Player) => {
+    setEditingPlayer(player) // 編集モードに設定
+    setActiveTab('single') // 「1人ずつ追加」タブに切り替え
   }
 
   return (
@@ -85,10 +98,11 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
 
       {/* タブの内容 */}
       <div className="h-48">
-        {' '}
-        {/* 高さを固定 */}
         {activeTab === 'single' ? (
-          <PlayerInputForm onAddPlayer={handleAddPlayer} />
+          <PlayerInputForm
+            onAddPlayer={handleAddPlayer}
+            editingPlayer={editingPlayer} // 編集中のプレイヤーを渡す
+          />
         ) : (
           <ChatLogInputForm
             teamDivider={teamDivider}
@@ -107,6 +121,7 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
               player && handleToggleRole(player, roleIndex)
             }
             onRemove={() => handleRemovePlayer(index)}
+            onEdit={() => player && handleEditPlayer(player)} // 編集ボタンの処理
           />
         ))}
       </div>

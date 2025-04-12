@@ -129,7 +129,8 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
               </div>
               {['TOP', 'JG', 'MID', 'ADC', 'SUP'].map((lane, index) => (
                 <div key={lane} className="mb-2">
-                  {activeDivision.players[index]?.getName() || 'N/A'}
+                  {activeDivision.players[index]?.getName() || 'N/A'} (
+                  {activeDivision.players[index]?.getRating() || 'N/A'})
                 </div>
               ))}
             </div>
@@ -140,7 +141,8 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
               </div>
               {['TOP', 'JG', 'MID', 'ADC', 'SUP'].map((lane, index) => (
                 <div key={lane} className="mb-2">
-                  {activeDivision.players[index + 5]?.getName() || 'N/A'}
+                  {activeDivision.players[index + 5]?.getName() || 'N/A'} (
+                  {activeDivision.players[index + 5]?.getRating() || 'N/A'})
                 </div>
               ))}
             </div>
