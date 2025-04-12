@@ -103,6 +103,11 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
         </button>
       </div>
 
+      {/* タブの説明 */}
+      <div className="mb-2 text-gray-500">
+        タグは使わないので適当な文字で大丈夫です。
+      </div>
+
       {/* タブの内容 */}
       <div className="h-48">
         {activeTab === 'single' ? (
