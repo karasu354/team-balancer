@@ -16,9 +16,9 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
   teamDivider,
   onPlayersUpdate,
 }) => {
-  const [activeTab, setActiveTab] = useState<'single' | 'bulk'>('single') // タブの状態管理
-  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null) // 編集中のプレイヤー
-  const players = teamDivider.getPlayers()
+  const [activeTab, setActiveTab] = useState<'single' | 'bulk'>('single')
+  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null)
+  const players = teamDivider.players
 
   const handleAddPlayer = (
     name: string,
@@ -27,15 +27,13 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
     rank: rankEnum
   ) => {
     try {
-      if (editingPlayer) {
-        // 編集モードの場合、プレイヤー情報を更新
-        editingPlayer.setRank(tier, rank)
-        setEditingPlayer(null) // 編集モードを解除
-      } else {
-        // 新規追加の場合
+      if (editingPlayer === null) {
         const newPlayer = new Player(name, tag)
-        newPlayer.setRank(tier, rank) // ティアとランクを設定
+        newPlayer.setRank(tier, rank)
         teamDivider.addPlayer(newPlayer)
+      } else {
+        editingPlayer.setRank(tier, rank)
+        setEditingPlayer(null)
       }
       onPlayersUpdate()
     } catch (error) {
@@ -48,14 +46,24 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
   }
 
   const handleToggleRole = (player: Player, roleIndex: number) => {
-    player.setRole(roleIndex)
+    player.setDesiredRoleByIndex(roleIndex)
+    onPlayersUpdate()
+  }
+
+  const handleToggleRoleFixed = (player: Player) => {
+    player.isRoleFixed = !player.isRoleFixed
+    onPlayersUpdate()
+  }
+
+  const handleToggleParticipation = (player: Player) => {
+    player.isParticipatingInGame = !player.isParticipatingInGame
     onPlayersUpdate()
   }
 
   const handleRemovePlayer = (index: number) => {
     try {
       const playerToRemove = players[index]
-      teamDivider.removePlayer(index)
+      teamDivider.removePlayerByIndex(index)
 
       // 編集中のプレイヤーが削除された場合、フォームをリセット
       if (editingPlayer === playerToRemove) {
@@ -134,6 +142,8 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
             }
             onRemove={() => handleRemovePlayer(index)}
             onEdit={() => player && handleEditPlayer(player)} // 編集ボタンの処理
+            onToggleParticipation={() => handleToggleParticipation(player)} // 参加フラグの切り替え
+            onToggleRoleFixed={() => handleToggleRoleFixed(player)} // isRoleFixedフラグの切り替え
           />
         ))}
       </div>
