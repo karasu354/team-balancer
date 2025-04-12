@@ -80,3 +80,19 @@ export const isValidTier = (value: string): boolean => {
 export const isValidRank = (value: string): boolean => {
   return Object.values(rankEnum).includes(value as rankEnum)
 }
+
+/**
+ * ティアのリストを取得する
+ * @returns ティアのリスト
+ */
+export const getTierList = (): string[] => {
+  return Object.values(tierEnum)
+}
+
+/**
+ * ランクのリストを取得する
+ * @returns ランクのリスト
+ */
+export const getRankList = (): string[] => {
+  return Object.values(rankEnum)
+}

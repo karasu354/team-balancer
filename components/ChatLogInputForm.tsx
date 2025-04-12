@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-import { TeamDivider } from '../utils/team-divider'
+import { TeamDivider } from '../utils/teamDivider'
 
 interface ChatLogInputFormProps {
   teamDivider: TeamDivider
@@ -22,7 +22,7 @@ const ChatLogInputForm: React.FC<ChatLogInputFormProps> = ({
   }
 
   return (
-    <div className="flex flex-col items-start space-y-2 w-full max-w-md">
+    <div className="mb-4 flex flex-col space-y-2 w-full max-w-4xl">
       <textarea
         value={logInput}
         onChange={(e) => setLogInput(e.target.value)}
@@ -32,12 +32,12 @@ Player1 #JP1がロビーから退出しました。
 Player3 #catがロビーに参加しました。
 Player4 #dogがロビーに参加しました。
 Player2 #meowがロビーから退出しました。`}
-        className="w-full p-2 border border-gray-300 rounded resize-none"
+        className="p-2 border border-gray-300 rounded w-full resize-none"
         rows={4}
       />
       <button
         onClick={handleLogSubmit}
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition whitespace-nowrap"
       >
         取り込む
       </button>

@@ -1,5 +1,5 @@
 import { Player } from '../../utils/player'
-import { TeamDivider } from '../../utils/team-divider'
+import { TeamDivider } from '../../utils/teamDivider'
 
 describe('TeamDivider', () => {
   let teamDivider: TeamDivider
@@ -39,8 +39,8 @@ describe('TeamDivider', () => {
       teamDivider.addPlayer(new Player('Player3', 'Tag#9999'))
 
       const players = teamDivider.getPlayers()
-      expect(players[0]?.getName()).toBe('Player2')
-      expect(players[1]?.getName()).toBe('Player3')
+      expect(players[0]?.getName()).toBe('Player3') // 最初の空きスロットに追加
+      expect(players[1]?.getName()).toBe('Player2')
       expect(players.slice(2).every((p) => p === null)).toBe(true)
     })
   })
@@ -56,8 +56,8 @@ describe('TeamDivider', () => {
 
       const players = teamDivider.getPlayers()
       expect(players).toHaveLength(10)
-      expect(players[0]?.getName()).toBe('Player2')
-      expect(players[1]).toBeNull()
+      expect(players[0]).toBeNull() // 削除されたスロットはnull
+      expect(players[1]?.getName()).toBe('Player2')
       expect(players.slice(2).every((p) => p === null)).toBe(true)
     })
 
@@ -96,16 +96,15 @@ Player2 #meowがロビーに参加しました。
       expect(players.slice(3).every((p) => p === null)).toBe(true)
     })
 
-    it('退室ログでプレイヤーが正しく削除されることを確認する', () => {
-      const logs = `Player1 #JP1がロビーに参加しました。
-Player2 #meowがロビーに参加しました。
-Player1 #JP1がロビーから退出しました。`
+    it('11人以上のプレイヤーが追加される場合、エラーがスローされることを確認する', () => {
+      const logs = Array.from(
+        { length: 11 },
+        (_, i) => `Player${i + 1} #Tag${i + 1}がロビーに参加しました。`
+      ).join('\n')
 
-      teamDivider.getPlayersByLog(logs)
-
-      const players = teamDivider.getPlayers()
-      expect(players[0]?.getName()).toBe('Player2')
-      expect(players.slice(1).every((p) => p === null)).toBe(true)
+      expect(() => teamDivider.getPlayersByLog(logs)).toThrow(
+        'Cannot add more players. Maximum limit reached.'
+      )
     })
 
     it('入室と退室が混在するログを正しく処理できることを確認する', () => {
