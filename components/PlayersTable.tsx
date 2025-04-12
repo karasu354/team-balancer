@@ -54,7 +54,14 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
 
   const handleRemovePlayer = (index: number) => {
     try {
+      const playerToRemove = players[index]
       teamDivider.removePlayer(index)
+
+      // 編集中のプレイヤーが削除された場合、フォームをリセット
+      if (editingPlayer === playerToRemove) {
+        setEditingPlayer(null)
+      }
+
       onPlayersUpdate()
     } catch (error) {
       if (error instanceof Error) {

@@ -106,7 +106,7 @@ export class TeamDivider {
     // teamDivisions を初期化
     this._resetTeamDivisions()
 
-    // 5000回チーム分けを試行
+    // 複数回チーム分けを試行
     for (let i = 0; i < 20000; i++) {
       const { players, mismatchCount, ratingDifference } = this._createTeams()
 

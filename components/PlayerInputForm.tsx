@@ -29,6 +29,12 @@ const PlayerInputForm: React.FC<PlayerInputFormProps> = ({
       setTag(editingPlayer.getTagLine())
       setTier(editingPlayer.getTier())
       setRank(editingPlayer.getRank())
+    } else {
+      // 編集モード解除時にフォームをリセット
+      setName('')
+      setTag('')
+      setTier(tierEnum.gold)
+      setRank(rankEnum.two)
     }
   }, [editingPlayer])
 
@@ -58,7 +64,7 @@ const PlayerInputForm: React.FC<PlayerInputFormProps> = ({
           placeholder="Riot ID"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="p-2 border border-gray-300 rounded w-full bg-gray-100 text-gray-400 cursor-not-allowed"
+          className="p-2 border border-gray-300 rounded w-full bg-gray-100 cursor-default"
           disabled={!!editingPlayer} // 編集時は名前を変更不可
         />
         <span className="text-gray-500">#</span>
@@ -67,7 +73,7 @@ const PlayerInputForm: React.FC<PlayerInputFormProps> = ({
           placeholder="TAGLINE"
           value={tag}
           onChange={(e) => setTag(e.target.value)}
-          className="p-2 border border-gray-300 rounded w-full bg-gray-100 text-gray-400 cursor-not-allowed"
+          className="p-2 border border-gray-300 rounded w-full bg-gray-100 cursor-default"
           disabled={!!editingPlayer} // 編集時はタグを変更不可
         />
       </div>
