@@ -1,8 +1,8 @@
 ## 構想
 
 使用方法の想定
-https://developer.riotgames.com/
 
+カスタムマッチのロビーチャットのログの例
 Player0 #JP1がロビーに参加しました。
 Player0 : やっほー
 Player1 #JP1がロビーに参加しました。
@@ -22,6 +22,8 @@ Player9 #JP1がロビーに参加しました。
 
 ## Riot API に関して
 
+https://developer.riotgames.com/
+
 サモナー名とタグ名からランク取得するために
 
 1. /riot/account/v1/accounts/by-riot-id/{gameName}/{tagLine} で ppid を取得
@@ -37,3 +39,11 @@ Player9 #JP1がロビーに参加しました。
 
 1. サモナー名とタグ名を使って Firebase で summonerId を取得
 2. /lol/league/v4/entries/by-summoner/{encryptedSummonerId} で tier と rank を取得
+
+## チーム分けの評価に関して
+
+分けたチームの差Dを考える。Dが低ければバランスの良いチーム分けと考えれる。
+D = /sum w_i P_i
+と置いたときw,Pはそれぞれ
+P : 要因（分けれたプレイヤーのレート合計の差、レーンごとのレート差、など）
+w : 要因Pの重み付け用

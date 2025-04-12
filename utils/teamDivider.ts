@@ -11,7 +11,7 @@ export class TeamDivider {
   )
   private teamDivisions: Record<
     number,
-    { players: Player[]; ratingDifference: number }
+    { players: Player[]; evaluationScore: number }
   > = {}
 
   constructor() {
@@ -80,7 +80,7 @@ export class TeamDivider {
    */
   getTeamDivisions(): Record<
     number,
-    { players: Player[]; ratingDifference: number }
+    { players: Player[]; evaluationScore: number }
   > {
     return this.teamDivisions
   }
@@ -109,13 +109,11 @@ export class TeamDivider {
 
     // 複数回チーム分けを試行
     for (let i = 0; i < TeamDivider.MAX_TEAM_ATTEMPTS; i++) {
-      const { players, mismatchCount, ratingDifference } = this._createTeams()
+      const { players, mismatchCount, evaluationScore } = this._createTeams()
 
       // 希望に合わない人数をキーに辞書を更新
-      if (
-        ratingDifference < this.teamDivisions[mismatchCount].ratingDifference
-      ) {
-        this.teamDivisions[mismatchCount] = { players, ratingDifference }
+      if (evaluationScore < this.teamDivisions[mismatchCount].evaluationScore) {
+        this.teamDivisions[mismatchCount] = { players, evaluationScore }
       }
     }
   }
@@ -126,33 +124,8 @@ export class TeamDivider {
    */
   private _resetTeamDivisions(): void {
     for (let i = 0; i <= TeamDivider.TOTAL_PLAYERS; i++) {
-      this.teamDivisions[i] = { players: [], ratingDifference: Infinity }
+      this.teamDivisions[i] = { players: [], evaluationScore: Infinity }
     }
-  }
-
-  /**
-   * チームを作成し、希望に合わない人数を計算する
-   * @returns 作成されたプレイヤーの並び、希望に合わない人数、レーティング差
-   */
-  private _createTeams(): {
-    players: Player[]
-    mismatchCount: number
-    ratingDifference: number
-  } {
-    const shuffledPlayers = this.players.filter((p): p is Player => p !== null)
-    this._shufflePlayers(shuffledPlayers)
-
-    let mismatchCount = 0
-
-    for (let i = 0; i < shuffledPlayers.length; i++) {
-      if (shuffledPlayers[i].getDesiredRole()[i % 5] === 0) {
-        mismatchCount++
-      }
-    }
-
-    const ratingDifference = this._calculateRatingDifference(shuffledPlayers)
-
-    return { players: shuffledPlayers, mismatchCount, ratingDifference }
   }
 
   /**
@@ -167,15 +140,53 @@ export class TeamDivider {
   }
 
   /**
-   * プレイヤー配列からチームのレーティング差を計算する
-   * @param players プレイヤー配列
-   * @returns レーティング差
+   * チームを作成し、評価値Dを計算する
+   * @returns 作成されたプレイヤーの並び、希望に合わない人数、評価値D
    */
-  private _calculateRatingDifference(players: Player[]): number {
+  private _createTeams(): {
+    players: Player[]
+    mismatchCount: number
+    evaluationScore: number
+  } {
+    const shuffledPlayers = this.players.filter((p): p is Player => p !== null)
+    this._shufflePlayers(shuffledPlayers)
+
+    let mismatchCount = 0
+
+    // 希望ロールに基づくペナルティを計算
+    for (let i = 0; i < shuffledPlayers.length; i++) {
+      if (shuffledPlayers[i].getDesiredRole()[i % 5] === 0) {
+        mismatchCount++
+      }
+    }
+
+    // 各要因Pを計算
+    const totalRatingDifference =
+      this._calculateTotalRatingDifference(shuffledPlayers)
+    const laneRatingDifference =
+      this._calculateLaneRatingDifference(shuffledPlayers)
+
+    // 各要因Pに重みwを掛けて評価値Dを計算
+    const weights = {
+      totalRatingDifference: 0.7, // チーム全体のレート差の重み
+      laneRatingDifference: 0.3, // レーンごとのレート差の重み
+    }
+    const evaluationScore =
+      weights.totalRatingDifference * totalRatingDifference +
+      weights.laneRatingDifference * laneRatingDifference
+
+    return { players: shuffledPlayers, mismatchCount, evaluationScore }
+  }
+
+  /**
+   * チーム全体のレート合計の差を計算する
+   * @param players プレイヤー配列
+   * @returns チーム全体のレート差
+   */
+  private _calculateTotalRatingDifference(players: Player[]): number {
     const blueTeam = players.slice(0, TeamDivider.TEAM_SIZE)
     const redTeam = players.slice(TeamDivider.TEAM_SIZE)
 
-    // チーム全体のレート合計の差
     const blueTeamRating = blueTeam.reduce(
       (total, player) => total + player.getRating(),
       0
@@ -184,9 +195,19 @@ export class TeamDivider {
       (total, player) => total + player.getRating(),
       0
     )
-    const totalRatingDifference = Math.abs(blueTeamRating - redTeamRating)
 
-    // レーンごとのレート差
+    return Math.abs(blueTeamRating - redTeamRating)
+  }
+
+  /**
+   * レーンごとのレート差を計算する
+   * @param players プレイヤー配列
+   * @returns レーンごとのレート差の合計
+   */
+  private _calculateLaneRatingDifference(players: Player[]): number {
+    const blueTeam = players.slice(0, TeamDivider.TEAM_SIZE)
+    const redTeam = players.slice(TeamDivider.TEAM_SIZE)
+
     let laneRatingDifference = 0
     for (let i = 0; i < TeamDivider.TEAM_SIZE; i++) {
       laneRatingDifference += Math.abs(
@@ -194,7 +215,6 @@ export class TeamDivider {
       )
     }
 
-    // 総合評価として、チーム全体のレート差とレーンごとのレート差を加算
-    return totalRatingDifference + laneRatingDifference
+    return laneRatingDifference
   }
 }

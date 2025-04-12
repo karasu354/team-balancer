@@ -115,7 +115,10 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
           <div className="flex">
             {/* レーン情報 */}
             <div className="w-1/3">
-              <div className="mb-4 font-bold">Lane</div>
+              <div className="mb-4 font-bold">
+                Lane（
+                {activeDivision.evaluationScore}）
+              </div>
               {['TOP', 'JG', 'MID', 'ADC', 'SUP'].map((lane) => (
                 <div key={lane} className="mb-2 font-medium">
                   {lane}
