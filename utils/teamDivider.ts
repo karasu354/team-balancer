@@ -3,19 +3,16 @@ import { parseChatLogs } from './utils'
 
 export class TeamDivider {
   private static readonly TEAM_SIZE = 5
-  private static readonly TOTAL_PLAYERS = 10
-  private static readonly MAX_TEAM_ATTEMPTS = 20000
+  private static readonly TOTAL_PLAYERS = 50
+  private static readonly MAX_TEAM_ATTEMPTS = 100000
 
-  private players: (Player | null)[] = Array(TeamDivider.TOTAL_PLAYERS).fill(
-    null
-  )
-  private teamDivisions: Record<
+  players: Player[] = []
+  teamDivisions: Record<
     number,
     { players: Player[]; evaluationScore: number }
   > = {}
 
   constructor() {
-    // teamDivisions を 0 から 10 のキーで初期化
     this._resetTeamDivisions()
   }
 
@@ -24,34 +21,24 @@ export class TeamDivider {
    * @param player 追加するプレイヤー
    */
   addPlayer(player: Player): void {
-    const emptyIndex = this.players.findIndex((p) => p === null)
-    if (emptyIndex === -1) {
+    if (this.players.length >= TeamDivider.TOTAL_PLAYERS) {
       throw new Error('Cannot add more players. Maximum limit reached.')
     }
-    this.players[emptyIndex] = player
+    if (this.players.some((p) => p.name === player.name)) {
+      return
+    }
+    this.players.push(player)
   }
 
   /**
    * プレイヤーを削除する
    * @param index 削除するプレイヤーのインデックス
    */
-  removePlayer(index: number): void {
-    if (
-      index < 0 ||
-      index >= this.players.length ||
-      this.players[index] === null
-    ) {
+  removePlayerByIndex(index: number): void {
+    if (index < 0 || index >= this.players.length) {
       throw new Error('Invalid index')
     }
-    this.players[index] = null // 指定されたインデックスをnullにする
-  }
-
-  /**
-   * 現在のプレイヤーリストを取得する
-   * @returns プレイヤーの配列
-   */
-  getPlayers(): (Player | null)[] {
-    return [...this.players]
+    this.players.splice(index, 1)
   }
 
   /**
@@ -60,14 +47,9 @@ export class TeamDivider {
    */
   getPlayersByLog(logs: string): void {
     const parsedLogs = parseChatLogs(logs)
-
-    // parsedLogs が空の場合は何もしない
     if (parsedLogs.length === 0) return
 
-    // 既存のプレイヤーリストをクリア
-    this.players = Array(TeamDivider.TOTAL_PLAYERS).fill(null)
-
-    // パースしたログを基にプレイヤーを追加
+    this.players = []
     for (const [name, tag] of parsedLogs) {
       const player = new Player(name, tag)
       this.addPlayer(player)
@@ -75,14 +57,13 @@ export class TeamDivider {
   }
 
   /**
-   * 希望に合わない人数ごとの最適なチーム分けを取得する
-   * @returns 希望に合わない人数をキーにしたチーム分けの辞書
+   * teamDivisions を初期化する
+   * @returns 初期化された teamDivisions
    */
-  getTeamDivisions(): Record<
-    number,
-    { players: Player[]; evaluationScore: number }
-  > {
-    return this.teamDivisions
+  private _resetTeamDivisions(): void {
+    for (let i = 0; i <= TeamDivider.TEAM_SIZE * 2; i++) {
+      this.teamDivisions[i] = { players: [], evaluationScore: Infinity }
+    }
   }
 
   /**
@@ -91,8 +72,8 @@ export class TeamDivider {
    */
   isDividable(): boolean {
     return (
-      this.players.filter((p) => p !== null).length ===
-      TeamDivider.TOTAL_PLAYERS
+      this.players.filter((p) => p.isParticipatingInGame).length ===
+      TeamDivider.TEAM_SIZE * 2
     )
   }
 
@@ -104,27 +85,14 @@ export class TeamDivider {
       throw new Error('Cannot divide teams with the current players')
     }
 
-    // teamDivisions を初期化
     this._resetTeamDivisions()
-
-    // 複数回チーム分けを試行
     for (let i = 0; i < TeamDivider.MAX_TEAM_ATTEMPTS; i++) {
       const { players, mismatchCount, evaluationScore } = this._createTeams()
 
-      // 希望に合わない人数をキーに辞書を更新
+      if (mismatchCount === -1) continue
       if (evaluationScore < this.teamDivisions[mismatchCount].evaluationScore) {
         this.teamDivisions[mismatchCount] = { players, evaluationScore }
       }
-    }
-  }
-
-  /**
-   * teamDivisions を初期化する
-   * @returns 初期化された teamDivisions
-   */
-  private _resetTeamDivisions(): void {
-    for (let i = 0; i <= TeamDivider.TOTAL_PLAYERS; i++) {
-      this.teamDivisions[i] = { players: [], evaluationScore: Infinity }
     }
   }
 
@@ -148,34 +116,36 @@ export class TeamDivider {
     mismatchCount: number
     evaluationScore: number
   } {
-    const shuffledPlayers = this.players.filter((p): p is Player => p !== null)
-    this._shufflePlayers(shuffledPlayers)
+    const participatePlayers = this.players.filter(
+      (p) => p.isParticipatingInGame
+    )
+    this._shufflePlayers(participatePlayers)
 
     let mismatchCount = 0
-
-    // 希望ロールに基づくペナルティを計算
-    for (let i = 0; i < shuffledPlayers.length; i++) {
-      if (shuffledPlayers[i].getDesiredRole()[i % 5] === 0) {
+    for (let i = 0; i < participatePlayers.length; i++) {
+      const player = participatePlayers[i]
+      if (player.desiredRoles[i % 5] === false) {
+        if (player.isRoleFixed) {
+          return { players: [], mismatchCount: -1, evaluationScore: Infinity }
+        }
         mismatchCount++
       }
     }
 
-    // 各要因Pを計算
     const totalRatingDifference =
-      this._calculateTotalRatingDifference(shuffledPlayers)
+      this._calculateTotalRatingDifference(participatePlayers)
     const laneRatingDifference =
-      this._calculateLaneRatingDifference(shuffledPlayers)
+      this._calculateLaneRatingDifference(participatePlayers)
 
-    // 各要因Pに重みwを掛けて評価値Dを計算
     const weights = {
-      totalRatingDifference: 0.7, // チーム全体のレート差の重み
-      laneRatingDifference: 0.3, // レーンごとのレート差の重み
+      totalRatingDifference: 0.3,
+      laneRatingDifference: 0.7,
     }
     const evaluationScore =
       weights.totalRatingDifference * totalRatingDifference +
       weights.laneRatingDifference * laneRatingDifference
 
-    return { players: shuffledPlayers, mismatchCount, evaluationScore }
+    return { players: participatePlayers, mismatchCount, evaluationScore }
   }
 
   /**
@@ -188,11 +158,11 @@ export class TeamDivider {
     const redTeam = players.slice(TeamDivider.TEAM_SIZE)
 
     const blueTeamRating = blueTeam.reduce(
-      (total, player) => total + player.getRating(),
+      (total, player) => total + player.rating,
       0
     )
     const redTeamRating = redTeam.reduce(
-      (total, player) => total + player.getRating(),
+      (total, player) => total + player.rating,
       0
     )
 
@@ -210,9 +180,7 @@ export class TeamDivider {
 
     let laneRatingDifference = 0
     for (let i = 0; i < TeamDivider.TEAM_SIZE; i++) {
-      laneRatingDifference += Math.abs(
-        blueTeam[i].getRating() - redTeam[i].getRating()
-      )
+      laneRatingDifference += Math.abs(blueTeam[i].rating - redTeam[i].rating)
     }
 
     return laneRatingDifference
