@@ -4,6 +4,7 @@ import { parseChatLogs } from './utils'
 export class TeamDivider {
   private static readonly TEAM_SIZE = 5
   private static readonly TOTAL_PLAYERS = 10
+  private static readonly MAX_TEAM_ATTEMPTS = 20000
 
   private players: (Player | null)[] = Array(TeamDivider.TOTAL_PLAYERS).fill(
     null
@@ -107,7 +108,7 @@ export class TeamDivider {
     this._resetTeamDivisions()
 
     // 複数回チーム分けを試行
-    for (let i = 0; i < 20000; i++) {
+    for (let i = 0; i < TeamDivider.MAX_TEAM_ATTEMPTS; i++) {
       const { players, mismatchCount, ratingDifference } = this._createTeams()
 
       // 希望に合わない人数をキーに辞書を更新
