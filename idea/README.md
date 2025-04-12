@@ -4,7 +4,9 @@
 https://developer.riotgames.com/
 
 Player0 #JP1がロビーに参加しました。
+Player0 : やっほー
 Player1 #JP1がロビーに参加しました。
+Player0 : test -> Player1 #JP1がロビーに参加しました。
 Player2 #JP1がロビーに参加しました。
 Player3 #JP1がロビーに参加しました。
 Player4 #JP1がロビーに参加しました。

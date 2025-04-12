@@ -15,9 +15,7 @@ export class TeamDivider {
 
   constructor() {
     // teamDivisions を 0 から 10 のキーで初期化
-    for (let i = 0; i <= TeamDivider.TOTAL_PLAYERS; i++) {
-      this.teamDivisions[i] = { players: [], ratingDifference: Infinity }
-    }
+    this._resetTeamDivisions()
   }
 
   /**
@@ -44,8 +42,7 @@ export class TeamDivider {
     ) {
       throw new Error('Invalid index')
     }
-    this.players.splice(index, 1) // 指定されたプレイヤーを削除
-    this.players.push(null) // 配列の末尾に null を追加してサイズを維持
+    this.players[index] = null // 指定されたインデックスをnullにする
   }
 
   /**
@@ -64,26 +61,16 @@ export class TeamDivider {
     const parsedLogs = parseChatLogs(logs)
 
     // parsedLogs が空の場合は何もしない
-    if (parsedLogs.length === 0) {
-      return
-    }
+    if (parsedLogs.length === 0) return
 
     // 既存のプレイヤーリストをクリア
     this.players = Array(TeamDivider.TOTAL_PLAYERS).fill(null)
 
     // パースしたログを基にプレイヤーを追加
-    parsedLogs.forEach(([name, tag]) => {
-      try {
-        const player = new Player(name, tag)
-        this.addPlayer(player)
-      } catch (error) {
-        if (error instanceof Error) {
-          console.error(`Failed to add player ${name}#${tag}: ${error.message}`)
-        } else {
-          console.error(`Failed to add player ${name}#${tag}: Unknown error`)
-        }
-      }
-    })
+    for (const [name, tag] of parsedLogs) {
+      const player = new Player(name, tag)
+      this.addPlayer(player)
+    }
   }
 
   /**
@@ -116,6 +103,9 @@ export class TeamDivider {
       throw new Error('Cannot divide teams with the current players')
     }
 
+    // teamDivisions を初期化
+    this._resetTeamDivisions()
+
     // 5000回チーム分けを試行
     for (let i = 0; i < 5000; i++) {
       const { players, mismatchCount, ratingDifference } = this._createTeams()
@@ -126,6 +116,16 @@ export class TeamDivider {
       ) {
         this.teamDivisions[mismatchCount] = { players, ratingDifference }
       }
+    }
+  }
+
+  /**
+   * teamDivisions を初期化する
+   * @returns 初期化された teamDivisions
+   */
+  private _resetTeamDivisions(): void {
+    for (let i = 0; i <= TeamDivider.TOTAL_PLAYERS; i++) {
+      this.teamDivisions[i] = { players: [], ratingDifference: Infinity }
     }
   }
 

@@ -15,7 +15,7 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ onApiKeySubmit }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col items-center space-y-4"
+      className="flex items-center space-x-4" // 横並びにするためのスタイル
     >
       <input
         type="password"

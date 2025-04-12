@@ -30,10 +30,6 @@ const Home = () => {
       <ApiKeyForm onApiKeySubmit={handleApiKeySubmit} />
 
       <h1 className="text-2xl font-bold">プレイヤー管理</h1>
-      <ChatLogInputForm
-        teamDivider={teamDivider}
-        onPlayersUpdate={handlePlayersUpdate}
-      />
       <PlayersTable
         teamDivider={teamDivider}
         onPlayersUpdate={handlePlayersUpdate}
