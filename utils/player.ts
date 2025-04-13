@@ -1,5 +1,15 @@
 import { calcurateRating, rankEnum, tierEnum } from './rank'
 
+export interface PlayerJson {
+  name: string
+  tagLine: string
+  desiredRoles: boolean[]
+  isRoleFixed: boolean
+  tier: string
+  rank: string
+  displayRank: string
+  rating: number
+}
 export class Player {
   readonly name: string
   readonly tagLine: string
@@ -9,7 +19,7 @@ export class Player {
   tier: tierEnum
   rank: rankEnum
   displayRank: string = ''
-  rating: number
+  rating: number = 0
 
   constructor(
     name: string,
@@ -22,7 +32,6 @@ export class Player {
     this.tier = tier
     this.rank = rank
     this.setRank(this.tier, this.rank)
-    this.rating = calcurateRating(this.tier, this.rank)
   }
 
   /**
@@ -58,5 +67,22 @@ export class Player {
       this.tier === tierEnum.challenger
         ? this.tier
         : `${this.tier} ${this.rank}`
+  }
+
+  /**
+   * プレイヤー情報を取得
+   * @returns プレイヤー情報のJSON形式
+   */
+  get playerInfo(): PlayerJson {
+    return {
+      name: this.name,
+      tagLine: this.tagLine,
+      desiredRoles: this.desiredRoles,
+      isRoleFixed: this.isRoleFixed,
+      tier: this.tier,
+      rank: this.rank,
+      displayRank: this.displayRank,
+      rating: this.rating,
+    }
   }
 }

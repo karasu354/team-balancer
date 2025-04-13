@@ -1,5 +1,11 @@
-import { Player } from './player'
+import { Player, PlayerJson } from './player'
+import { rankEnum, tierEnum } from './rank'
 import { parseChatLogs } from './utils'
+
+export interface PlayersJson {
+  version: string
+  players: PlayerJson[]
+}
 
 export class TeamDivider {
   private static readonly TEAM_SIZE = 5
@@ -14,6 +20,36 @@ export class TeamDivider {
 
   constructor() {
     this._resetTeamDivisions()
+  }
+
+  /**
+   * プレイヤーを取得する
+   * @returns プレイヤーの配列
+   */
+  get playersInfo(): PlayersJson {
+    return {
+      version: '1.0',
+      players: this.players.map((p) => p.playerInfo) || [],
+    }
+  }
+
+  /**
+   * PlayersJsonからプレイヤーを取得する
+   * @param playersJson プレイヤーの配列
+   * @returns プレイヤーの配列
+   */
+  setPlayersFromPlayersJson(playersJson: PlayersJson): Player[] {
+    this.players = playersJson.players.map((player) => {
+      const newPlayer = new Player(player.name, player.tagLine)
+      newPlayer.desiredRoles = player.desiredRoles
+      newPlayer.isRoleFixed = player.isRoleFixed
+      newPlayer.tier = player.tier as tierEnum
+      newPlayer.rank = player.rank as rankEnum
+      newPlayer.displayRank = player.displayRank
+      newPlayer.rating = player.rating
+      return newPlayer
+    })
+    return this.players
   }
 
   /**
@@ -136,14 +172,18 @@ export class TeamDivider {
       this._calculateTotalRatingDifference(participatePlayers)
     const laneRatingDifference =
       this._calculateLaneRatingDifference(participatePlayers)
+    const adcSupPairDifference =
+      this._calculateAdcSupPairDifference(participatePlayers)
 
     const weights = {
       totalRatingDifference: 0.3,
-      laneRatingDifference: 0.7,
+      laneRatingDifference: 0.5,
+      adcSupPairDifference: 0.2,
     }
     const evaluationScore =
       weights.totalRatingDifference * totalRatingDifference +
-      weights.laneRatingDifference * laneRatingDifference
+      weights.laneRatingDifference * laneRatingDifference +
+      weights.adcSupPairDifference * adcSupPairDifference
 
     return { players: participatePlayers, mismatchCount, evaluationScore }
   }
@@ -184,5 +224,22 @@ export class TeamDivider {
     }
 
     return laneRatingDifference
+  }
+
+  /**
+   * adcとsupのペアのレート差を計算する
+   * @param players プレイヤー配列
+   * @returns adcとsupのペアのレート差
+   */
+  private _calculateAdcSupPairDifference(players: Player[]): number {
+    const blueAdc = players[3]
+    const blueSup = players[4]
+    const redAdc = players[8]
+    const redSup = players[9]
+
+    const bluePairRating = blueAdc.rating + blueSup.rating
+    const redPairRating = redAdc.rating + redSup.rating
+
+    return Math.abs(bluePairRating - redPairRating)
   }
 }

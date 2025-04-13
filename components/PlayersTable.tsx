@@ -6,6 +6,7 @@ import { TeamDivider } from '../utils/teamDivider'
 import ChatLogInputForm from './ChatLogInputForm'
 import PlayerCard from './PlayerCard'
 import PlayerInputForm from './PlayerInputForm'
+import ServerIdForm from './ServerIdForm'
 
 interface PlayersTableProps {
   teamDivider: TeamDivider
@@ -130,6 +131,12 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
           />
         )}
       </div>
+
+      {/* サーバーIDフォーム */}
+      <ServerIdForm
+        teamDivider={teamDivider}
+        onPlayersUpdate={onPlayersUpdate}
+      />
 
       {/* プレイヤー一覧 */}
       <div className="grid grid-cols-2 gap-0 w-full border border-gray-300 rounded-lg">
