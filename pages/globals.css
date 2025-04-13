@@ -1,1 +1,4 @@
 @import 'tailwindcss';
+.max-w-4xl {
+  min-width: var(--container-5xl);
+}

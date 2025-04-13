@@ -25,10 +25,10 @@ const PlayerInputForm: React.FC<PlayerInputFormProps> = ({
   useEffect(() => {
     if (editingPlayer) {
       // 編集中のプレイヤー情報をフォームに反映
-      setName(editingPlayer.getName())
-      setTag(editingPlayer.getTagLine())
-      setTier(editingPlayer.getTier())
-      setRank(editingPlayer.getRank())
+      setName(editingPlayer.name)
+      setTag(editingPlayer.tagLine)
+      setTier(editingPlayer.tier)
+      setRank(editingPlayer.rank)
     } else {
       // 編集モード解除時にフォームをリセット
       setName('')
