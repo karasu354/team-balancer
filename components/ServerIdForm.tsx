@@ -59,7 +59,7 @@ const ServerIdForm: React.FC<ServerIdFormProps> = ({
         placeholder="サーバーIDを入力"
         value={serverId}
         onChange={(e) => setServerId(e.target.value)}
-        className="p-2 border rounded w-100"
+        className="p-2 border rounded w-96"
       />
 
       {/* 呼び出しボタン */}
