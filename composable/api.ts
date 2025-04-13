@@ -1,30 +1,47 @@
+import { PlayersJson } from '../utils/teamDivider'
+
+const API_BASE_URL = '/api/teams'
+
 /**
- * プレイヤー情報を取得するAPI呼び出し関数
- * @param apiKey Riot APIキー
- * @param gameName サモナー名
- * @param tagLine タグ名
- * @returns プレイヤー情報のPromise
+ * チームデータを取得する
+ * @param teamId チームID
+ * @returns チームデータ
  */
-export async function fetchPlayerInfo(
-  apiKey: string,
-  gameName: string,
-  tagLine: string
-): Promise<any> {
-  try {
-    const response = await fetch('/api/playerInfo', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ apiKey, gameName, tagLine }),
-    })
+export async function getTeamData(teamId: string): Promise<PlayersJson | null> {
+  const response = await fetch(`${API_BASE_URL}/${teamId}`, {
+    method: 'GET',
+  })
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch player info: ${response.statusText}`)
-    }
-
-    const data = await response.json()
-    return data
-  } catch (error) {
-    console.error('Error in fetchPlayerInfo:', error)
-    throw error
+  if (!response.ok) {
+    console.error(`Failed to fetch team data: ${response.statusText}`)
+    return null
   }
+
+  return response.json()
+}
+
+/**
+ * チームデータを登録または更新する
+ * @param teamId チームID
+ * @param data チームデータ
+ * @returns 成功メッセージ
+ */
+export async function setTeamData(
+  teamId: string,
+  data: PlayersJson
+): Promise<string> {
+  const response = await fetch(`${API_BASE_URL}/${teamId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  })
+
+  if (!response.ok) {
+    throw new Error(`Failed to save team data: ${response.statusText}`)
+  }
+
+  const result = await response.json()
+  return result.message
 }

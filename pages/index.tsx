@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 
-import ApiKeyForm from '../components/ApiKeyForm'
 import DividedTeamTable from '../components/DividedTeamTable'
 import PlayersTable from '../components/PlayersTable'
 import { TeamDivider } from '../utils/teamDivider'
@@ -12,7 +11,6 @@ const Home = () => {
 
   const handleApiKeySubmit = (key: string) => {
     setApiKey(key) // APIキーを保存
-    console.log('API Key saved:', key)
   }
 
   const handlePlayersUpdate = () => {
