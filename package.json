@@ -1,6 +1,6 @@
 {
-  "name": "team-division",
-  "version": "1.4.0",
+  "name": "team-balancer",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
