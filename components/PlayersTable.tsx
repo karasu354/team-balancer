@@ -66,7 +66,6 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
       const playerToRemove = players[index]
       teamDivider.removePlayerByIndex(index)
 
-      // 編集中のプレイヤーが削除された場合、フォームをリセット
       if (editingPlayer === playerToRemove) {
         setEditingPlayer(null)
       }
@@ -82,13 +81,12 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
   }
 
   const handleEditPlayer = (player: Player) => {
-    setEditingPlayer(player) // 編集モードに設定
-    setActiveTab('single') // 「1人ずつ追加」タブに切り替え
+    setEditingPlayer(player)
+    setActiveTab('single')
   }
 
   return (
     <div className="w-full max-w-4xl">
-      {/* タブ切り替え */}
       <div className="mb-4 flex">
         <button
           onClick={() => setActiveTab('single')}
@@ -112,17 +110,15 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
         </button>
       </div>
 
-      {/* タブの説明 */}
       <div className="mb-2 text-gray-500">
         タグは使わないので適当な文字で大丈夫です。
       </div>
 
-      {/* タブの内容 */}
       <div className="h-48">
         {activeTab === 'single' ? (
           <PlayerInputForm
             onAddPlayer={handleAddPlayer}
-            editingPlayer={editingPlayer} // 編集中のプレイヤーを渡す
+            editingPlayer={editingPlayer}
           />
         ) : (
           <ChatLogInputForm
@@ -132,13 +128,11 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
         )}
       </div>
 
-      {/* サーバーIDフォーム */}
       <ServerIdForm
         teamDivider={teamDivider}
         onPlayersUpdate={onPlayersUpdate}
       />
 
-      {/* プレイヤー一覧 */}
       <div className="grid grid-cols-2 gap-0 w-full border border-gray-300 rounded-lg">
         {players.map((player, index) => (
           <PlayerCard
@@ -148,9 +142,9 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
               player && handleToggleRole(player, roleIndex)
             }
             onRemove={() => handleRemovePlayer(index)}
-            onEdit={() => player && handleEditPlayer(player)} // 編集ボタンの処理
-            onToggleParticipation={() => handleToggleParticipation(player)} // 参加フラグの切り替え
-            onToggleRoleFixed={() => handleToggleRoleFixed(player)} // isRoleFixedフラグの切り替え
+            onEdit={() => player && handleEditPlayer(player)}
+            onToggleParticipation={() => handleToggleParticipation(player)}
+            onToggleRoleFixed={() => handleToggleRoleFixed(player)}
           />
         ))}
       </div>

@@ -17,7 +17,7 @@ const ChatLogInputForm: React.FC<ChatLogInputFormProps> = ({
     if (logInput.trim()) {
       teamDivider.getPlayersByLog(logInput)
       onPlayersUpdate()
-      setLogInput('') // 入力内容をクリア
+      setLogInput('')
     }
   }
 

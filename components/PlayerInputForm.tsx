@@ -65,7 +65,7 @@ const PlayerInputForm: React.FC<PlayerInputFormProps> = ({
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="p-2 border border-gray-300 rounded w-full bg-gray-100 cursor-default"
-          disabled={!!editingPlayer} // 編集時は名前を変更不可
+          disabled={!!editingPlayer}
         />
         <span className="text-gray-500">#</span>
         <input
@@ -74,7 +74,7 @@ const PlayerInputForm: React.FC<PlayerInputFormProps> = ({
           value={tag}
           onChange={(e) => setTag(e.target.value)}
           className="p-2 border border-gray-300 rounded w-full bg-gray-100 cursor-default"
-          disabled={!!editingPlayer} // 編集時はタグを変更不可
+          disabled={!!editingPlayer}
         />
       </div>
       <div className="flex items-center space-x-2">
@@ -97,7 +97,7 @@ const PlayerInputForm: React.FC<PlayerInputFormProps> = ({
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
               : 'border-gray-300'
           }`}
-          disabled={isRankDisabled} // MASTER以上の場合は非活性
+          disabled={isRankDisabled}
         >
           {Object.values(rankEnum).map((rankValue) => (
             <option key={rankValue} value={rankValue}>

@@ -17,7 +17,6 @@ export default async function handler(
 
   try {
     if (req.method === 'GET') {
-      // GET: チームデータを取得
       await redis.connect()
       const teamData = await redis.getTeamPlayers(id)
       await redis.disconnect()
@@ -28,7 +27,6 @@ export default async function handler(
 
       return res.status(200).json(teamData)
     } else if (req.method === 'PUT') {
-      // PUT: チームデータを登録または更新
       const body: PlayersJson = req.body
 
       if (!body || !Array.isArray(body.players)) {

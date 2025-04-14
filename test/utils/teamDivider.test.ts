@@ -100,13 +100,12 @@ Player1 #JP1がロビーから退出しました。
     })
 
     it('空のログを渡した場合、プレイヤーリストが変更されないことを確認する', () => {
-      // 初期状態でプレイヤーを追加
       const player1 = new Player('Player1', 'Tag#1234')
       const player2 = new Player('Player2', 'Tag#5678')
       teamDivider.addPlayer(player1)
       teamDivider.addPlayer(player2)
 
-      const logs = '' // 空のログ
+      const logs = ''
       teamDivider.getPlayersByLog(logs)
 
       const players = teamDivider.players

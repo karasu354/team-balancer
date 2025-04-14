@@ -7,8 +7,8 @@ interface PlayerCardProps {
   onToggleRole?: (roleIndex: number) => void
   onRemove?: () => void
   onEdit?: () => void
-  onToggleParticipation?: () => void // 参加フラグの切り替え
-  onToggleRoleFixed?: () => void // isRoleFixedフラグの切り替え
+  onToggleParticipation?: () => void
+  onToggleRoleFixed?: () => void
 }
 
 const PlayerCard: React.FC<PlayerCardProps> = ({
@@ -27,7 +27,6 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
     >
       {player ? (
         <>
-          {/* 参加フラグ */}
           <div className="flex items-center space-x-2">
             <input
               type="checkbox"
@@ -37,7 +36,6 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
             />
           </div>
 
-          {/* プレイヤー情報 */}
           <div className="flex-1">
             <div className="flex items-center space-x-2">
               <button
@@ -53,7 +51,6 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
             </p>
           </div>
 
-          {/* ロール選択 */}
           <div className="flex space-x-2">
             {['TOP', 'JG', 'MID', 'ADC', 'SUP'].map((role, roleIndex) => (
               <label key={role} className="flex items-center space-x-1">
@@ -67,7 +64,6 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
             ))}
           </div>
 
-          {/* isRoleFixedフラグ */}
           <div className="flex items-center space-x-2">
             <label className="flex items-center space-x-1">
               <input
@@ -80,7 +76,6 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
             </label>
           </div>
 
-          {/* 削除ボタン */}
           <button
             className="w-8 h-8 flex items-center justify-center text-red-500 rounded-full hover:bg-red-500 hover:text-white hover:border-transparent transition"
             onClick={onRemove}

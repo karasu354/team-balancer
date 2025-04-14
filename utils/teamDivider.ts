@@ -22,10 +22,6 @@ export class TeamDivider {
     this._resetTeamDivisions()
   }
 
-  /**
-   * プレイヤーを取得する
-   * @returns プレイヤーの配列
-   */
   get playersInfo(): PlayersJson {
     return {
       version: '1.0',
@@ -33,11 +29,6 @@ export class TeamDivider {
     }
   }
 
-  /**
-   * PlayersJsonからプレイヤーを取得する
-   * @param playersJson プレイヤーの配列
-   * @returns プレイヤーの配列
-   */
   setPlayersFromPlayersJson(playersJson: PlayersJson): Player[] {
     this.players = playersJson.players.map((player) => {
       const newPlayer = new Player(player.name, player.tagLine)
@@ -52,10 +43,6 @@ export class TeamDivider {
     return this.players
   }
 
-  /**
-   * プレイヤーを追加する
-   * @param player 追加するプレイヤー
-   */
   addPlayer(player: Player): void {
     if (this.players.length >= TeamDivider.TOTAL_PLAYERS) {
       throw new Error('Cannot add more players. Maximum limit reached.')
@@ -66,10 +53,6 @@ export class TeamDivider {
     this.players.push(player)
   }
 
-  /**
-   * プレイヤーを削除する
-   * @param index 削除するプレイヤーのインデックス
-   */
   removePlayerByIndex(index: number): void {
     if (index < 0 || index >= this.players.length) {
       throw new Error('Invalid index')
@@ -77,10 +60,6 @@ export class TeamDivider {
     this.players.splice(index, 1)
   }
 
-  /**
-   * チャットログを解析してプレイヤーリストを更新する
-   * @param logs 改行コードを含むチャットログの文字列
-   */
   getPlayersByLog(logs: string): void {
     const parsedLogs = parseChatLogs(logs)
     if (parsedLogs.length === 0) return
@@ -92,20 +71,12 @@ export class TeamDivider {
     }
   }
 
-  /**
-   * teamDivisions を初期化する
-   * @returns 初期化された teamDivisions
-   */
   private _resetTeamDivisions(): void {
     for (let i = 0; i <= TeamDivider.TEAM_SIZE * 2; i++) {
       this.teamDivisions[i] = { players: [], evaluationScore: Infinity }
     }
   }
 
-  /**
-   * チーム分けが可能か確認する
-   * @returns 分けられる場合は true、それ以外は false
-   */
   isDividable(): boolean {
     return (
       this.players.filter((p) => p.isParticipatingInGame).length ===
@@ -113,9 +84,6 @@ export class TeamDivider {
     )
   }
 
-  /**
-   * チームを分ける
-   */
   divideTeams(): void {
     if (!this.isDividable()) {
       throw new Error('Cannot divide teams with the current players')
@@ -132,10 +100,6 @@ export class TeamDivider {
     }
   }
 
-  /**
-   * プレイヤーをシャッフルする
-   * @param players シャッフル対象のプレイヤー配列
-   */
   private _shufflePlayers(players: Player[]): void {
     for (let i = players.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1))
@@ -143,10 +107,6 @@ export class TeamDivider {
     }
   }
 
-  /**
-   * チームを作成し、評価値Dを計算する
-   * @returns 作成されたプレイヤーの並び、希望に合わない人数、評価値D
-   */
   private _createTeams(): {
     players: Player[]
     mismatchCount: number
@@ -188,11 +148,6 @@ export class TeamDivider {
     return { players: participatePlayers, mismatchCount, evaluationScore }
   }
 
-  /**
-   * チーム全体のレート合計の差を計算する
-   * @param players プレイヤー配列
-   * @returns チーム全体のレート差
-   */
   private _calculateTotalRatingDifference(players: Player[]): number {
     const blueTeam = players.slice(0, TeamDivider.TEAM_SIZE)
     const redTeam = players.slice(TeamDivider.TEAM_SIZE)
@@ -209,11 +164,6 @@ export class TeamDivider {
     return Math.abs(blueTeamRating - redTeamRating)
   }
 
-  /**
-   * レーンごとのレート差を計算する
-   * @param players プレイヤー配列
-   * @returns レーンごとのレート差の合計
-   */
   private _calculateLaneRatingDifference(players: Player[]): number {
     const blueTeam = players.slice(0, TeamDivider.TEAM_SIZE)
     const redTeam = players.slice(TeamDivider.TEAM_SIZE)
@@ -226,11 +176,6 @@ export class TeamDivider {
     return laneRatingDifference
   }
 
-  /**
-   * adcとsupのペアのレート差を計算する
-   * @param players プレイヤー配列
-   * @returns adcとsupのペアのレート差
-   */
   private _calculateAdcSupPairDifference(players: Player[]): number {
     const blueAdc = players[3]
     const blueSup = players[4]
