@@ -10,10 +10,10 @@ describe('Player', () => {
 
   describe('setDesiredRoleByIndex', () => {
     it('希望ロールを正しく切り替えられることを確認する', () => {
-      player.setDesiredRoleByIndex(0) // TOPロールを切り替え
+      player.setDesiredRoleByIndex(0)
       expect(player.desiredRoles).toEqual([false, true, true, true, true])
 
-      player.setDesiredRoleByIndex(0) // TOPロールを元に戻す
+      player.setDesiredRoleByIndex(0)
       expect(player.desiredRoles).toEqual([true, true, true, true, true])
     })
 

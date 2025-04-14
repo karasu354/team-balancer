@@ -11,21 +11,18 @@ export class VercelRedis {
     this.client.on('error', (err) => console.error('Redis Client Error:', err))
   }
 
-  // Redisに接続
   public async connect() {
     if (!this.client.isOpen) {
       await this.client.connect()
     }
   }
 
-  // Redisから切断
   public async disconnect() {
     if (this.client.isOpen) {
       await this.client.disconnect()
     }
   }
 
-  // チームデータを取得
   public async getTeamPlayers(teamId: string): Promise<PlayersJson | null> {
     const data = await this.client.get(`teams:${teamId}:players`)
     if (data) {
@@ -34,7 +31,6 @@ export class VercelRedis {
     return null
   }
 
-  // チームデータを登録または更新
   public async setTeamPlayers(
     teamId: string,
     players: PlayersJson
@@ -42,7 +38,6 @@ export class VercelRedis {
     await this.client.set(`teams:${teamId}:players`, JSON.stringify(players))
   }
 
-  // Redisからすべてのキーを削除
   public async flushAll() {
     await this.client.flushAll()
   }

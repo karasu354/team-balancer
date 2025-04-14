@@ -34,10 +34,6 @@ export class Player {
     this.setRank(this.tier, this.rank)
   }
 
-  /**
-   * 希望ロールの更新
-   * @param index ロール番号 (0:TOP, 1:JUNGLE, 2:MID, 3:ADC, 4:SUPPORT)
-   */
   setDesiredRoleByIndex(index: number): void {
     if (index < 0 || index >= this.desiredRoles.length) {
       throw new Error('Invalid role index.')
@@ -45,11 +41,6 @@ export class Player {
     this.desiredRoles[index] = !this.desiredRoles[index]
   }
 
-  /**
-   * ランクの設定、レーティング計算、ランク表示の更新
-   * @param tier ティア (例: tierEnum.gold)
-   * @param rank ランク (例: rankEnum.two)
-   */
   setRank(tier: tierEnum, rank: rankEnum): void {
     if (
       !Object.values(tierEnum).includes(tier) ||
@@ -69,10 +60,6 @@ export class Player {
         : `${this.tier} ${this.rank}`
   }
 
-  /**
-   * プレイヤー情報を取得
-   * @returns プレイヤー情報のJSON形式
-   */
   get playerInfo(): PlayerJson {
     return {
       name: this.name,

@@ -15,13 +15,13 @@ describe('calcurateRating', () => {
 
   test('ランクが CHALLENGER のとき、計算が正しいこと (ランクを無視)', () => {
     const tier = tierEnum.challenger
-    const rank = rankEnum.three // ランクは無視される
+    const rank = rankEnum.three
     expect(calcurateRating(tier, rank)).toBe(3600)
   })
 
   test('ランクが MASTER のとき、計算が正しいこと (ランクを無視)', () => {
     const tier = tierEnum.master
-    const rank = rankEnum.one // ランクは無視される
+    const rank = rankEnum.one
     expect(calcurateRating(tier, rank)).toBe(2800)
   })
 

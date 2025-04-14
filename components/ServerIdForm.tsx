@@ -31,7 +31,7 @@ const ServerIdForm: React.FC<ServerIdFormProps> = ({
       console.error('Error fetching team data:', error)
       alert('チームデータの取得に失敗しました。')
     } finally {
-      setTimeout(() => setIsLoading(false), 2000) // API処理時間 + 2秒
+      setTimeout(() => setIsLoading(false), 2000)
     }
   }
 
@@ -47,13 +47,12 @@ const ServerIdForm: React.FC<ServerIdFormProps> = ({
       console.error('Error saving team data:', error)
       alert('チームデータの保存に失敗しました。')
     } finally {
-      setTimeout(() => setIsLoading(false), 2000) // API処理時間 + 2秒
+      setTimeout(() => setIsLoading(false), 2000)
     }
   }
 
   return (
     <div className="flex items-center space-x-4 mb-4">
-      {/* サーバーID入力 */}
       <input
         type="text"
         placeholder="サーバーIDを入力"
@@ -62,7 +61,6 @@ const ServerIdForm: React.FC<ServerIdFormProps> = ({
         className="p-2 border rounded w-96"
       />
 
-      {/* 呼び出しボタン */}
       <button
         onClick={handleFetchTeamData}
         disabled={!serverId.trim() || isLoading}
@@ -75,7 +73,6 @@ const ServerIdForm: React.FC<ServerIdFormProps> = ({
         {isLoading ? '読み込み中...' : '呼び出し'}
       </button>
 
-      {/* 保存ボタン */}
       <button
         onClick={handleSaveTeamData}
         disabled={!serverId.trim() || isLoading}

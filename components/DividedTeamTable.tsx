@@ -60,7 +60,6 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
 
   return (
     <div className="w-full max-w-4xl">
-      {/* チームを分けるボタン */}
       <div className="mb-4 flex justify-center space-x-4">
         <button
           onClick={handleDivideTeams}
@@ -87,7 +86,6 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
       </div>
 
       <div className="flex">
-        {/* タブ */}
         <div className="flex flex-col space-y-2 mr-4">
           {Object.keys(teamDivisions).map((key) => (
             <button
@@ -109,7 +107,6 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
           ))}
         </div>
 
-        {/* チーム表示 */}
         <div className="flex-1 border border-gray-300 rounded-lg p-4">
           {activeDivision.players.length === 10 && (
             <div>
@@ -123,7 +120,6 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
                     </div>
                   ))}
                 </div>
-                {/* Blue Team */}
                 <div className="w-1/3">
                   <div className="mb-4 text-xl font-bold text-blue-500">
                     Blue Team
@@ -135,7 +131,6 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
                     </div>
                   ))}
                 </div>
-                {/* Red Team */}
                 <div className="w-1/3">
                   <div className="mb-4 text-xl font-bold text-red-500">
                     Red Team
