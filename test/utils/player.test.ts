@@ -1,5 +1,5 @@
 import { Player } from '../../utils/player'
-import { calcurateRating, rankEnum, tierEnum } from '../../utils/rank'
+import { calculateRating, rankEnum, tierEnum } from '../../utils/rank'
 
 describe('Player', () => {
   let player: Player
@@ -33,7 +33,7 @@ describe('Player', () => {
       expect(player.tier).toBe(tierEnum.platinum)
       expect(player.rank).toBe(rankEnum.one)
       expect(player.rating).toBe(
-        calcurateRating(tierEnum.platinum, rankEnum.one)
+        calculateRating(tierEnum.platinum, rankEnum.one)
       )
       expect(player.displayRank).toBe('PLATINUM I')
       player.setRank(tierEnum.master, rankEnum.two)

@@ -1,7 +1,4 @@
-import {
-  getCombinations,
-  parseChatLogs,
-} from '../../utils/utils'
+import { getCombinations, parseChatLogs } from '../../utils/utils'
 
 describe('getCombinations', () => {
   test('配列から指定されたサイズのすべての組み合わせを取得できる', () => {

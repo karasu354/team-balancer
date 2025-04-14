@@ -1,4 +1,4 @@
-import { calcurateRating, rankEnum, tierEnum } from './rank'
+import { calculateRating, rankEnum, tierEnum } from './rank'
 
 export interface PlayerJson {
   name: string
@@ -50,7 +50,7 @@ export class Player {
     }
     this.tier = tier
     this.rank = rank
-    this.rating = calcurateRating(tier, rank)
+    this.rating = calculateRating(tier, rank)
 
     this.displayRank =
       this.tier === tierEnum.master ||

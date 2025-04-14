@@ -18,7 +18,6 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4 space-y-4">
-
       <h1 className="text-2xl font-bold">プレイヤー管理</h1>
       <PlayersTable
         teamDivider={teamDivider}

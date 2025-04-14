@@ -38,7 +38,7 @@ const rankScores: Record<rankEnum, number> = {
   [rankEnum.four]: 0,
 }
 
-export const calcurateRating = (tier: tierEnum, rank: rankEnum): number => {
+export const calculateRating = (tier: tierEnum, rank: rankEnum): number => {
   if (
     !Object.values(tierEnum).includes(tier) ||
     !Object.values(rankEnum).includes(rank)
