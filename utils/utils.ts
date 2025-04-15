@@ -1,25 +1,6 @@
-export function getCombinations<T>(array: T[], k: number): T[][] {
-  const result: T[][] = []
-
-  const generate = (index: number, current: T[]) => {
-    if (current.length === k) {
-      result.push([...current])
-      return
-    }
-    for (let i = index; i < array.length; i++) {
-      current.push(array[i])
-      generate(i + 1, current)
-      current.pop()
-    }
-  }
-
-  generate(0, [])
-  return result
-}
-
-export function parseChatLogs(logs: string): [string, string][] {
-  const result: [string, string][] = []
-  const lines = logs.split('\n') // 改行で分割
+export function parseChatLogs(logs: string): string[] {
+  const result: string[] = []
+  const lines = logs.split('\n')
   const joinLogRegex = /^(.+?) #(.+?)がロビーに参加しました。$/
   const leaveLogRegex = /^(.+?) #(.+?)がロビーから退出しました。$/
 
@@ -31,15 +12,15 @@ export function parseChatLogs(logs: string): [string, string][] {
 
     const joinMatch = trimmedLine.match(joinLogRegex)
     if (joinMatch) {
-      const [, name, tag] = joinMatch
-      result.push([name, tag])
+      const [name] = joinMatch.slice(1, 2)
+      result.push(name)
       return
     }
 
     const leaveMatch = trimmedLine.match(leaveLogRegex)
     if (leaveMatch) {
-      const [, name, tag] = leaveMatch
-      const index = result.findIndex(([n, t]) => n === name && t === tag)
+      const [name] = leaveMatch.slice(1, 2)
+      const index = result.findIndex((n) => n === name)
       if (index !== -1) {
         result.splice(index, 1)
       }

@@ -1,80 +1,50 @@
-import { getCombinations, parseChatLogs } from '../../utils/utils'
-
-describe('getCombinations', () => {
-  test('配列から指定されたサイズのすべての組み合わせを取得できる', () => {
-    const array = [1, 2, 3, 4]
-    const k = 2
-    const expected = [
-      [1, 2],
-      [1, 3],
-      [1, 4],
-      [2, 3],
-      [2, 4],
-      [3, 4],
-    ]
-    expect(getCombinations(array, k)).toEqual(expected)
-  })
-
-  test('空の配列を渡した場合、空の結果を返す', () => {
-    const array: number[] = []
-    const k = 2
-    expect(getCombinations(array, k)).toEqual([])
-  })
-
-  test('組み合わせのサイズが 0 の場合、空の配列を返す', () => {
-    const array = [1, 2, 3]
-    const k = 0
-    expect(getCombinations(array, k)).toEqual([[]])
-  })
-
-  test('組み合わせのサイズが配列の長さを超える場合、空の配列を返す', () => {
-    const array = [1, 2]
-    const k = 3
-    expect(getCombinations(array, k)).toEqual([])
-  })
-})
+import { parseChatLogs } from '../../utils/utils'
 
 describe('parseChatLogs', () => {
-  test('入室ログからプレイヤー名とタグ名を正しく抽出できる', () => {
-    const logs = `Player1 #JP1がロビーに参加しました。
-Player2 #meowがロビーに参加しました。
-ひろし #123がロビーに参加しました。`
-
-    const expected = [
-      ['Player1', 'JP1'],
-      ['Player2', 'meow'],
-      ['ひろし', '123'],
-    ]
-
-    expect(parseChatLogs(logs)).toEqual(expected)
+  test('ロビーに参加したプレイヤー名を正しく取得できること', () => {
+    const logs = `
+      Alice #1234がロビーに参加しました。
+      Bob #5678がロビーに参加しました。
+    `
+    const result = parseChatLogs(logs)
+    expect(result).toEqual(['Alice', 'Bob'])
   })
 
-  test('退室ログでプレイヤーが削除されることを確認する', () => {
-    const logs = `Player1 #JP1がロビーに参加しました。
-Player2 #meowがロビーに参加しました。
-Player1 #JP1がロビーから退出しました。`
-
-    const expected = [['Player2', 'meow']]
-
-    expect(parseChatLogs(logs)).toEqual(expected)
+  test('ロビーから退出したプレイヤー名がリストから削除されること', () => {
+    const logs = `
+      Alice #1234がロビーに参加しました。
+      Bob #5678がロビーに参加しました。
+      Alice #1234がロビーから退出しました。
+    `
+    const result = parseChatLogs(logs)
+    expect(result).toEqual(['Bob'])
   })
 
-  test('入室ログと退室ログが混在している場合の処理を確認する', () => {
-    const logs = `Player1 #JP1がロビーに参加しました。
-Player2 #meowがロビーに参加しました。
-Player1 #JP1がロビーから退出しました。
-ひろし #123がロビーに参加しました。`
-
-    const expected = [
-      ['Player2', 'meow'],
-      ['ひろし', '123'],
-    ]
-
-    expect(parseChatLogs(logs)).toEqual(expected)
+  test('無関係なログが無視されること', () => {
+    const logs = `
+      Alice #1234がロビーに参加しました。
+      無関係なログメッセージ
+      Bob #5678がロビーに参加しました。
+      システムメッセージ: サーバーが再起動されました。
+    `
+    const result = parseChatLogs(logs)
+    expect(result).toEqual(['Alice', 'Bob'])
   })
 
-  test('空のログを渡した場合、空の結果を返す', () => {
+  test('空のログを渡した場合、空のリストが返されること', () => {
     const logs = ''
-    expect(parseChatLogs(logs)).toEqual([])
+    const result = parseChatLogs(logs)
+    expect(result).toEqual([])
+  })
+
+  test('ロビーに参加した後、全員が退出した場合、空のリストが返されること', () => {
+    const logs = `
+      Alice #1234がロビーに参加しました。
+      Bob #5678がロビーに参加しました。
+      Alice #1234がロビーから退出しました。
+      Bob #5678がロビーから退出しました。
+    `
+    const result = parseChatLogs(logs)
+    expect(result).toEqual([])
   })
 })
