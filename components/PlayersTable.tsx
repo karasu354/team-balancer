@@ -2,36 +2,31 @@ import React, { useState } from 'react'
 
 import { Player } from '../utils/player'
 import { rankEnum, tierEnum } from '../utils/rank'
-import { TeamDivider } from '../utils/teamDivider'
+import { TeamBalancer } from '../utils/teamBalancer'
 import ChatLogInputForm from './ChatLogInputForm'
 import PlayerCard from './PlayerCard'
 import PlayerInputForm from './PlayerInputForm'
 import ServerIdForm from './ServerIdForm'
 
 interface PlayersTableProps {
-  teamDivider: TeamDivider
+  teamBalancer: TeamBalancer
   onPlayersUpdate: () => void
 }
 
 const PlayersTable: React.FC<PlayersTableProps> = ({
-  teamDivider,
+  teamBalancer,
   onPlayersUpdate,
 }) => {
   const [activeTab, setActiveTab] = useState<'single' | 'bulk'>('single')
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null)
-  const players = teamDivider.players
+  const players = teamBalancer.players
 
-  const handleAddPlayer = (
-    name: string,
-    tag: string,
-    tier: tierEnum,
-    rank: rankEnum
-  ) => {
+  const handleAddPlayer = (name: string, tier: tierEnum, rank: rankEnum) => {
     try {
       if (editingPlayer === null) {
-        const newPlayer = new Player(name, tag)
+        const newPlayer = new Player(name)
         newPlayer.setRank(tier, rank)
-        teamDivider.addPlayer(newPlayer)
+        teamBalancer.addPlayer(newPlayer)
       } else {
         editingPlayer.setRank(tier, rank)
         setEditingPlayer(null)
@@ -64,7 +59,7 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
   const handleRemovePlayer = (index: number) => {
     try {
       const playerToRemove = players[index]
-      teamDivider.removePlayerByIndex(index)
+      teamBalancer.removePlayerByIndex(index)
 
       if (editingPlayer === playerToRemove) {
         setEditingPlayer(null)
@@ -110,10 +105,6 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
         </button>
       </div>
 
-      <div className="mb-2 text-gray-500">
-        タグは使わないので適当な文字で大丈夫です。
-      </div>
-
       <div className="h-48">
         {activeTab === 'single' ? (
           <PlayerInputForm
@@ -122,14 +113,14 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
           />
         ) : (
           <ChatLogInputForm
-            teamDivider={teamDivider}
+            teamDivider={teamBalancer}
             onPlayersUpdate={onPlayersUpdate}
           />
         )}
       </div>
 
       <ServerIdForm
-        teamDivider={teamDivider}
+        teamBalancer={teamBalancer}
         onPlayersUpdate={onPlayersUpdate}
       />
 
@@ -143,8 +134,6 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
             }
             onRemove={() => handleRemovePlayer(index)}
             onEdit={() => player && handleEditPlayer(player)}
-            onToggleParticipation={() => handleToggleParticipation(player)}
-            onToggleRoleFixed={() => handleToggleRoleFixed(player)}
           />
         ))}
       </div>

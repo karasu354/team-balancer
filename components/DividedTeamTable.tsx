@@ -1,17 +1,17 @@
 import React, { useState } from 'react'
 
-import { TeamDivider } from '../utils/teamDivider'
+import { TeamBalancer } from '../utils/teamBalancer'
 
 interface DividedTeamTableProps {
-  teamDivider: TeamDivider
+  teamBalancer: TeamBalancer
   onTeamsUpdate: () => void
 }
 
 const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
-  teamDivider,
+  teamBalancer,
   onTeamsUpdate,
 }) => {
-  const teamDivisions = teamDivider.teamDivisions
+  const balancedTeamsByMissMatch = teamBalancer.balancedTeamsByMissMatch
   const [activeTab, setActiveTab] = useState<number>(0)
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -23,7 +23,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
     setIsLoading(true)
     try {
       await new Promise((resolve) => setTimeout(resolve, 2000))
-      teamDivider.divideTeams()
+      teamBalancer.divideTeams()
       onTeamsUpdate()
     } catch (error) {
       alert(
@@ -35,18 +35,18 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
   }
 
   const handleCopyToClipboard = () => {
-    const activeDivision = teamDivisions[activeTab]
+    const activeBalancedTeam = balancedTeamsByMissMatch[activeTab]
     const lanes = ['TOP', 'JG', 'MID', 'ADC', 'SUP']
     const blueTeam = lanes
       .map(
         (lane, index) =>
-          `${lane}: ${activeDivision.players[index].name || 'N/A'}`
+          `${lane}: ${activeBalancedTeam.players[index].name || 'N/A'}`
       )
       .join('\n')
     const redTeam = lanes
       .map(
         (lane, index) =>
-          `${lane}: ${activeDivision.players[index + 5].name || 'N/A'}`
+          `${lane}: ${activeBalancedTeam.players[index + 5].name || 'N/A'}`
       )
       .join('\n')
 
@@ -55,8 +55,8 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
     alert('チーム結果をクリップボードにコピーしました！')
   }
 
-  const activeDivision = teamDivisions[activeTab]
-  const isDivideButtonDisabled = teamDivider.isDividable() === false
+  const activeBalancedTeam = balancedTeamsByMissMatch[activeTab]
+  const isDivideButtonDisabled = teamBalancer.isDividable() === false
 
   return (
     <div className="w-full max-w-4xl">
@@ -74,9 +74,9 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
         </button>
         <button
           onClick={handleCopyToClipboard}
-          disabled={activeDivision.players.length === 0}
+          disabled={activeBalancedTeam.players.length === 0}
           className={`px-4 py-2 rounded ${
-            activeDivision.players.length === 0
+            activeBalancedTeam.players.length === 0
               ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
               : 'bg-blue-500 text-white hover:bg-blue-600 transition'
           }`}
@@ -87,17 +87,19 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
 
       <div className="flex">
         <div className="flex flex-col space-y-2 mr-4">
-          {Object.keys(teamDivisions).map((key) => (
+          {Object.keys(balancedTeamsByMissMatch).map((key) => (
             <button
               key={key}
               onClick={() => handleTabChange(Number(key))}
-              disabled={teamDivisions[Number(key)].players.length === 0}
+              disabled={
+                balancedTeamsByMissMatch[Number(key)].players.length === 0
+              }
               className={`px-4 py-2 rounded ${
                 Number(key) === activeTab
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-200 text-gray-700'
               } ${
-                teamDivisions[Number(key)].players.length === 0
+                balancedTeamsByMissMatch[Number(key)].players.length === 0
                   ? 'cursor-not-allowed opacity-50'
                   : ''
               }`}
@@ -108,9 +110,9 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
         </div>
 
         <div className="flex-1 border border-gray-300 rounded-lg p-4">
-          {activeDivision.players.length === 10 && (
+          {activeBalancedTeam.players.length === 10 && (
             <div>
-              <p>Rating Difference {activeDivision.evaluationScore}</p>
+              <p>Rating Difference {activeBalancedTeam.evaluationScore}</p>
               <div className="flex">
                 <div className="w-1/3">
                   <div className="mb-4 font-bold">Lane</div>
@@ -126,8 +128,8 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
                   </div>
                   {['TOP', 'JG', 'MID', 'ADC', 'SUP'].map((lane, index) => (
                     <div key={lane} className="mb-2">
-                      {activeDivision.players[index].name || 'N/A'} (
-                      {activeDivision.players[index].rating})
+                      {activeBalancedTeam.players[index].name || 'N/A'} (
+                      {activeBalancedTeam.players[index].rating})
                     </div>
                   ))}
                 </div>
@@ -137,8 +139,8 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
                   </div>
                   {['TOP', 'JG', 'MID', 'ADC', 'SUP'].map((lane, index) => (
                     <div key={lane} className="mb-2">
-                      {activeDivision.players[index + 5].name || 'N/A'} (
-                      {activeDivision.players[index + 5].rating})
+                      {activeBalancedTeam.players[index + 5].name || 'N/A'} (
+                      {activeBalancedTeam.players[index + 5].rating})
                     </div>
                   ))}
                 </div>

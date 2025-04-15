@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
 
 import { Player } from '../utils/player'
+import PlayerDetailCard from './PlayerDetailCard'
 
 interface PlayerCardProps {
   player: Player | null
+  onToggleParticipation?: (isParticipating: boolean) => void
   onToggleRole?: (roleIndex: number) => void
   onRemove?: () => void
   onEdit?: (updatedPlayer: Player) => void
@@ -11,6 +13,7 @@ interface PlayerCardProps {
 
 const PlayerCard: React.FC<PlayerCardProps> = ({
   player,
+  onToggleParticipation,
   onToggleRole,
   onRemove,
   onEdit,
@@ -29,27 +32,24 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
 
   const handleEditToggle = () => {
     setIsEditing(!isEditing)
-    setEditablePlayer(player) // 編集開始時に現在のプレイヤーデータをセット
+    setEditablePlayer(player)
   }
 
-  const handleSaveEdit = () => {
-    if (editablePlayer && onEdit) {
-      onEdit(editablePlayer)
+  const handleSaveEdit = (updatedPlayer: Player) => {
+    if (onEdit) {
+      onEdit(updatedPlayer)
     }
     setIsEditing(false)
   }
 
-  const handleRoleChange = (roleIndex: number) => {
-    if (editablePlayer) {
-      const updatedRoles = [...editablePlayer.desiredRoles]
-      updatedRoles[roleIndex] = !updatedRoles[roleIndex]
-      setEditablePlayer({ ...editablePlayer, desiredRoles: updatedRoles })
+  const handleParticipationToggle = () => {
+    if (onToggleParticipation) {
+      onToggleParticipation(!player.isParticipatingInGame)
     }
   }
 
   return (
     <div className="border border-gray-300 rounded-lg p-4">
-      {/* 非展開時 */}
       <div className="flex items-center justify-between">
         <div>
           <p className="text-lg font-bold">{player.name}</p>
@@ -61,128 +61,36 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
               .join(', ')}
           </p>
         </div>
-        <button
-          onClick={handleToggleExpand}
-          className="text-blue-500 hover:text-blue-700 transition"
-        >
-          {isExpanded ? '▲ 閉じる' : '▼ 詳細'}
-        </button>
-      </div>
-
-      {/* 展開時 */}
-      <div
-        className={`overflow-hidden transition-all duration-300 ${
-          isExpanded ? 'max-h-screen' : 'max-h-0'
-        }`}
-      >
-        <div className="mt-4 border-t pt-4">
-          {isEditing ? (
-            <div className="space-y-2">
-              <input
-                type="text"
-                value={editablePlayer?.name || ''}
-                onChange={(e) =>
-                  setEditablePlayer({
-                    ...editablePlayer!,
-                    name: e.target.value,
-                  })
-                }
-                className="p-2 border border-gray-300 rounded w-full"
-              />
-              <select
-                value={editablePlayer?.tier || ''}
-                onChange={(e) =>
-                  setEditablePlayer({
-                    ...editablePlayer!,
-                    tier: e.target.value as Player['tier'],
-                  })
-                }
-                className="p-2 border border-gray-300 rounded w-full"
-              >
-                {Object.values(Player.tierEnum).map((tier) => (
-                  <option key={tier} value={tier}>
-                    {tier}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={editablePlayer?.rank || ''}
-                onChange={(e) =>
-                  setEditablePlayer({
-                    ...editablePlayer!,
-                    rank: e.target.value as Player['rank'],
-                  })
-                }
-                className="p-2 border border-gray-300 rounded w-full"
-              >
-                {Object.values(Player.rankEnum).map((rank) => (
-                  <option key={rank} value={rank}>
-                    {rank}
-                  </option>
-                ))}
-              </select>
-              <div className="flex space-x-2">
-                {['TOP', 'JG', 'MID', 'ADC', 'SUP'].map((role, index) => (
-                  <label key={role} className="flex items-center space-x-1">
-                    <input
-                      type="checkbox"
-                      checked={editablePlayer?.desiredRoles[index] || false}
-                      onChange={() => handleRoleChange(index)}
-                    />
-                    <span className="text-xs">{role}</span>
-                  </label>
-                ))}
-              </div>
-              <div className="flex space-x-2">
-                <button
-                  onClick={handleSaveEdit}
-                  className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
-                >
-                  保存
-                </button>
-                <button
-                  onClick={handleEditToggle}
-                  className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
-                >
-                  キャンセル
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <p>ティア: {player.tier}</p>
-              <p>レーティング: {player.rating}</p>
-              <div className="flex space-x-2">
-                {['TOP', 'JG', 'MID', 'ADC', 'SUP'].map((role, index) => (
-                  <label key={role} className="flex items-center space-x-1">
-                    <input
-                      type="checkbox"
-                      checked={player.desiredRoles[index]}
-                      onChange={() => onToggleRole?.(index)}
-                      disabled
-                    />
-                    <span className="text-xs">{role}</span>
-                  </label>
-                ))}
-              </div>
-              <div className="flex space-x-2">
-                <button
-                  onClick={handleEditToggle}
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-                >
-                  編集
-                </button>
-                <button
-                  onClick={onRemove}
-                  className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
-                >
-                  削除
-                </button>
-              </div>
-            </div>
-          )}
+        <div className="flex items-center space-x-2">
+          <label className="flex items-center space-x-1">
+            <input
+              type="checkbox"
+              checked={player.isParticipatingInGame}
+              onChange={handleParticipationToggle}
+            />
+            <span className="text-sm">参加</span>
+          </label>
+          <button
+            onClick={handleToggleExpand}
+            className="text-blue-500 hover:text-blue-700 transition"
+          >
+            {isExpanded ? '▲ 閉じる' : '▼ 詳細'}
+          </button>
         </div>
       </div>
+
+      {isExpanded && (
+        <PlayerDetailCard
+          player={player}
+          isEditing={isEditing}
+          onEditToggle={handleEditToggle}
+          onSaveEdit={handleSaveEdit}
+          onRoleChange={onToggleRole!}
+          onRemove={onRemove!}
+          editablePlayer={editablePlayer}
+          setEditablePlayer={setEditablePlayer}
+        />
+      )}
     </div>
   )
 }

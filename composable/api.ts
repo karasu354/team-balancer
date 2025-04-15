@@ -1,4 +1,4 @@
-import { PlayersJson } from '../utils/teamDivider'
+import { PlayersJson } from '../utils/teamBalancer'
 
 const API_BASE_URL = '/api/teams'
 
