@@ -27,7 +27,7 @@ const PlayerEditCard: React.FC<PlayerEditCardProps> = ({
         <div>
           <input
             type="text"
-            placeholder="Plaer Name"
+            placeholder="Player Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="p-2 border border-gray-300 rounded w-full"
