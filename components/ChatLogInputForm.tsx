@@ -1,21 +1,21 @@
 import React, { useState } from 'react'
 
-import { TeamDivider } from '../utils/teamDivider'
+import { TeamBalancer } from '../utils/teamBalancer'
 
 interface ChatLogInputFormProps {
-  teamDivider: TeamDivider
+  teamBalancer: TeamBalancer
   onPlayersUpdate: () => void
 }
 
 const ChatLogInputForm: React.FC<ChatLogInputFormProps> = ({
-  teamDivider,
+  teamBalancer,
   onPlayersUpdate,
 }) => {
   const [logInput, setLogInput] = useState<string>('')
 
   const handleLogSubmit = () => {
     if (logInput.trim()) {
-      teamDivider.getPlayersByLog(logInput)
+      teamBalancer.addPlayersByLog(logInput)
       onPlayersUpdate()
       setLogInput('')
     }

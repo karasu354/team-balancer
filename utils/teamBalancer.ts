@@ -7,31 +7,41 @@ export interface PlayersJson {
   players: PlayerJson[]
 }
 
-export class TeamDivider {
+export class TeamBalancer {
   private static readonly TEAM_SIZE = 5
   private static readonly TOTAL_PLAYERS = 50
   private static readonly MAX_TEAM_ATTEMPTS = 100000
+  private static readonly PLAYERS_VERSION = '1.0'
 
   players: Player[] = []
-  teamDivisions: Record<
+  balancedTeamsByMissMatch: Record<
     number,
     { players: Player[]; evaluationScore: number }
   > = {}
 
   constructor() {
-    this._resetTeamDivisions()
+    this._resetBalancedTeamsByMissMatch()
+  }
+
+  private _resetBalancedTeamsByMissMatch(): void {
+    for (let i = 0; i <= TeamBalancer.TEAM_SIZE * 2; i++) {
+      this.balancedTeamsByMissMatch[i] = {
+        players: [],
+        evaluationScore: Infinity,
+      }
+    }
   }
 
   get playersInfo(): PlayersJson {
     return {
-      version: '1.0',
+      version: TeamBalancer.PLAYERS_VERSION,
       players: this.players.map((p) => p.playerInfo) || [],
     }
   }
 
   setPlayersFromPlayersJson(playersJson: PlayersJson): Player[] {
     this.players = playersJson.players.map((player) => {
-      const newPlayer = new Player(player.name, player.tagLine)
+      const newPlayer = new Player(player.name)
       newPlayer.desiredRoles = player.desiredRoles
       newPlayer.isRoleFixed = player.isRoleFixed
       newPlayer.tier = player.tier as tierEnum
@@ -44,8 +54,10 @@ export class TeamDivider {
   }
 
   addPlayer(player: Player): void {
-    if (this.players.length >= TeamDivider.TOTAL_PLAYERS) {
-      throw new Error('Cannot add more players. Maximum limit reached.')
+    if (this.players.length >= TeamBalancer.TOTAL_PLAYERS) {
+      throw new Error(
+        'これ以上プレイヤーを追加できません。最大人数に達しました。'
+      )
     }
     if (this.players.some((p) => p.name === player.name)) {
       return
@@ -55,47 +67,48 @@ export class TeamDivider {
 
   removePlayerByIndex(index: number): void {
     if (index < 0 || index >= this.players.length) {
-      throw new Error('Invalid index')
+      throw new Error('無効なインデックスです。')
     }
     this.players.splice(index, 1)
   }
 
-  getPlayersByLog(logs: string): void {
+  addPlayersByLog(logs: string): void {
     const parsedLogs = parseChatLogs(logs)
     if (parsedLogs.length === 0) return
 
-    this.players = []
-    for (const [name, tag] of parsedLogs) {
-      const player = new Player(name, tag)
-      this.addPlayer(player)
-    }
-  }
-
-  private _resetTeamDivisions(): void {
-    for (let i = 0; i <= TeamDivider.TEAM_SIZE * 2; i++) {
-      this.teamDivisions[i] = { players: [], evaluationScore: Infinity }
-    }
+    parsedLogs.forEach((name) => {
+      if (!this.players.some((player) => player.name === name)) {
+        const newPlayer = new Player(name)
+        this.addPlayer(newPlayer)
+      }
+    })
   }
 
   isDividable(): boolean {
     return (
       this.players.filter((p) => p.isParticipatingInGame).length ===
-      TeamDivider.TEAM_SIZE * 2
+      TeamBalancer.TEAM_SIZE * 2
     )
   }
 
   divideTeams(): void {
     if (!this.isDividable()) {
-      throw new Error('Cannot divide teams with the current players')
+      throw new Error('現在のプレイヤーではチーム分割ができません。')
     }
 
-    this._resetTeamDivisions()
-    for (let i = 0; i < TeamDivider.MAX_TEAM_ATTEMPTS; i++) {
+    this._resetBalancedTeamsByMissMatch()
+    for (let i = 0; i < TeamBalancer.MAX_TEAM_ATTEMPTS; i++) {
       const { players, mismatchCount, evaluationScore } = this._createTeams()
 
       if (mismatchCount === -1) continue
-      if (evaluationScore < this.teamDivisions[mismatchCount].evaluationScore) {
-        this.teamDivisions[mismatchCount] = { players, evaluationScore }
+      if (
+        evaluationScore <
+        this.balancedTeamsByMissMatch[mismatchCount].evaluationScore
+      ) {
+        this.balancedTeamsByMissMatch[mismatchCount] = {
+          players,
+          evaluationScore,
+        }
       }
     }
   }
@@ -149,8 +162,8 @@ export class TeamDivider {
   }
 
   private _calculateTotalRatingDifference(players: Player[]): number {
-    const blueTeam = players.slice(0, TeamDivider.TEAM_SIZE)
-    const redTeam = players.slice(TeamDivider.TEAM_SIZE)
+    const blueTeam = players.slice(0, TeamBalancer.TEAM_SIZE)
+    const redTeam = players.slice(TeamBalancer.TEAM_SIZE)
 
     const blueTeamRating = blueTeam.reduce(
       (total, player) => total + player.rating,
@@ -165,11 +178,11 @@ export class TeamDivider {
   }
 
   private _calculateLaneRatingDifference(players: Player[]): number {
-    const blueTeam = players.slice(0, TeamDivider.TEAM_SIZE)
-    const redTeam = players.slice(TeamDivider.TEAM_SIZE)
+    const blueTeam = players.slice(0, TeamBalancer.TEAM_SIZE)
+    const redTeam = players.slice(TeamBalancer.TEAM_SIZE)
 
     let laneRatingDifference = 0
-    for (let i = 0; i < TeamDivider.TEAM_SIZE; i++) {
+    for (let i = 0; i < TeamBalancer.TEAM_SIZE; i++) {
       laneRatingDifference += Math.abs(blueTeam[i].rating - redTeam[i].rating)
     }
 

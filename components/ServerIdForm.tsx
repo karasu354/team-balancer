@@ -1,15 +1,15 @@
 import React, { useState } from 'react'
 
 import { getTeamData, setTeamData } from '../composable/api'
-import { TeamDivider } from '../utils/teamDivider'
+import { TeamBalancer } from '../utils/teamBalancer'
 
 interface ServerIdFormProps {
-  teamDivider: TeamDivider
+  teamBalancer: TeamBalancer
   onPlayersUpdate: () => void
 }
 
 const ServerIdForm: React.FC<ServerIdFormProps> = ({
-  teamDivider,
+  teamBalancer,
   onPlayersUpdate,
 }) => {
   const [serverId, setServerId] = useState<string>('')
@@ -22,7 +22,7 @@ const ServerIdForm: React.FC<ServerIdFormProps> = ({
     try {
       const teamData = await getTeamData(serverId)
       if (teamData) {
-        teamDivider.setPlayersFromPlayersJson(teamData)
+        teamBalancer.setPlayersFromPlayersJson(teamData)
         onPlayersUpdate()
       } else {
         alert('チームデータが見つかりませんでした。')
@@ -40,7 +40,7 @@ const ServerIdForm: React.FC<ServerIdFormProps> = ({
 
     setIsLoading(true)
     try {
-      const playersInfo = teamDivider.playersInfo
+      const playersInfo = teamBalancer.playersInfo
       await setTeamData(serverId, playersInfo)
       alert('チームデータを保存しました。')
     } catch (error) {

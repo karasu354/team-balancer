@@ -2,7 +2,6 @@ import { calculateRating, rankEnum, tierEnum } from './rank'
 
 export interface PlayerJson {
   name: string
-  tagLine: string
   desiredRoles: boolean[]
   isRoleFixed: boolean
   tier: string
@@ -11,34 +10,24 @@ export interface PlayerJson {
   rating: number
 }
 export class Player {
-  readonly name: string
-  readonly tagLine: string
+  name: string = ''
   isParticipatingInGame: boolean = false
-  desiredRoles: boolean[] = Array(5).fill(true)
-  isRoleFixed: boolean = false
-  tier: tierEnum
-  rank: rankEnum
+
+  tier: tierEnum = tierEnum.gold
+  rank: rankEnum = rankEnum.two
   displayRank: string = ''
   rating: number = 0
 
+  desiredRoles: boolean[] = Array(5).fill(true)
+  isRoleFixed: boolean = false
+
   constructor(
     name: string,
-    tagLine: string,
     tier: tierEnum = tierEnum.gold,
     rank: rankEnum = rankEnum.two
   ) {
     this.name = name
-    this.tagLine = tagLine
-    this.tier = tier
-    this.rank = rank
-    this.setRank(this.tier, this.rank)
-  }
-
-  setDesiredRoleByIndex(index: number): void {
-    if (index < 0 || index >= this.desiredRoles.length) {
-      throw new Error('Invalid role index.')
-    }
-    this.desiredRoles[index] = !this.desiredRoles[index]
+    this.setRank(tier, rank)
   }
 
   setRank(tier: tierEnum, rank: rankEnum): void {
@@ -46,7 +35,7 @@ export class Player {
       !Object.values(tierEnum).includes(tier) ||
       !Object.values(rankEnum).includes(rank)
     ) {
-      throw new Error('無効なティアまたはランクです')
+      throw new Error('無効なティアまたはランクです。')
     }
     this.tier = tier
     this.rank = rank
@@ -60,10 +49,16 @@ export class Player {
         : `${this.tier} ${this.rank}`
   }
 
+  setDesiredRoleByIndex(index: number): void {
+    if (index < 0 || index >= this.desiredRoles.length) {
+      throw new Error('無効なロール番号です。')
+    }
+    this.desiredRoles[index] = !this.desiredRoles[index]
+  }
+
   get playerInfo(): PlayerJson {
     return {
       name: this.name,
-      tagLine: this.tagLine,
       desiredRoles: this.desiredRoles,
       isRoleFixed: this.isRoleFixed,
       tier: this.tier,

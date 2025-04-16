@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import { RedisClientType, createClient } from 'redis'
 
-import { PlayersJson } from '../utils/teamDivider'
+import { PlayersJson } from '../utils/teamBalancer'
 
 export class VercelRedis {
   private client: RedisClientType

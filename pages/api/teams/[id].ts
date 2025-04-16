@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 
 import { VercelRedis } from '../../../services/vercelRedis'
-import { PlayersJson } from '../../../utils/teamDivider'
+import { PlayersJson } from '../../../utils/teamBalancer'
 
 export default async function handler(
   req: NextApiRequest,
