@@ -5,15 +5,13 @@ import { Player } from '../utils/player'
 interface PlayerEditCardProps {
   editablePlayer: Player | null
   setEditablePlayer: (player: Player) => void
-  onSaveEdit: (updatedPlayer: Player) => void
-  onCancelEdit: () => void
+  onEdit: (e: React.MouseEvent) => void
 }
 
 const PlayerEditCard: React.FC<PlayerEditCardProps> = ({
   editablePlayer,
   setEditablePlayer,
-  onSaveEdit,
-  onCancelEdit,
+  onEdit,
 }) => {
   const handleInputChange = (field: keyof Player, value: any) => {
     if (editablePlayer) {
@@ -40,52 +38,7 @@ const PlayerEditCard: React.FC<PlayerEditCardProps> = ({
   }
 
   return (
-    <div className="space-y-2">
-      <input
-        type="text"
-        value={editablePlayer?.name || ''}
-        onChange={(e) => handleInputChange('name', e.target.value)}
-        className="p-2 border border-gray-300 rounded w-full"
-        placeholder="プレイヤー名を入力"
-      />
-      <select
-        value={editablePlayer?.tier || ''}
-        onChange={(e) =>
-          handleInputChange('tier', e.target.value as Player['tier'])
-        }
-        className="p-2 border border-gray-300 rounded w-full"
-      >
-        {Object.values(Player.tierEnum).map((tier) => (
-          <option key={tier} value={tier}>
-            {tier}
-          </option>
-        ))}
-      </select>
-      <select
-        value={editablePlayer?.rank || ''}
-        onChange={(e) =>
-          handleInputChange('rank', e.target.value as Player['rank'])
-        }
-        className="p-2 border border-gray-300 rounded w-full"
-      >
-        {Object.values(Player.rankEnum).map((rank) => (
-          <option key={rank} value={rank}>
-            {rank}
-          </option>
-        ))}
-      </select>
-      <div className="flex space-x-2">
-        {['TOP', 'JG', 'MID', 'ADC', 'SUP'].map((role, index) => (
-          <label key={role} className="flex items-center space-x-1">
-            <input
-              type="checkbox"
-              checked={editablePlayer?.desiredRoles[index] || false}
-              onChange={() => handleRoleToggle(index)}
-            />
-            <span className="text-xs">{role}</span>
-          </label>
-        ))}
-      </div>
+    <div className="mt-4 border-t pt-4">
       <label className="flex items-center space-x-1">
         <input
           type="checkbox"
@@ -94,15 +47,15 @@ const PlayerEditCard: React.FC<PlayerEditCardProps> = ({
         />
         <span className="text-sm">希望ロール固定</span>
       </label>
-      <div className="flex space-x-2">
+      <div className="flex justify-end space-x-2">
         <button
-          onClick={() => onSaveEdit(editablePlayer!)}
+          onClick={onEdit}
           className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
         >
           保存
         </button>
         <button
-          onClick={onCancelEdit}
+          onClick={onEdit}
           className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
         >
           キャンセル

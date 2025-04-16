@@ -2,72 +2,58 @@ import React from 'react'
 
 import { Player } from '../utils/player'
 import PlayerDetailCard from './PlayerDetailCard'
+import PlayerEditCard from './PlayerEditCard'
 
 interface PlayerCardProps {
   player: Player
   isExpanded: boolean
-  onPlayersUpdate: () => void
-  onToggleExpand: () => void
-  onToggleRole?: (roleIndex: number) => void
+  onToggleExpand: (e: React.MouseEvent) => void
+  onCurrentPlayerUpdate: (updatedPlayer: Player) => void
   onRemove: () => void
-  onToggleParticipating: () => void
 }
 
 const PlayerCard: React.FC<PlayerCardProps> = ({
   player,
   isExpanded,
-  onPlayersUpdate,
   onToggleExpand,
-  onToggleRole,
+  onCurrentPlayerUpdate,
   onRemove,
-  onToggleParticipating,
 }) => {
-  const handleParticipationToggle = (e: React.MouseEvent) => {
+  const [isEditMode, setIsEditMode] = React.useState(false)
+
+  const handleEditModeToggle = (e: React.MouseEvent) => {
     e.stopPropagation()
-    onToggleParticipating()
+    setIsEditMode((prev) => !prev)
+  }
+
+  const handleParticipationToggle = () => {
+    player.isParticipatingInGame = !player.isParticipatingInGame
+    onCurrentPlayerUpdate(player)
   }
 
   return (
     <div
       className={`border border-gray-300 rounded-lg p-4 cursor-pointer transition ${
         player.isParticipatingInGame
-          ? 'bg-blue-100' // 参加している場合の背景色
-          : isExpanded
-            ? 'bg-gray-100' // 展開されている場合の背景色
-            : 'bg-white hover:bg-gray-50' // 通常時の背景色
+          ? 'bg-blue-100'
+          : 'bg-white hover:bg-gray-50'
       }`}
-      onClick={onToggleExpand}
+      onClick={handleParticipationToggle} // カード全体で参加/非参加を切り替え
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          {' '}
-          {/* 横並びにして中央揃え */}
           <p className="text-lg font-bold">{player.name}</p>
           <p className="text-sm text-gray-500">({player.rating})</p>
           <p className="text-sm text-gray-500">
-            希望ロール:{' '}
+            希望ロール:
             {['TOP', 'JG', 'MID', 'ADC', 'SUP']
               .filter((_, index) => player.desiredRoles[index])
-              .join(', ')}
+              .join(',')}
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <label
-            className="flex items-center space-x-1"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <input
-              type="checkbox"
-              checked={player.isParticipatingInGame}
-              onClick={handleParticipationToggle}
-            />
-            <span className="text-sm">参加</span>
-          </label>
           <button
-            onClick={(e) => {
-              e.stopPropagation()
-              onToggleExpand()
-            }}
+            onClick={onToggleExpand}
             className="text-blue-500 hover:text-blue-700 transition"
           >
             {isExpanded ? '▲' : '▼'}
@@ -75,11 +61,22 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
         </div>
       </div>
 
-      {isExpanded && (
+      {isExpanded && !isEditMode && (
         <PlayerDetailCard
           player={player}
-          onRoleChange={onToggleRole!}
-          onRemove={onRemove!}
+          onEdit={handleEditModeToggle}
+          onPlayerUpdate={onCurrentPlayerUpdate}
+          onRemove={onRemove}
+        />
+      )}
+
+      {isExpanded && isEditMode && (
+        <PlayerEditCard
+          editablePlayer={player}
+          setEditablePlayer={(updatedPlayer) =>
+            onCurrentPlayerUpdate(updatedPlayer)
+          }
+          onEdit={handleEditModeToggle}
         />
       )}
     </div>

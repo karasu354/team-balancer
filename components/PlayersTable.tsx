@@ -6,11 +6,13 @@ import PlayerCard from './PlayerCard'
 
 interface PlayersTableProps {
   teamBalancer: TeamBalancer
+  onRemovePlayerByIndex: (index: number) => void
   onPlayersUpdate: () => void
 }
 
 const PlayersTable: React.FC<PlayersTableProps> = ({
   teamBalancer,
+  onRemovePlayerByIndex,
   onPlayersUpdate,
 }) => {
   const players = teamBalancer.players
@@ -20,17 +22,17 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
     setIsExpandedList(Array(players.length).fill(false))
   }, [players.length])
 
-  const handleToggleExpand = (index: number) => {
+  const handleToggleExpand = (e: React.MouseEvent, index: number) => {
+    e.stopPropagation()
     setIsExpandedList((prev) =>
       prev.map((isExpanded, i) => (i === index ? !isExpanded : isExpanded))
     )
     onPlayersUpdate()
   }
 
-  const handleRemovePlayer = (index: number) => {
+  const handleUpdatePlayer = (index: number, updatedPlayer: Player) => {
     try {
-      teamBalancer.removePlayerByIndex(index)
-      setIsExpandedList((prev) => prev.filter((_, i) => i !== index))
+      teamBalancer.players[index] = updatedPlayer
       onPlayersUpdate()
     } catch (error) {
       if (error instanceof Error) {
@@ -41,16 +43,6 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
     }
   }
 
-  const handleToggleParticipating = (index: number) => {
-    players[index].isParticipatingInGame = !players[index].isParticipatingInGame
-    onPlayersUpdate()
-  }
-
-  const handleToggleRole = (player: Player, roleIndex: number) => {
-    player.setDesiredRoleByIndex(roleIndex)
-    onPlayersUpdate()
-  }
-
   return (
     <div className="grid grid-cols-2 gap-0 w-full border border-gray-300 rounded-lg">
       {players.map((player, index) => (
@@ -58,11 +50,11 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
           key={index}
           player={player}
           isExpanded={isExpandedList[index]}
-          onPlayersUpdate={onPlayersUpdate}
-          onToggleExpand={() => handleToggleExpand(index)}
-          onToggleRole={(roleIndex) => handleToggleRole(player, roleIndex)}
-          onRemove={() => handleRemovePlayer(index)}
-          onToggleParticipating={() => handleToggleParticipating(index)}
+          onToggleExpand={(e: React.MouseEvent) => handleToggleExpand(e, index)}
+          onCurrentPlayerUpdate={(updatedPlayer) =>
+            handleUpdatePlayer(index, updatedPlayer)
+          }
+          onRemove={() => onRemovePlayerByIndex(index)}
         />
       ))}
     </div>

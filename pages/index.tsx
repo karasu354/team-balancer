@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import DividedTeamTable from '../components/DividedTeamTable'
 import PlayerInputForm from '../components/PlayerInputForm'
@@ -10,7 +10,11 @@ import { TeamBalancer } from '../utils/teamBalancer'
 
 const Home = () => {
   const [teamBalancer] = useState(new TeamBalancer())
-  const [, setUpdate] = useState(0)
+  const [updateCount, setUpdate] = useState(0)
+
+  useEffect(() => {
+    console.log('count : ', updateCount)
+  }, [updateCount])
 
   const handlePlayersUpdate = () => {
     setUpdate((prev) => prev + 1)
@@ -25,6 +29,19 @@ const Home = () => {
       const newPlayer = new Player(name)
       newPlayer.setRank(tier, rank)
       teamBalancer.addPlayer(newPlayer)
+      handlePlayersUpdate()
+    } catch (error) {
+      if (error instanceof Error) {
+        alert(error.message)
+      } else {
+        alert('何かのエラーが出たけどエラーメッセージがわからん。')
+      }
+    }
+  }
+
+  const handleRemovePlayer = (index: number) => {
+    try {
+      teamBalancer.removePlayerByIndex(index)
       handlePlayersUpdate()
     } catch (error) {
       if (error instanceof Error) {
@@ -52,6 +69,7 @@ const Home = () => {
 
       <PlayersTable
         teamBalancer={teamBalancer}
+        onRemovePlayerByIndex={handleRemovePlayer}
         onPlayersUpdate={handlePlayersUpdate}
       />
 
