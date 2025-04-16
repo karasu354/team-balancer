@@ -1,59 +1,49 @@
-import React, { useState } from 'react'
+import React from 'react'
 
 import { Player } from '../utils/player'
 import PlayerDetailCard from './PlayerDetailCard'
 
 interface PlayerCardProps {
-  player: Player | null
-  onToggleParticipation?: (isParticipating: boolean) => void
+  player: Player
+  isExpanded: boolean
+  onPlayersUpdate: () => void
+  onToggleExpand: () => void
   onToggleRole?: (roleIndex: number) => void
-  onRemove?: () => void
-  onEdit?: (updatedPlayer: Player) => void
+  onRemove: () => void
+  onToggleParticipating: () => void
 }
 
 const PlayerCard: React.FC<PlayerCardProps> = ({
   player,
-  onToggleParticipation,
+  isExpanded,
+  onPlayersUpdate,
+  onToggleExpand,
   onToggleRole,
   onRemove,
-  onEdit,
+  onToggleParticipating,
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
-  const [editablePlayer, setEditablePlayer] = useState<Player | null>(player)
-
-  if (!player) {
-    return <div className="flex-1 text-center text-gray-400">No Player</div>
-  }
-
-  const handleToggleExpand = () => {
-    setIsExpanded(!isExpanded)
-  }
-
-  const handleEditToggle = () => {
-    setIsEditing(!isEditing)
-    setEditablePlayer(player)
-  }
-
-  const handleSaveEdit = (updatedPlayer: Player) => {
-    if (onEdit) {
-      onEdit(updatedPlayer)
-    }
-    setIsEditing(false)
-  }
-
-  const handleParticipationToggle = () => {
-    if (onToggleParticipation) {
-      onToggleParticipation(!player.isParticipatingInGame)
-    }
+  const handleParticipationToggle = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    onToggleParticipating()
   }
 
   return (
-    <div className="border border-gray-300 rounded-lg p-4">
+    <div
+      className={`border border-gray-300 rounded-lg p-4 cursor-pointer transition ${
+        player.isParticipatingInGame
+          ? 'bg-blue-100' // 参加している場合の背景色
+          : isExpanded
+            ? 'bg-gray-100' // 展開されている場合の背景色
+            : 'bg-white hover:bg-gray-50' // 通常時の背景色
+      }`}
+      onClick={onToggleExpand}
+    >
       <div className="flex items-center justify-between">
-        <div>
+        <div className="flex items-center space-x-4">
+          {' '}
+          {/* 横並びにして中央揃え */}
           <p className="text-lg font-bold">{player.name}</p>
-          <p className="text-sm text-gray-500">({player.displayRank})</p>
+          <p className="text-sm text-gray-500">({player.rating})</p>
           <p className="text-sm text-gray-500">
             希望ロール:{' '}
             {['TOP', 'JG', 'MID', 'ADC', 'SUP']
@@ -62,19 +52,25 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <label className="flex items-center space-x-1">
+          <label
+            className="flex items-center space-x-1"
+            onClick={(e) => e.stopPropagation()}
+          >
             <input
               type="checkbox"
               checked={player.isParticipatingInGame}
-              onChange={handleParticipationToggle}
+              onClick={handleParticipationToggle}
             />
             <span className="text-sm">参加</span>
           </label>
           <button
-            onClick={handleToggleExpand}
+            onClick={(e) => {
+              e.stopPropagation()
+              onToggleExpand()
+            }}
             className="text-blue-500 hover:text-blue-700 transition"
           >
-            {isExpanded ? '▲ 閉じる' : '▼ 詳細'}
+            {isExpanded ? '▲' : '▼'}
           </button>
         </div>
       </div>
@@ -82,13 +78,8 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
       {isExpanded && (
         <PlayerDetailCard
           player={player}
-          isEditing={isEditing}
-          onEditToggle={handleEditToggle}
-          onSaveEdit={handleSaveEdit}
           onRoleChange={onToggleRole!}
           onRemove={onRemove!}
-          editablePlayer={editablePlayer}
-          setEditablePlayer={setEditablePlayer}
         />
       )}
     </div>
