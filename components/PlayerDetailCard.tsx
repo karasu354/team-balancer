@@ -3,15 +3,15 @@ import React from 'react'
 import { Player } from '../utils/player'
 
 interface PlayerDetailCardProps {
-  player: Player
+  currentPlayer: Player
   onPlayerUpdate: (updatedPlayer: Player) => void
-  onEdit: (e: React.MouseEvent) => void
+  onEditModeToggle: (e: React.MouseEvent) => void
   onRemove: () => void
 }
 
 const PlayerDetailCard: React.FC<PlayerDetailCardProps> = ({
-  player,
-  onEdit,
+  currentPlayer,
+  onEditModeToggle,
   onPlayerUpdate,
   onRemove,
 }) => {
@@ -25,23 +25,23 @@ const PlayerDetailCard: React.FC<PlayerDetailCardProps> = ({
         <p className="text-sm font-bold">プレイヤー情報</p>
         <div className="grid grid-cols-2 gap-2">
           <p className="text-sm font-medium">名前:</p>
-          <p className="text-sm">{player.name}</p>
+          <p className="text-sm">{currentPlayer.name}</p>
           <p className="text-sm font-medium">ティア:</p>
-          <p className="text-sm">{player.tier}</p>
+          <p className="text-sm">{currentPlayer.tier}</p>
           <p className="text-sm font-medium">ランク:</p>
-          <p className="text-sm">{player.rank}</p>
+          <p className="text-sm">{currentPlayer.rank}</p>
           <p className="text-sm font-medium">レーティング:</p>
-          <p className="text-sm">{player.rating}</p>
+          <p className="text-sm">{currentPlayer.rating}</p>
           <p className="text-sm font-medium">希望ロール:</p>
           <p className="text-sm">
             {['TOP', 'JG', 'MID', 'ADC', 'SUP']
-              .filter((_, index) => player.desiredRoles[index])
+              .filter((_, index) => currentPlayer.desiredRoles[index])
               .join(', ')}
           </p>
         </div>
         <div className="flex justify-end space-x-2">
           <button
-            onClick={onEdit}
+            onClick={onEditModeToggle}
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
           >
             編集

@@ -63,8 +63,8 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
 
       {isExpanded && !isEditMode && (
         <PlayerDetailCard
-          player={player}
-          onEdit={handleEditModeToggle}
+          currentPlayer={player}
+          onEditModeToggle={handleEditModeToggle}
           onPlayerUpdate={onCurrentPlayerUpdate}
           onRemove={onRemove}
         />
@@ -72,11 +72,11 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
 
       {isExpanded && isEditMode && (
         <PlayerEditCard
-          editablePlayer={player}
+          currentPlayer={player}
           setEditablePlayer={(updatedPlayer) =>
             onCurrentPlayerUpdate(updatedPlayer)
           }
-          onEdit={handleEditModeToggle}
+          onEditModeToggle={handleEditModeToggle}
         />
       )}
     </div>

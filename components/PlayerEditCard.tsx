@@ -3,63 +3,50 @@ import React from 'react'
 import { Player } from '../utils/player'
 
 interface PlayerEditCardProps {
-  editablePlayer: Player | null
+  currentPlayer: Player
   setEditablePlayer: (player: Player) => void
-  onEdit: (e: React.MouseEvent) => void
+  onEditModeToggle: (e: React.MouseEvent) => void
 }
 
 const PlayerEditCard: React.FC<PlayerEditCardProps> = ({
-  editablePlayer,
+  currentPlayer,
   setEditablePlayer,
-  onEdit,
+  onEditModeToggle,
 }) => {
-  const handleInputChange = (field: keyof Player, value: any) => {
-    if (editablePlayer) {
-      const updatedPlayer = new Player(
-        editablePlayer.name,
-        editablePlayer.tier,
-        editablePlayer.rank
-      )
-      updatedPlayer.desiredRoles = editablePlayer.desiredRoles
-      updatedPlayer.isParticipatingInGame = editablePlayer.isParticipatingInGame
-      updatedPlayer.displayRank = editablePlayer.displayRank
-      updatedPlayer.rating = editablePlayer.rating
-      updatedPlayer.isRoleFixed = editablePlayer.isRoleFixed
-      setEditablePlayer(updatedPlayer)
-    }
-  }
+  const [name, setName] = React.useState(currentPlayer.name)
 
-  const handleRoleToggle = (roleIndex: number) => {
-    if (editablePlayer) {
-      const updatedRoles = [...editablePlayer.desiredRoles]
-      updatedRoles[roleIndex] = !updatedRoles[roleIndex]
-      handleInputChange('desiredRoles', updatedRoles)
-    }
+  const handleUpdatePlayer = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    currentPlayer.name = name
+    onEditModeToggle(e)
   }
 
   return (
     <div className="mt-4 border-t pt-4">
-      <label className="flex items-center space-x-1">
-        <input
-          type="checkbox"
-          checked={editablePlayer?.isRoleFixed || false}
-          onChange={(e) => handleInputChange('isRoleFixed', e.target.checked)}
-        />
-        <span className="text-sm">希望ロール固定</span>
-      </label>
-      <div className="flex justify-end space-x-2">
-        <button
-          onClick={onEdit}
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
-        >
-          保存
-        </button>
-        <button
-          onClick={onEdit}
-          className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
-        >
-          キャンセル
-        </button>
+      <div className="space-y-4">
+        <div>
+          <input
+            type="text"
+            placeholder="Plaer Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="p-2 border border-gray-300 rounded w-full"
+          />
+        </div>
+        <div className="flex justify-end space-x-2">
+          <button
+            onClick={handleUpdatePlayer}
+            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
+          >
+            保存
+          </button>
+          <button
+            onClick={onEditModeToggle}
+            className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
+          >
+            キャンセル
+          </button>
+        </div>
       </div>
     </div>
   )
