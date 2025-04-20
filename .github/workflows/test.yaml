@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - main
-      - develop # 対象のブランチ名を指定
+      - develop
 
 jobs:
   test:
@@ -17,10 +17,13 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '22' # プロジェクトで使用しているNode.jsのバージョン
+          node-version: '22'
 
       - name: Install dependencies
         run: npm install
+
+      - name: Check code formatting
+        run: npm run format:test
 
       - name: Run unit tests
         run: npm run test:unit
