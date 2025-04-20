@@ -1,12 +1,15 @@
 import { Player } from '../../utils/player'
 import { rankEnum, tierEnum } from '../../utils/rank'
 import { roleEnum } from '../../utils/role'
+import { generateInternalId } from '../../utils/utils'
 
 describe('Player', () => {
   let player: Player
+  const id = generateInternalId()
 
   beforeEach(() => {
     player = new Player('Player')
+    player.id = id
     player.desiredRoles = [roleEnum.top]
   })
 
@@ -32,11 +35,18 @@ describe('Player', () => {
     test('レーティングが正しく計算されること', () => {
       expect(player.rating).toBe(1400) // GOLD II のレーティング
     })
+
+    test('IDが生成されること', () => {
+      expect(player.id).toBeDefined()
+      expect(typeof player.id).toBe('string')
+      expect(player.id.length).toBeGreaterThan(0)
+    })
   })
 
   describe('fromJson', () => {
     test('PlayerJson から正しくインスタンスを生成できること', () => {
       const playerJson = {
+        id: id,
         name: 'Alice',
         tier: tierEnum.platinum,
         rank: rankEnum.one,
@@ -50,6 +60,7 @@ describe('Player', () => {
 
       const player = Player.fromJson(playerJson)
 
+      expect(player.id).toBe(id)
       expect(player.name).toBe('Alice')
       expect(player.tier).toBe(tierEnum.platinum)
       expect(player.rank).toBe(rankEnum.one)
@@ -94,6 +105,7 @@ describe('Player', () => {
   describe('playerInfo', () => {
     test('プレイヤー情報が正しく取得できること', () => {
       const info = player.playerInfo
+      expect(info.id).toBe(player.id)
       expect(info.name).toBe('Player')
       expect(info.tier).toBe(tierEnum.gold)
       expect(info.rank).toBe(rankEnum.two)

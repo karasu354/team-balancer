@@ -2,9 +2,11 @@ import { Player } from '../../utils/player'
 import { rankEnum, tierEnum } from '../../utils/rank'
 import { roleEnum } from '../../utils/role'
 import { TeamBalancer } from '../../utils/teamBalancer'
+import { generateInternalId } from '../../utils/utils'
 
 describe('TeamBalancer クラス', () => {
   let teamBalancer: TeamBalancer
+  const id = generateInternalId()
 
   beforeEach(() => {
     teamBalancer = new TeamBalancer()
@@ -38,6 +40,7 @@ describe('TeamBalancer クラス', () => {
       expect(playersInfo.playersTotalCount).toBe(2)
       expect(playersInfo.players).toEqual([
         {
+          id: player1.id,
           name: 'Alice',
           tier: tierEnum.gold,
           rank: rankEnum.two,
@@ -51,6 +54,7 @@ describe('TeamBalancer クラス', () => {
           isRoleFixed: false,
         },
         {
+          id: player2.id,
           name: 'Bob',
           tier: tierEnum.platinum,
           rank: rankEnum.one,

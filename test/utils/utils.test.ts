@@ -1,4 +1,9 @@
-import { generateRandomPermutations, parseChatLogs } from '../../utils/utils'
+import {
+  factorial,
+  generateInternalId,
+  generateRandomPermutations,
+  parseChatLogs,
+} from '../../utils/utils'
 
 describe('parseChatLogs', () => {
   test('ロビーに参加したプレイヤー名を正しく取得できること', () => {
@@ -92,5 +97,29 @@ describe('generateRandomPermutations', () => {
     const result = generateRandomPermutations(array, count)
 
     expect(result).toEqual([])
+  })
+})
+
+describe('factorial', () => {
+  test('0の階乗は1であること', () => {
+    expect(factorial(0)).toBe(1)
+  })
+
+  test('5の階乗が120であること', () => {
+    expect(factorial(5)).toBe(120)
+  })
+
+  test('10の階乗が3628800であること', () => {
+    expect(factorial(10)).toBe(3628800)
+  })
+})
+
+describe('generateInternalId', () => {
+  test('生成されたIDがタイムスタンプを含む形式であること', () => {
+    const id = generateInternalId()
+    const parts = id.split('-')
+    expect(parts.length).toBe(2)
+    expect(Number(parts[0])).not.toBeNaN()
+    expect(parts[1].length).toBe(6)
   })
 })
