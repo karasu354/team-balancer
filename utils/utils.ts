@@ -29,3 +29,27 @@ export function parseChatLogs(logs: string): string[] {
 
   return result
 }
+
+export function factorial(n: number): number {
+  return n <= 1 ? 1 : n * factorial(n - 1)
+}
+
+export function generateRandomPermutations(
+  array: number[],
+  count: number
+): number[][] {
+  if (array.length === 0) return []
+  const result: Set<string> = new Set()
+  const maxCount = factorial(array.length)
+
+  while (result.size < maxCount && result.size < count) {
+    const shuffled = [...array]
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+    result.add(shuffled.join(','))
+  }
+
+  return Array.from(result).map((str) => str.split(',').map(Number))
+}

@@ -1,4 +1,4 @@
-import { parseChatLogs } from '../../utils/utils'
+import { generateRandomPermutations, parseChatLogs } from '../../utils/utils'
 
 describe('parseChatLogs', () => {
   test('ロビーに参加したプレイヤー名を正しく取得できること', () => {
@@ -45,6 +45,52 @@ describe('parseChatLogs', () => {
       Bob #5678がロビーから退出しました。
     `
     const result = parseChatLogs(logs)
+    expect(result).toEqual([])
+  })
+})
+
+describe('generateRandomPermutations', () => {
+  test('指定された数のユニークな順列が生成されること', () => {
+    const array = [0, 1, 2]
+    const count = 5
+    const result = generateRandomPermutations(array, count)
+
+    expect(result.length).toBe(count)
+
+    const uniqueResults = new Set(result.map((perm) => perm.join(',')))
+    expect(uniqueResults.size).toBe(count)
+  })
+
+  test('生成された順列が元の配列の要素をすべて含むこと', () => {
+    const array = [0, 1, 2]
+    const count = 5
+    const result = generateRandomPermutations(array, count)
+
+    result.forEach((perm) => {
+      expect(perm.sort()).toEqual(array.sort())
+    })
+  })
+
+  test('生成する順列の数が全順列数を超えないこと', () => {
+    const array = [0, 1, 2]
+    const count = 10
+    const result = generateRandomPermutations(array, count)
+
+    expect(result.length).toBeLessThanOrEqual(6)
+  })
+
+  test('空の配列を渡した場合、空の順列リストが返されること', () => {
+    const count = 5
+    const result = generateRandomPermutations([], count)
+
+    expect(result).toEqual([])
+  })
+
+  test('count が 0 の場合、空のリストが返されること', () => {
+    const array = [0, 1, 2]
+    const count = 0
+    const result = generateRandomPermutations(array, count)
+
     expect(result).toEqual([])
   })
 })

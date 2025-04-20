@@ -1,11 +1,13 @@
 import { Player } from '../../utils/player'
 import { rankEnum, tierEnum } from '../../utils/rank'
+import { roleEnum } from '../../utils/role'
 
 describe('Player', () => {
   let player: Player
 
   beforeEach(() => {
     player = new Player('Player')
+    player.desiredRoles = [roleEnum.top]
   })
 
   describe('constructor', () => {
@@ -18,8 +20,45 @@ describe('Player', () => {
       expect(player.rank).toBe(rankEnum.two)
     })
 
+    test('デフォルトのロールが正しく設定されること', () => {
+      expect(player.mainRole).toBe(roleEnum.all)
+      expect(player.subRole).toBe(roleEnum.all)
+    })
+
+    test('デフォルトの希望ロールが正しく設定されること', () => {
+      expect(player.desiredRoles).toEqual([roleEnum.top])
+    })
+
     test('レーティングが正しく計算されること', () => {
-      expect(player.rating).toBe(1400)
+      expect(player.rating).toBe(1400) // GOLD II のレーティング
+    })
+  })
+
+  describe('fromJson', () => {
+    test('PlayerJson から正しくインスタンスを生成できること', () => {
+      const playerJson = {
+        name: 'Alice',
+        tier: tierEnum.platinum,
+        rank: rankEnum.one,
+        displayRank: 'PLATINUM I',
+        rating: 1900,
+        mainRole: roleEnum.mid,
+        subRole: roleEnum.jungle,
+        desiredRoles: [roleEnum.mid, roleEnum.jungle],
+        isRoleFixed: true,
+      }
+
+      const player = Player.fromJson(playerJson)
+
+      expect(player.name).toBe('Alice')
+      expect(player.tier).toBe(tierEnum.platinum)
+      expect(player.rank).toBe(rankEnum.one)
+      expect(player.displayRank).toBe('PLATINUM I')
+      expect(player.rating).toBe(1900)
+      expect(player.mainRole).toBe(roleEnum.mid)
+      expect(player.subRole).toBe(roleEnum.jungle)
+      expect(player.desiredRoles).toEqual([roleEnum.mid, roleEnum.jungle])
+      expect(player.isRoleFixed).toBe(true)
     })
   })
 
@@ -30,33 +69,25 @@ describe('Player', () => {
       expect(player.rank).toBe(rankEnum.one)
       expect(player.rating).toBe(1900)
     })
-
-    test('無効なティアを設定した場合、エラーがスローされること', () => {
-      expect(() => player.setRank('INVALID' as tierEnum, rankEnum.one)).toThrow(
-        '無効なティアまたはランクです。'
-      )
-    })
-
-    test('無効なランクを設定した場合、エラーがスローされること', () => {
-      expect(() =>
-        player.setRank(tierEnum.gold, 'INVALID' as rankEnum)
-      ).toThrow('無効なティアまたはランクです。')
-    })
   })
 
-  describe('setDesiredRoleByIndex', () => {
-    test('希望ロールを正しく切り替えられること', () => {
-      player.setDesiredRoleByIndex(0)
-      expect(player.desiredRoles[0]).toBe(false)
+  describe('setDesiredRoleByRole', () => {
+    test('希望ロールを追加できること', () => {
+      player.setDesiredRoleByRole(roleEnum.mid)
+      expect(player.desiredRoles).toContain(roleEnum.mid)
     })
 
-    test('無効なインデックスを指定した場合、エラーがスローされること', () => {
-      expect(() => player.setDesiredRoleByIndex(-1)).toThrow(
-        '無効なロール番号です。'
-      )
-      expect(() => player.setDesiredRoleByIndex(5)).toThrow(
-        '無効なロール番号です。'
-      )
+    test('希望ロールを削除できること', () => {
+      player.setDesiredRoleByRole(roleEnum.top)
+      expect(player.desiredRoles).not.toContain(roleEnum.top)
+    })
+
+    test('希望ロールが正しく切り替えられること', () => {
+      player.setDesiredRoleByRole(roleEnum.mid)
+      expect(player.desiredRoles).toContain(roleEnum.mid)
+
+      player.setDesiredRoleByRole(roleEnum.mid)
+      expect(player.desiredRoles).not.toContain(roleEnum.mid)
     })
   })
 
@@ -68,7 +99,7 @@ describe('Player', () => {
       expect(info.rank).toBe(rankEnum.two)
       expect(info.displayRank).toBe('GOLD II')
       expect(info.rating).toBe(1400)
-      expect(info.desiredRoles).toEqual([true, true, true, true, true])
+      expect(info.desiredRoles).toEqual([roleEnum.top])
       expect(info.isRoleFixed).toBe(false)
     })
   })

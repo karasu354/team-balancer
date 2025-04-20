@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Team Balancer API
   description: API for managing team player data.
-  version: 1.0.0
+  version: 0.0.1
 servers:
   - url: http://localhost:3000/api
     description: Local development server
@@ -26,14 +26,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/PlayersJson'
               example:
-                version: "1.0"
+                version: '1.0'
                 players:
-                  - name: "Alice"
+                  - name: 'Alice'
                     desiredRoles: [true, false, true, false, true]
                     isRoleFixed: false
-                    tier: "GOLD"
-                    rank: "II"
-                    displayRank: "GOLD II"
+                    tier: 'GOLD'
+                    rank: 'II'
+                    displayRank: 'GOLD II'
                     rating: 1400
         '400':
           description: Invalid or missing team ID.
@@ -42,7 +42,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                error: "Invalid or missing team ID"
+                error: 'Invalid or missing team ID'
         '404':
           description: Team not found.
           content:
@@ -50,7 +50,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                error: "Team not found"
+                error: 'Team not found'
     put:
       summary: Update team player data
       description: Save or update the player data for a specific team by its ID.
@@ -68,14 +68,14 @@ paths:
             schema:
               $ref: '#/components/schemas/PlayersJson'
             example:
-              version: "1.0"
+              version: '1.0'
               players:
-                - name: "Bob"
+                - name: 'Bob'
                   desiredRoles: [true, true, false, false, true]
                   isRoleFixed: true
-                  tier: "PLATINUM"
-                  rank: "I"
-                  displayRank: "PLATINUM I"
+                  tier: 'PLATINUM'
+                  rank: 'I'
+                  displayRank: 'PLATINUM I'
                   rating: 1900
       responses:
         '200':
@@ -85,7 +85,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Success'
               example:
-                message: "Team data saved successfully"
+                message: 'Team data saved successfully'
         '400':
           description: Invalid request body.
           content:
@@ -93,7 +93,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                error: "Invalid request body"
+                error: 'Invalid request body'
         '405':
           description: Method not allowed.
           content:
@@ -101,7 +101,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                error: "Method PUT Not Allowed"
+                error: 'Method PUT Not Allowed'
         '500':
           description: Internal server error.
           content:
@@ -109,7 +109,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                error: "Internal Server Error"
+                error: 'Internal Server Error'
 components:
   schemas:
     PlayersJson:
@@ -117,7 +117,7 @@ components:
       properties:
         version:
           type: string
-          example: "1.0"
+          example: '1.0'
         players:
           type: array
           items:
@@ -127,7 +127,7 @@ components:
       properties:
         name:
           type: string
-          example: "Alice"
+          example: 'Alice'
         desiredRoles:
           type: array
           items:
@@ -138,13 +138,13 @@ components:
           example: false
         tier:
           type: string
-          example: "GOLD"
+          example: 'GOLD'
         rank:
           type: string
-          example: "II"
+          example: 'II'
         displayRank:
           type: string
-          example: "GOLD II"
+          example: 'GOLD II'
         rating:
           type: number
           example: 1400
@@ -153,10 +153,10 @@ components:
       properties:
         error:
           type: string
-          example: "Error message"
+          example: 'Error message'
     Success:
       type: object
       properties:
         message:
           type: string
-          example: "Success message"
+          example: 'Success message'
