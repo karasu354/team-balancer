@@ -1,7 +1,9 @@
 import { calculateRating, rankEnum, tierEnum } from './rank'
 import { roleEnum } from './role'
+import { generateInternalId } from './utils'
 
 export interface PlayerJson {
+  id: string
   name: string
   tier: tierEnum
   rank: rankEnum
@@ -16,6 +18,7 @@ export class Player {
   private static readonly ROLE_RATING_MULTIPLIER_FOR_SUB = 0.9
   private static readonly ROLE_RATING_MULTIPLIER_FOR_NOT_DESIRED = 0.8
 
+  id: string = ''
   name: string = ''
   isParticipatingInGame: boolean = false
 
@@ -38,6 +41,7 @@ export class Player {
     mainRole: roleEnum = roleEnum.all,
     subRole: roleEnum = roleEnum.all
   ) {
+    this.id = generateInternalId()
     this.name = name
     this.setRank(tier, rank)
     this.mainRole = mainRole
@@ -52,6 +56,7 @@ export class Player {
       playerJson.mainRole,
       playerJson.subRole
     )
+    player.id = playerJson.id
     player.displayRank = playerJson.displayRank
     player.rating = playerJson.rating
     player.desiredRoles = playerJson.desiredRoles
@@ -86,6 +91,7 @@ export class Player {
 
   get playerInfo(): PlayerJson {
     return {
+      id: this.id,
       name: this.name,
       tier: this.tier,
       rank: this.rank,

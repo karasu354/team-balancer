@@ -22,7 +22,7 @@ const ServerIdForm: React.FC<ServerIdFormProps> = ({
     try {
       const teamData = await getTeamData(serverId)
       if (teamData) {
-        teamBalancer.setPlayersFromPlayersJson(teamData)
+        teamBalancer = TeamBalancer.fromJson(teamData)
         onPlayersUpdate()
       } else {
         alert('チームデータが見つかりませんでした。')

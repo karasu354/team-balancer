@@ -1,9 +1,13 @@
 import { Player, PlayerJson } from './player'
-import { rankEnum, tierEnum } from './rank'
 import { roleEnum } from './role'
-import { generateRandomPermutations, parseChatLogs } from './utils'
+import {
+  generateInternalId,
+  generateRandomPermutations,
+  parseChatLogs,
+} from './utils'
 
 export interface PlayersJson {
+  id: string
   version: string
   playersTotalCount: number
   players: PlayerJson[]
@@ -15,6 +19,7 @@ export class TeamBalancer {
   private static readonly MAX_TEAM_ATTEMPTS = 100000
   private static readonly PLAYERS_VERSION = '0.0.1'
 
+  id: string = ''
   playersTotalCount: number = 0
   players: Player[] = []
   balancedTeamsByMissMatch: Record<
@@ -23,6 +28,7 @@ export class TeamBalancer {
   > = {}
 
   constructor() {
+    this.id = generateInternalId()
     this._resetBalancedTeamsByMissMatch()
   }
 
@@ -37,6 +43,7 @@ export class TeamBalancer {
 
   static fromJson(playersJson: PlayersJson): TeamBalancer {
     const teamBalancer = new TeamBalancer()
+    teamBalancer.id = playersJson.id
     teamBalancer.playersTotalCount = playersJson.playersTotalCount
     teamBalancer.players = playersJson.players.map((player) =>
       Player.fromJson(player)
@@ -49,6 +56,7 @@ export class TeamBalancer {
 
   get playersInfo(): PlayersJson {
     return {
+      id: this.id,
       version: TeamBalancer.PLAYERS_VERSION,
       playersTotalCount: this.players.length,
       players: this.players.map((p) => p.playerInfo) || [],
