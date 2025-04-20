@@ -1,38 +1,45 @@
 import React, { useState } from 'react'
 
 import { rankEnum, tierEnum } from '../utils/rank'
+import { roleEnum } from '../utils/role'
 import { TeamBalancer } from '../utils/teamBalancer'
 import ChatLogInputForm from './ChatLogInputForm'
 
 interface PlayerInputFormProps {
   teamBalancer: TeamBalancer
-  onAddPlayer: (name: string, tier: tierEnum, rank: rankEnum) => void
-  onPlayersUpdate: () => void
+  onAddPlayer: (
+    name: string,
+    tier: tierEnum,
+    rank: rankEnum,
+    mainRole: roleEnum,
+    subRole: roleEnum
+  ) => void
+  onAppUpdate: () => void
 }
 
 const PlayerInputForm: React.FC<PlayerInputFormProps> = ({
   teamBalancer,
   onAddPlayer,
-  onPlayersUpdate,
+  onAppUpdate,
 }) => {
   const [activeTab, setActiveTab] = useState<'single' | 'bulk'>('single')
   const [name, setName] = useState('')
   const [tier, setTier] = useState<tierEnum>(tierEnum.gold)
   const [rank, setRank] = useState<rankEnum>(rankEnum.two)
+  const [mainRole, setMainRole] = useState<roleEnum>(roleEnum.all)
+  const [subRole, setSubRole] = useState<roleEnum>(roleEnum.all)
 
   const initForm = () => {
     setName('')
     setTier(tierEnum.gold)
     setRank(rankEnum.two)
+    setMainRole(roleEnum.all)
+    setSubRole(roleEnum.all)
   }
 
   const handleAddPlayer = () => {
-    if (name.trim()) {
-      onAddPlayer(name, tier, rank)
-      initForm()
-    } else {
-      alert('Riot ID、ティア、ランクを入力してください')
-    }
+    onAddPlayer(name, tier, rank, mainRole, subRole)
+    initForm()
   }
 
   const isRankDisabled = [
@@ -88,6 +95,8 @@ const PlayerInputForm: React.FC<PlayerInputFormProps> = ({
                   </option>
                 ))}
               </select>
+            </div>
+            <div className="flex items-center space-x-2">
               <select
                 value={rank}
                 onChange={(e) => setRank(e.target.value as rankEnum)}
@@ -104,7 +113,29 @@ const PlayerInputForm: React.FC<PlayerInputFormProps> = ({
                   </option>
                 ))}
               </select>
+              <select
+                value={mainRole}
+                onChange={(e) => setMainRole(e.target.value as roleEnum)}
+                className="p-2 border border-gray-300 rounded w-full"
+              >
+                {Object.values(roleEnum).map((roleValue) => (
+                  <option key={roleValue} value={roleValue}>
+                    {roleValue}
+                  </option>
+                ))}
+              </select>
             </div>
+            <select
+              value={subRole}
+              onChange={(e) => setSubRole(e.target.value as roleEnum)}
+              className="p-2 border border-gray-300 rounded w-full"
+            >
+              {Object.values(roleEnum).map((roleValue) => (
+                <option key={roleValue} value={roleValue}>
+                  {roleValue}
+                </option>
+              ))}
+            </select>
             <button
               onClick={handleAddPlayer}
               className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
@@ -115,7 +146,7 @@ const PlayerInputForm: React.FC<PlayerInputFormProps> = ({
         ) : (
           <ChatLogInputForm
             teamBalancer={teamBalancer}
-            onPlayersUpdate={onPlayersUpdate}
+            onAppUpdate={onAppUpdate}
           />
         )}
       </div>

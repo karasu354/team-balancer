@@ -14,6 +14,7 @@ export interface PlayerJson {
   desiredRoles: roleEnum[]
   isRoleFixed: boolean
 }
+
 export class Player {
   private static readonly ROLE_RATING_MULTIPLIER_FOR_SUB = 0.9
   private static readonly ROLE_RATING_MULTIPLIER_FOR_NOT_DESIRED = 0.8

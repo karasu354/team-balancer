@@ -4,12 +4,12 @@ import { TeamBalancer } from '../utils/teamBalancer'
 
 interface DividedTeamTableProps {
   teamBalancer: TeamBalancer
-  onTeamsUpdate: () => void
+  onAppUpdate: () => void
 }
 
 const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
   teamBalancer,
-  onTeamsUpdate,
+  onAppUpdate,
 }) => {
   const balancedTeamsByMissMatch = teamBalancer.balancedTeamsByMissMatch
   const [activeTab, setActiveTab] = useState<number>(0)
@@ -24,7 +24,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
     try {
       await new Promise((resolve) => setTimeout(resolve, 2000))
       teamBalancer.divideTeams()
-      onTeamsUpdate()
+      onAppUpdate()
     } catch (error) {
       alert(
         'チーム分けに失敗しました。プレイヤーが10人揃っているか確認してください。'

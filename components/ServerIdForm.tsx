@@ -5,12 +5,14 @@ import { TeamBalancer } from '../utils/teamBalancer'
 
 interface ServerIdFormProps {
   teamBalancer: TeamBalancer
-  onPlayersUpdate: () => void
+  onUpdateTeamBalancer: (teamBalancer: TeamBalancer) => void
+  onAppUpdate: () => void
 }
 
 const ServerIdForm: React.FC<ServerIdFormProps> = ({
   teamBalancer,
-  onPlayersUpdate,
+  onUpdateTeamBalancer,
+  onAppUpdate,
 }) => {
   const [serverId, setServerId] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -22,8 +24,7 @@ const ServerIdForm: React.FC<ServerIdFormProps> = ({
     try {
       const teamData = await getTeamData(serverId)
       if (teamData) {
-        teamBalancer = TeamBalancer.fromJson(teamData)
-        onPlayersUpdate()
+        onUpdateTeamBalancer(TeamBalancer.fromJson(teamData))
       } else {
         alert('チームデータが見つかりませんでした。')
       }
