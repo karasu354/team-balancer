@@ -1,0 +1,57 @@
+name: バグ報告
+description: バグを報告するためのテンプレート
+title: '[バグ] '
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **バグを報告する際は、以下のテンプレートに従って詳細を記入してください。**
+  - type: input
+    id: summary
+    attributes:
+      label: バグの概要
+      description: バグの簡単な説明を記入してください。
+      placeholder: '例: ログイン画面でエラーが発生する'
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現手順
+      description: バグを再現するための手順を記入してください。
+      placeholder: |
+        1. ログイン画面を開く
+        2. ユーザー名とパスワードを入力する
+        3. "ログイン" ボタンをクリックする
+        4. エラーが表示される
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待される動作
+      description: 本来期待される動作を記入してください。
+      placeholder: '例: 正常にログインできる'
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 実際の動作
+      description: 実際に発生した動作を記入してください。
+      placeholder: '例: エラーメッセージが表示される'
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: 発生環境
+      description: バグが発生した環境を記入してください（OS、ブラウザ、デバイスなど）。
+      placeholder: '例: Windows 10, Chrome 112.0.0'
+  - type: textarea
+    id: additional
+    attributes:
+      label: 補足情報
+      description: その他の補足情報があれば記入してください。
+      placeholder: '例: スクリーンショットやログファイルなど'
