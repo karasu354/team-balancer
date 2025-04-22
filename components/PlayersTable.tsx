@@ -7,13 +7,13 @@ import PlayerCard from './PlayerCard'
 interface PlayersTableProps {
   teamBalancer: TeamBalancer
   onRemovePlayerByIndex: (index: number) => void
-  onPlayersUpdate: () => void
+  onAppUpdate: () => void
 }
 
 const PlayersTable: React.FC<PlayersTableProps> = ({
   teamBalancer,
   onRemovePlayerByIndex,
-  onPlayersUpdate,
+  onAppUpdate,
 }) => {
   const players = teamBalancer.players
   const [isExpandedList, setIsExpandedList] = useState<boolean[]>([])
@@ -27,13 +27,13 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
     setIsExpandedList((prev) =>
       prev.map((isExpanded, i) => (i === index ? !isExpanded : isExpanded))
     )
-    onPlayersUpdate()
+    onAppUpdate()
   }
 
   const handleUpdatePlayer = (index: number, updatedPlayer: Player) => {
     try {
       teamBalancer.players[index] = updatedPlayer
-      onPlayersUpdate()
+      onAppUpdate()
     } catch (error) {
       if (error instanceof Error) {
         alert(error.message)

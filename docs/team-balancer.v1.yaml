@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Team Balancer API
   description: API for managing team player data.
-  version: 1.0.0
+  version: 0.0.1
 servers:
   - url: http://localhost:3000/api
     description: Local development server

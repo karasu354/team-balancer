@@ -6,50 +6,43 @@ import PlayersTable from '../components/PlayersTable'
 import ServerIdForm from '../components/ServerIdForm'
 import { Player } from '../utils/player'
 import { rankEnum, tierEnum } from '../utils/rank'
+import { roleEnum } from '../utils/role'
 import { TeamBalancer } from '../utils/teamBalancer'
 
 const Home = () => {
-  const [teamBalancer] = useState(new TeamBalancer())
-  const [updateCount, setUpdate] = useState(0)
+  const [teamBalancer, setTeamBalancer] = useState<TeamBalancer>(
+    new TeamBalancer()
+  )
+  const [updateCount, setUpdate] = useState<number>(0)
 
   useEffect(() => {
     console.log('count : ', updateCount)
   }, [updateCount])
 
-  const handlePlayersUpdate = () => {
+  const handleAppUpdate = () => {
     setUpdate((prev) => prev + 1)
   }
 
-  const handleTeamsUpdate = () => {
-    setUpdate((prev) => prev + 1)
-  }
-
-  const handleAddPlayer = (name: string, tier: tierEnum, rank: rankEnum) => {
-    try {
-      const newPlayer = new Player(name)
-      newPlayer.setRank(tier, rank)
-      teamBalancer.addPlayer(newPlayer)
-      handlePlayersUpdate()
-    } catch (error) {
-      if (error instanceof Error) {
-        alert(error.message)
-      } else {
-        alert('何かのエラーが出たけどエラーメッセージがわからん。')
-      }
-    }
+  const handleAddPlayer = (
+    name: string,
+    tier: tierEnum,
+    rank: rankEnum,
+    mainRole: roleEnum,
+    subRole: roleEnum
+  ) => {
+    const newPlayer = new Player(name, tier, rank, mainRole, subRole)
+    teamBalancer.addPlayer(newPlayer)
+    handleAppUpdate()
   }
 
   const handleRemovePlayer = (index: number) => {
-    try {
-      teamBalancer.removePlayerByIndex(index)
-      handlePlayersUpdate()
-    } catch (error) {
-      if (error instanceof Error) {
-        alert(error.message)
-      } else {
-        alert('何かのエラーが出たけどエラーメッセージがわからん。')
-      }
-    }
+    teamBalancer.removePlayerByIndex(index)
+    handleAppUpdate()
+  }
+
+  const handleUpdateTeamBalancer = (newTeamBalancer: TeamBalancer) => {
+    setTeamBalancer(newTeamBalancer)
+    handleAppUpdate()
   }
 
   return (
@@ -59,23 +52,24 @@ const Home = () => {
       <PlayerInputForm
         teamBalancer={teamBalancer}
         onAddPlayer={handleAddPlayer}
-        onPlayersUpdate={handlePlayersUpdate}
+        onAppUpdate={handleAppUpdate}
       />
 
       <ServerIdForm
         teamBalancer={teamBalancer}
-        onPlayersUpdate={handlePlayersUpdate}
+        onUpdateTeamBalancer={handleUpdateTeamBalancer}
+        onAppUpdate={handleAppUpdate}
       />
 
       <PlayersTable
         teamBalancer={teamBalancer}
         onRemovePlayerByIndex={handleRemovePlayer}
-        onPlayersUpdate={handlePlayersUpdate}
+        onAppUpdate={handleAppUpdate}
       />
 
       <DividedTeamTable
         teamBalancer={teamBalancer}
-        onTeamsUpdate={handleTeamsUpdate}
+        onAppUpdate={handleAppUpdate}
       />
     </div>
   )

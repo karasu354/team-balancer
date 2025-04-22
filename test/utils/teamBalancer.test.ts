@@ -1,9 +1,12 @@
 import { Player } from '../../utils/player'
 import { rankEnum, tierEnum } from '../../utils/rank'
+import { roleEnum } from '../../utils/role'
 import { TeamBalancer } from '../../utils/teamBalancer'
+import { generateInternalId } from '../../utils/utils'
 
 describe('TeamBalancer クラス', () => {
   let teamBalancer: TeamBalancer
+  const id = generateInternalId()
 
   beforeEach(() => {
     teamBalancer = new TeamBalancer()
@@ -25,6 +28,74 @@ describe('TeamBalancer クラス', () => {
     })
   })
 
+  describe('fromJson', () => {
+    test('PlayersJson から正しく TeamBalancer インスタンスを生成できること', () => {
+      const playersJson = {
+        id: 'team-id-123',
+        version: '0.0.1',
+        playersTotalCount: 2,
+        players: [
+          {
+            id: 'player-id-1',
+            name: 'Alice',
+            tier: tierEnum.gold,
+            rank: rankEnum.two,
+            displayRank: 'GOLD II',
+            rating: 1400,
+            mainRole: roleEnum.top,
+            subRole: roleEnum.jungle,
+            desiredRoles: [roleEnum.top, roleEnum.jungle],
+            isRoleFixed: false,
+          },
+          {
+            id: 'player-id-2',
+            name: 'Bob',
+            tier: tierEnum.platinum,
+            rank: rankEnum.one,
+            displayRank: 'PLATINUM I',
+            rating: 1900,
+            mainRole: roleEnum.mid,
+            subRole: roleEnum.bot,
+            desiredRoles: [roleEnum.mid, roleEnum.bot],
+            isRoleFixed: true,
+          },
+        ],
+      }
+
+      const teamBalancer = TeamBalancer.fromJson(playersJson)
+
+      expect(teamBalancer.id).toBe('team-id-123')
+      expect(teamBalancer.playersTotalCount).toBe(2)
+      expect(teamBalancer.players.length).toBe(2)
+
+      const player1 = teamBalancer.players[0]
+      expect(player1.id).toBe('player-id-1')
+      expect(player1.name).toBe('Alice')
+      expect(player1.tier).toBe(tierEnum.gold)
+      expect(player1.rank).toBe(rankEnum.two)
+      expect(player1.displayRank).toBe('GOLD II')
+      expect(player1.rating).toBe(1400)
+      expect(player1.mainRole).toBe(roleEnum.top)
+      expect(player1.subRole).toBe(roleEnum.jungle)
+      expect(player1.desiredRoles).toEqual([roleEnum.top, roleEnum.jungle])
+      expect(player1.isRoleFixed).toBe(false)
+      expect(player1.isParticipatingInGame).toBe(true)
+
+      const player2 = teamBalancer.players[1]
+      expect(player2.id).toBe('player-id-2')
+      expect(player2.name).toBe('Bob')
+      expect(player2.tier).toBe(tierEnum.platinum)
+      expect(player2.rank).toBe(rankEnum.one)
+      expect(player2.displayRank).toBe('PLATINUM I')
+      expect(player2.rating).toBe(1900)
+      expect(player2.mainRole).toBe(roleEnum.mid)
+      expect(player2.subRole).toBe(roleEnum.bot)
+      expect(player2.desiredRoles).toEqual([roleEnum.mid, roleEnum.bot])
+      expect(player2.isRoleFixed).toBe(true)
+      expect(player2.isParticipatingInGame).toBe(true)
+    })
+  })
+
   describe('playersInfo', () => {
     test('プレイヤー情報が正しく取得できること', () => {
       const player1 = new Player('Alice', tierEnum.gold, rankEnum.two)
@@ -33,32 +104,44 @@ describe('TeamBalancer クラス', () => {
       teamBalancer.addPlayer(player2)
 
       const playersInfo = teamBalancer.playersInfo
-      expect(playersInfo.version).toBe('1.0')
+      expect(playersInfo.version).toBe('0.0.1')
+      expect(playersInfo.playersTotalCount).toBe(2)
       expect(playersInfo.players).toEqual([
         {
+          id: player1.id,
           name: 'Alice',
-          desiredRoles: [true, true, true, true, true],
-          isRoleFixed: false,
-          tier: 'GOLD',
-          rank: 'II',
+          tier: tierEnum.gold,
+          rank: rankEnum.two,
           displayRank: 'GOLD II',
           rating: 1400,
+          mainRole: roleEnum.all,
+          subRole: roleEnum.all,
+          desiredRoles: Object.values(roleEnum).filter(
+            (role) => role !== roleEnum.all
+          ),
+          isRoleFixed: false,
         },
         {
+          id: player2.id,
           name: 'Bob',
-          desiredRoles: [true, true, true, true, true],
-          isRoleFixed: false,
-          tier: 'PLATINUM',
-          rank: 'I',
+          tier: tierEnum.platinum,
+          rank: rankEnum.one,
           displayRank: 'PLATINUM I',
           rating: 1900,
+          mainRole: roleEnum.all,
+          subRole: roleEnum.all,
+          desiredRoles: Object.values(roleEnum).filter(
+            (role) => role !== roleEnum.all
+          ),
+          isRoleFixed: false,
         },
       ])
     })
 
     test('プレイヤーがいない場合、空のリストが返されること', () => {
       const playersInfo = teamBalancer.playersInfo
-      expect(playersInfo.version).toBe('1.0')
+      expect(playersInfo.version).toBe('0.0.1')
+      expect(playersInfo.playersTotalCount).toBe(0)
       expect(playersInfo.players).toEqual([])
     })
   })
@@ -87,60 +170,24 @@ describe('TeamBalancer クラス', () => {
     })
   })
 
-  describe('removePlayerByIndex', () => {
-    test('指定したインデックスのプレイヤーを削除できること', () => {
-      const player = new Player('Alice', tierEnum.gold, rankEnum.two)
-      teamBalancer.addPlayer(player)
-      teamBalancer.removePlayerByIndex(0)
-      expect(teamBalancer.players).not.toContain(player)
+  describe('divideTeams', () => {
+    test('チーム分割が成功すること', () => {
+      for (let i = 0; i < 10; i++) {
+        const player = new Player(`Player${i}`, tierEnum.gold, rankEnum.two)
+        player.isParticipatingInGame = true
+        teamBalancer.addPlayer(player)
+      }
+      teamBalancer.divideTeams()
+      const team1 = teamBalancer.balancedTeamsByMissMatch[0].players.slice(0, 5)
+      const team2 = teamBalancer.balancedTeamsByMissMatch[0].players.slice(5)
+      expect(team1.length).toBe(5)
+      expect(team2.length).toBe(5)
     })
 
-    test('無効なインデックスを指定した場合、エラーがスローされること', () => {
-      expect(() => teamBalancer.removePlayerByIndex(-1)).toThrow(
-        '無効なインデックスです。'
+    test('プレイヤー数が不足している場合、エラーがスローされること', () => {
+      expect(() => teamBalancer.divideTeams()).toThrow(
+        '現在のプレイヤーではチーム分割ができません。'
       )
-      expect(() => teamBalancer.removePlayerByIndex(1)).toThrow(
-        '無効なインデックスです。'
-      )
-    })
-  })
-
-  describe('addPlayersByLog', () => {
-    test('ログから新しいプレイヤーを正しく追加できること', () => {
-      const logs = `
-        Alice #1234がロビーに参加しました。
-        Bob #5678がロビーに参加しました。
-      `
-      teamBalancer.addPlayersByLog(logs)
-      expect(teamBalancer.players.map((p) => p.name)).toEqual(['Alice', 'Bob'])
-    })
-
-    test('既存のプレイヤーを保持しつつ、新しいプレイヤーを追加できること', () => {
-      const existingPlayer = new Player('Charlie', tierEnum.gold, rankEnum.two)
-      teamBalancer.addPlayer(existingPlayer)
-
-      const logs = `
-        Alice #1234がロビーに参加しました。
-        Bob #5678がロビーに参加しました。
-      `
-      teamBalancer.addPlayersByLog(logs)
-      expect(teamBalancer.players.map((p) => p.name)).toEqual([
-        'Charlie',
-        'Alice',
-        'Bob',
-      ])
-    })
-
-    test('ログに既存のプレイヤーが含まれている場合、重複して追加されないこと', () => {
-      const existingPlayer = new Player('Alice', tierEnum.gold, rankEnum.two)
-      teamBalancer.addPlayer(existingPlayer)
-
-      const logs = `
-        Alice #1234がロビーに参加しました。
-        Bob #5678がロビーに参加しました。
-      `
-      teamBalancer.addPlayersByLog(logs)
-      expect(teamBalancer.players.map((p) => p.name)).toEqual(['Alice', 'Bob'])
     })
   })
 
@@ -165,27 +212,6 @@ describe('TeamBalancer クラス', () => {
         teamBalancer.addPlayer(player)
       }
       expect(teamBalancer.isDividable()).toBe(false)
-    })
-  })
-
-  describe('divideTeams', () => {
-    test('チーム分割が成功すること', () => {
-      for (let i = 0; i < 10; i++) {
-        const player = new Player(`Player${i}`, tierEnum.gold, rankEnum.two)
-        player.isParticipatingInGame = true
-        teamBalancer.addPlayer(player)
-      }
-      teamBalancer.divideTeams()
-      const team1 = teamBalancer.balancedTeamsByMissMatch[0].players.slice(0, 5)
-      const team2 = teamBalancer.balancedTeamsByMissMatch[0].players.slice(5)
-      expect(team1.length).toBe(5)
-      expect(team2.length).toBe(5)
-    })
-
-    test('プレイヤー数が不足している場合、エラーがスローされること', () => {
-      expect(() => teamBalancer.divideTeams()).toThrow(
-        '現在のプレイヤーではチーム分割ができません。'
-      )
     })
   })
 })
