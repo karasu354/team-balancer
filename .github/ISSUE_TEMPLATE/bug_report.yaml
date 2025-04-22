@@ -1,7 +1,7 @@
 name: バグ報告
 description: バグを報告するためのテンプレート
-title: "[バグ] "
-labels: ["bug"]
+title: '[バグ] '
+labels: ['bug']
 body:
   - type: markdown
     attributes:
@@ -12,7 +12,7 @@ body:
     attributes:
       label: バグの概要
       description: バグの簡単な説明を記入してください。
-      placeholder: "例: ログイン画面でエラーが発生する"
+      placeholder: '例: ログイン画面でエラーが発生する'
     validations:
       required: true
   - type: textarea
@@ -32,7 +32,7 @@ body:
     attributes:
       label: 期待される動作
       description: 本来期待される動作を記入してください。
-      placeholder: "例: 正常にログインできる"
+      placeholder: '例: 正常にログインできる'
     validations:
       required: true
   - type: textarea
@@ -40,7 +40,7 @@ body:
     attributes:
       label: 実際の動作
       description: 実際に発生した動作を記入してください。
-      placeholder: "例: エラーメッセージが表示される"
+      placeholder: '例: エラーメッセージが表示される'
     validations:
       required: true
   - type: textarea
@@ -48,10 +48,10 @@ body:
     attributes:
       label: 発生環境
       description: バグが発生した環境を記入してください（OS、ブラウザ、デバイスなど）。
-      placeholder: "例: Windows 10, Chrome 112.0.0"
+      placeholder: '例: Windows 10, Chrome 112.0.0'
   - type: textarea
     id: additional
     attributes:
       label: 補足情報
       description: その他の補足情報があれば記入してください。
-      placeholder: "例: スクリーンショットやログファイルなど"
+      placeholder: '例: スクリーンショットやログファイルなど'

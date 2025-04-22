@@ -1,7 +1,7 @@
 name: 新機能要望
 description: 新しい機能や改善案を提案するためのテンプレート
-title: "[要望] "
-labels: ["enhancement"]
+title: '[要望] '
+labels: ['enhancement']
 body:
   - type: markdown
     attributes:
@@ -12,7 +12,7 @@ body:
     attributes:
       label: 機能の概要
       description: 提案する機能の簡単な説明を記入してください。
-      placeholder: "例: ユーザープロフィール編集機能の追加"
+      placeholder: '例: ユーザープロフィール編集機能の追加'
     validations:
       required: true
   - type: textarea
@@ -40,10 +40,10 @@ body:
     attributes:
       label: 代替案
       description: 他に考えられる解決策があれば記入してください。
-      placeholder: "例: プロフィール編集機能の代わりに、サポートチームへの連絡フォームを追加する"
+      placeholder: '例: プロフィール編集機能の代わりに、サポートチームへの連絡フォームを追加する'
   - type: textarea
     id: additional
     attributes:
       label: 補足情報
       description: その他の補足情報があれば記入してください。
-      placeholder: "例: 参考になるリンクやスクリーンショットなど"
+      placeholder: '例: 参考になるリンクやスクリーンショットなど'
