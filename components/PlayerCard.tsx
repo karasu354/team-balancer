@@ -33,12 +33,12 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
 
   return (
     <div
-      className={`border border-gray-300 rounded-lg p-4 cursor-pointer transition ${
+      className={`w-md cursor-pointer rounded-lg border border-gray-300 p-4 transition ${
         player.isParticipatingInGame
           ? 'bg-blue-100'
           : 'bg-white hover:bg-gray-50'
       }`}
-      onClick={handleParticipationToggle} // カード全体で参加/非参加を切り替え
+      onClick={handleParticipationToggle}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
@@ -54,7 +54,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
         <div className="flex items-center space-x-2">
           <button
             onClick={onToggleExpand}
-            className="text-blue-500 hover:text-blue-700 transition"
+            className="text-blue-500 transition hover:text-blue-700"
           >
             {isExpanded ? '▲' : '▼'}
           </button>

@@ -64,10 +64,10 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
         <button
           onClick={handleDivideTeams}
           disabled={isLoading || isDivideButtonDisabled}
-          className={`px-4 py-2 rounded ${
+          className={`rounded px-4 py-2 ${
             isLoading || isDivideButtonDisabled
-              ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
-              : 'bg-green-500 text-white hover:bg-green-600 transition'
+              ? 'cursor-not-allowed bg-gray-400 text-gray-700'
+              : 'bg-green-500 text-white transition hover:bg-green-600'
           }`}
         >
           {isLoading ? '分けています...' : 'チームを分ける'}
@@ -75,10 +75,10 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
         <button
           onClick={handleCopyToClipboard}
           disabled={activeBalancedTeam.players.length === 0}
-          className={`px-4 py-2 rounded ${
+          className={`rounded px-4 py-2 ${
             activeBalancedTeam.players.length === 0
-              ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
-              : 'bg-blue-500 text-white hover:bg-blue-600 transition'
+              ? 'cursor-not-allowed bg-gray-400 text-gray-700'
+              : 'bg-blue-500 text-white transition hover:bg-blue-600'
           }`}
         >
           結果をコピー
@@ -86,7 +86,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
       </div>
 
       <div className="flex">
-        <div className="flex flex-col space-y-2 mr-4">
+        <div className="mr-4 flex flex-col space-y-2">
           {Object.keys(balancedTeamsByMissMatch).map((key) => (
             <button
               key={key}
@@ -94,7 +94,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
               disabled={
                 balancedTeamsByMissMatch[Number(key)].players.length === 0
               }
-              className={`px-4 py-2 rounded ${
+              className={`rounded px-4 py-2 ${
                 Number(key) === activeTab
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-200 text-gray-700'
@@ -109,7 +109,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
           ))}
         </div>
 
-        <div className="flex-1 border border-gray-300 rounded-lg p-4">
+        <div className="flex-1 rounded-lg border border-gray-300 p-4">
           {activeBalancedTeam.players.length === 10 && (
             <div>
               <p>Rating Difference {activeBalancedTeam.evaluationScore}</p>

@@ -22,7 +22,7 @@ const ChatLogInputForm: React.FC<ChatLogInputFormProps> = ({
   }
 
   return (
-    <div className="mb-4 flex flex-col space-y-2 w-full max-w-4xl">
+    <div className="mb-4 flex w-full max-w-4xl flex-col space-y-2">
       <textarea
         value={logInput}
         onChange={(e) => setLogInput(e.target.value)}
@@ -32,12 +32,12 @@ Player1 #JP1がロビーから退出しました。
 Player3 #catがロビーに参加しました。
 Player4 #dogがロビーに参加しました。
 Player2 #meowがロビーから退出しました。`}
-        className="p-2 border border-gray-300 rounded w-full resize-none"
+        className="w-full resize-none rounded border border-gray-300 p-2"
         rows={4}
       />
       <button
         onClick={handleLogSubmit}
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition whitespace-nowrap"
+        className="rounded bg-blue-500 px-4 py-2 whitespace-nowrap text-white transition hover:bg-blue-600"
       >
         取り込む
       </button>

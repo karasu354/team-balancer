@@ -42,13 +42,13 @@ const PlayerDetailCard: React.FC<PlayerDetailCardProps> = ({
         <div className="flex justify-end space-x-2">
           <button
             onClick={onEditModeToggle}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+            className="rounded bg-blue-500 px-4 py-2 text-white transition hover:bg-blue-600"
           >
             編集
           </button>
           <button
             onClick={handleRemove}
-            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+            className="rounded bg-red-500 px-4 py-2 text-white transition hover:bg-red-600"
           >
             削除
           </button>

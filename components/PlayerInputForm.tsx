@@ -53,7 +53,7 @@ const PlayerInputForm: React.FC<PlayerInputFormProps> = ({
       <div className="mb-4 flex">
         <button
           onClick={() => setActiveTab('single')}
-          className={`px-4 py-2 rounded ${
+          className={`rounded px-4 py-2 ${
             activeTab === 'single'
               ? 'bg-blue-500 text-white'
               : 'bg-gray-200 text-gray-700'
@@ -63,7 +63,7 @@ const PlayerInputForm: React.FC<PlayerInputFormProps> = ({
         </button>
         <button
           onClick={() => setActiveTab('bulk')}
-          className={`px-4 py-2 rounded ${
+          className={`rounded px-4 py-2 ${
             activeTab === 'bulk'
               ? 'bg-blue-500 text-white'
               : 'bg-gray-200 text-gray-700'
@@ -82,12 +82,12 @@ const PlayerInputForm: React.FC<PlayerInputFormProps> = ({
                 placeholder="Player Name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="p-2 border border-gray-300 rounded w-full"
+                className="w-full rounded border border-gray-300 p-2"
               />
               <select
                 value={tier}
                 onChange={(e) => setTier(e.target.value as tierEnum)}
-                className="p-2 border border-gray-300 rounded w-full"
+                className="w-full rounded border border-gray-300 p-2"
               >
                 {Object.values(tierEnum).map((tierValue) => (
                   <option key={tierValue} value={tierValue}>
@@ -100,9 +100,9 @@ const PlayerInputForm: React.FC<PlayerInputFormProps> = ({
               <select
                 value={rank}
                 onChange={(e) => setRank(e.target.value as rankEnum)}
-                className={`p-2 border rounded w-full ${
+                className={`w-full rounded border p-2 ${
                   isRankDisabled
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    ? 'cursor-not-allowed bg-gray-100 text-gray-400'
                     : 'border-gray-300'
                 }`}
                 disabled={isRankDisabled}
@@ -116,7 +116,7 @@ const PlayerInputForm: React.FC<PlayerInputFormProps> = ({
               <select
                 value={mainRole}
                 onChange={(e) => setMainRole(e.target.value as roleEnum)}
-                className="p-2 border border-gray-300 rounded w-full"
+                className="w-full rounded border border-gray-300 p-2"
               >
                 {Object.values(roleEnum).map((roleValue) => (
                   <option key={roleValue} value={roleValue}>
@@ -128,7 +128,7 @@ const PlayerInputForm: React.FC<PlayerInputFormProps> = ({
             <select
               value={subRole}
               onChange={(e) => setSubRole(e.target.value as roleEnum)}
-              className="p-2 border border-gray-300 rounded w-full"
+              className="w-full rounded border border-gray-300 p-2"
             >
               {Object.values(roleEnum).map((roleValue) => (
                 <option key={roleValue} value={roleValue}>
@@ -138,7 +138,7 @@ const PlayerInputForm: React.FC<PlayerInputFormProps> = ({
             </select>
             <button
               onClick={handleAddPlayer}
-              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
+              className="rounded bg-green-500 px-4 py-2 text-white transition hover:bg-green-600"
             >
               追加
             </button>
