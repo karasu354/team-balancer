@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 
+import { roleList } from '../utils/role'
 import { TeamBalancer } from '../utils/teamBalancer'
 
 interface DividedTeamTableProps {
@@ -36,7 +37,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
 
   const handleCopyToClipboard = () => {
     const activeBalancedTeam = balancedTeamsByMissMatch[activeTab]
-    const lanes = ['TOP', 'JG', 'MID', 'ADC', 'SUP']
+    const lanes = roleList
     const blueTeam = lanes
       .map(
         (lane, index) =>
@@ -116,7 +117,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
               <div className="flex">
                 <div className="w-1/3">
                   <div className="mb-4 font-bold">Lane</div>
-                  {['TOP', 'JG', 'MID', 'ADC', 'SUP'].map((lane) => (
+                  {roleList.map((lane) => (
                     <div key={lane} className="mb-2 font-medium">
                       {lane}
                     </div>
@@ -126,7 +127,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
                   <div className="mb-4 text-xl font-bold text-blue-500">
                     Blue Team
                   </div>
-                  {['TOP', 'JG', 'MID', 'ADC', 'SUP'].map((lane, index) => (
+                  {roleList.map((lane, index) => (
                     <div key={lane} className="mb-2">
                       {activeBalancedTeam.players[index].name || 'N/A'} (
                       {activeBalancedTeam.players[index].rating})
@@ -137,7 +138,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
                   <div className="mb-4 text-xl font-bold text-red-500">
                     Red Team
                   </div>
-                  {['TOP', 'JG', 'MID', 'ADC', 'SUP'].map((lane, index) => (
+                  {roleList.map((lane, index) => (
                     <div key={lane} className="mb-2">
                       {activeBalancedTeam.players[index + 5].name || 'N/A'} (
                       {activeBalancedTeam.players[index + 5].rating})

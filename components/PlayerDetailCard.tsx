@@ -1,6 +1,7 @@
 import React from 'react'
 
 import { Player } from '../utils/player'
+import { roleList } from '../utils/role'
 
 interface PlayerDetailCardProps {
   currentPlayer: Player
@@ -34,7 +35,7 @@ const PlayerDetailCard: React.FC<PlayerDetailCardProps> = ({
           <p className="text-sm">{currentPlayer.rating}</p>
           <p className="text-sm font-medium">希望ロール:</p>
           <p className="text-sm">
-            {['TOP', 'JG', 'MID', 'ADC', 'SUP']
+            {roleList
               .filter((_, index) => currentPlayer.desiredRoles[index])
               .join(', ')}
           </p>

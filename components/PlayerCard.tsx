@@ -9,7 +9,7 @@ import {
 } from 'react-icons/fa6'
 
 import { Player } from '../utils/player'
-import { roleEnum } from '../utils/role'
+import { roleEnum, roleList } from '../utils/role'
 import PlayerDetailCard from './PlayerDetailCard'
 import PlayerEditCard from './PlayerEditCard'
 
@@ -45,13 +45,13 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
   return (
     <div className="w-md rounded border border-gray-400 p-2">
       <div className="flex justify-between" onClick={handleParticipationToggle}>
-        <div className="justyfy-center flex items-center gap-4">
+        <div className="flex items-center justify-center gap-4">
           <div>
             <p className="font-bold">{player.name}</p>
             <p className="text-xs">({player.displayRank})</p>
           </div>
         </div>
-        <div className="justyfy-center flex items-center gap-4">
+        <div className="flex items-center justify-center gap-4">
           <div>
             <div className="grid grid-cols-2 gap-2">
               <div className="text-left">Main:</div>
@@ -83,7 +83,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
             <FaLock className={lockIconColor} />
           </div>
           <div className="">
-            {['TOP', 'JG', 'MID', 'BOT', 'SUP'].map((role, _) => (
+            {roleList.map((role, _) => (
               <p
                 key={role}
                 className={`text-xs ${
