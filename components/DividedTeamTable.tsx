@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 
+import { roleList } from '../utils/role'
 import { TeamBalancer } from '../utils/teamBalancer'
 
 interface DividedTeamTableProps {
@@ -36,7 +37,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
 
   const handleCopyToClipboard = () => {
     const activeBalancedTeam = balancedTeamsByMissMatch[activeTab]
-    const lanes = ['TOP', 'JG', 'MID', 'ADC', 'SUP']
+    const lanes = roleList
     const blueTeam = lanes
       .map(
         (lane, index) =>
@@ -64,10 +65,10 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
         <button
           onClick={handleDivideTeams}
           disabled={isLoading || isDivideButtonDisabled}
-          className={`px-4 py-2 rounded ${
+          className={`rounded px-4 py-2 ${
             isLoading || isDivideButtonDisabled
-              ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
-              : 'bg-green-500 text-white hover:bg-green-600 transition'
+              ? 'cursor-not-allowed bg-gray-400 text-gray-700'
+              : 'bg-green-500 text-white transition hover:bg-green-600'
           }`}
         >
           {isLoading ? '分けています...' : 'チームを分ける'}
@@ -75,10 +76,10 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
         <button
           onClick={handleCopyToClipboard}
           disabled={activeBalancedTeam.players.length === 0}
-          className={`px-4 py-2 rounded ${
+          className={`rounded px-4 py-2 ${
             activeBalancedTeam.players.length === 0
-              ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
-              : 'bg-blue-500 text-white hover:bg-blue-600 transition'
+              ? 'cursor-not-allowed bg-gray-400 text-gray-700'
+              : 'bg-blue-500 text-white transition hover:bg-blue-600'
           }`}
         >
           結果をコピー
@@ -86,7 +87,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
       </div>
 
       <div className="flex">
-        <div className="flex flex-col space-y-2 mr-4">
+        <div className="mr-4 flex flex-col space-y-2">
           {Object.keys(balancedTeamsByMissMatch).map((key) => (
             <button
               key={key}
@@ -94,7 +95,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
               disabled={
                 balancedTeamsByMissMatch[Number(key)].players.length === 0
               }
-              className={`px-4 py-2 rounded ${
+              className={`rounded px-4 py-2 ${
                 Number(key) === activeTab
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-200 text-gray-700'
@@ -109,14 +110,14 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
           ))}
         </div>
 
-        <div className="flex-1 border border-gray-300 rounded-lg p-4">
+        <div className="flex-1 rounded-lg border border-gray-300 p-4">
           {activeBalancedTeam.players.length === 10 && (
             <div>
               <p>Rating Difference {activeBalancedTeam.evaluationScore}</p>
               <div className="flex">
                 <div className="w-1/3">
                   <div className="mb-4 font-bold">Lane</div>
-                  {['TOP', 'JG', 'MID', 'ADC', 'SUP'].map((lane) => (
+                  {roleList.map((lane) => (
                     <div key={lane} className="mb-2 font-medium">
                       {lane}
                     </div>
@@ -126,7 +127,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
                   <div className="mb-4 text-xl font-bold text-blue-500">
                     Blue Team
                   </div>
-                  {['TOP', 'JG', 'MID', 'ADC', 'SUP'].map((lane, index) => (
+                  {roleList.map((lane, index) => (
                     <div key={lane} className="mb-2">
                       {activeBalancedTeam.players[index].name || 'N/A'} (
                       {activeBalancedTeam.players[index].rating})
@@ -137,7 +138,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
                   <div className="mb-4 text-xl font-bold text-red-500">
                     Red Team
                   </div>
-                  {['TOP', 'JG', 'MID', 'ADC', 'SUP'].map((lane, index) => (
+                  {roleList.map((lane, index) => (
                     <div key={lane} className="mb-2">
                       {activeBalancedTeam.players[index + 5].name || 'N/A'} (
                       {activeBalancedTeam.players[index + 5].rating})

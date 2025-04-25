@@ -30,19 +30,19 @@ const PlayerEditCard: React.FC<PlayerEditCardProps> = ({
             placeholder="Player Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="p-2 border border-gray-300 rounded w-full"
+            className="w-full rounded border border-gray-300 p-2"
           />
         </div>
         <div className="flex justify-end space-x-2">
           <button
             onClick={handleUpdatePlayer}
-            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
+            className="rounded bg-green-500 px-4 py-2 text-white transition hover:bg-green-600"
           >
             保存
           </button>
           <button
             onClick={onEditModeToggle}
-            className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
+            className="rounded bg-gray-500 px-4 py-2 text-white transition hover:bg-gray-600"
           >
             キャンセル
           </button>

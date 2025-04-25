@@ -53,22 +53,22 @@ const ServerIdForm: React.FC<ServerIdFormProps> = ({
   }
 
   return (
-    <div className="flex items-center space-x-4 mb-4">
+    <div className="mb-4 flex items-center space-x-4">
       <input
         type="text"
         placeholder="サーバーIDを入力"
         value={serverId}
         onChange={(e) => setServerId(e.target.value)}
-        className="p-2 border rounded w-96"
+        className="w-96 rounded border p-2"
       />
 
       <button
         onClick={handleFetchTeamData}
         disabled={!serverId.trim() || isLoading}
-        className={`px-4 py-2 rounded ${
+        className={`rounded px-4 py-2 ${
           !serverId.trim() || isLoading
-            ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
-            : 'bg-blue-500 text-white hover:bg-blue-600 transition'
+            ? 'cursor-not-allowed bg-gray-400 text-gray-700'
+            : 'bg-blue-500 text-white transition hover:bg-blue-600'
         }`}
       >
         {isLoading ? '読み込み中...' : '呼び出し'}
@@ -77,10 +77,10 @@ const ServerIdForm: React.FC<ServerIdFormProps> = ({
       <button
         onClick={handleSaveTeamData}
         disabled={!serverId.trim() || isLoading}
-        className={`px-4 py-2 rounded ${
+        className={`rounded px-4 py-2 ${
           !serverId.trim() || isLoading
-            ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
-            : 'bg-green-500 text-white hover:bg-green-600 transition'
+            ? 'cursor-not-allowed bg-gray-400 text-gray-700'
+            : 'bg-green-500 text-white transition hover:bg-green-600'
         }`}
       >
         {isLoading ? '保存中...' : '保存'}

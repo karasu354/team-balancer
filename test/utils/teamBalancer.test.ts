@@ -43,8 +43,8 @@ describe('TeamBalancer クラス', () => {
             displayRank: 'GOLD II',
             rating: 1400,
             mainRole: roleEnum.top,
-            subRole: roleEnum.jungle,
-            desiredRoles: [roleEnum.top, roleEnum.jungle],
+            subRole: roleEnum.jg,
+            desiredRoles: [roleEnum.top, roleEnum.jg],
             isRoleFixed: false,
           },
           {
@@ -76,8 +76,8 @@ describe('TeamBalancer クラス', () => {
       expect(player1.displayRank).toBe('GOLD II')
       expect(player1.rating).toBe(1400)
       expect(player1.mainRole).toBe(roleEnum.top)
-      expect(player1.subRole).toBe(roleEnum.jungle)
-      expect(player1.desiredRoles).toEqual([roleEnum.top, roleEnum.jungle])
+      expect(player1.subRole).toBe(roleEnum.jg)
+      expect(player1.desiredRoles).toEqual([roleEnum.top, roleEnum.jg])
       expect(player1.isRoleFixed).toBe(false)
       expect(player1.isParticipatingInGame).toBe(true)
 

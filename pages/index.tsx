@@ -46,7 +46,7 @@ const Home = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4 space-y-4">
+    <div className="flex min-h-screen flex-col items-center justify-center space-y-4 bg-gray-100 p-4">
       <h1 className="text-2xl font-bold">プレイヤー管理</h1>
 
       <PlayerInputForm

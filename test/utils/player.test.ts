@@ -53,8 +53,8 @@ describe('Player', () => {
         displayRank: 'PLATINUM I',
         rating: 1900,
         mainRole: roleEnum.mid,
-        subRole: roleEnum.jungle,
-        desiredRoles: [roleEnum.mid, roleEnum.jungle],
+        subRole: roleEnum.jg,
+        desiredRoles: [roleEnum.mid, roleEnum.jg],
         isRoleFixed: true,
       }
 
@@ -67,8 +67,8 @@ describe('Player', () => {
       expect(player.displayRank).toBe('PLATINUM I')
       expect(player.rating).toBe(1900)
       expect(player.mainRole).toBe(roleEnum.mid)
-      expect(player.subRole).toBe(roleEnum.jungle)
-      expect(player.desiredRoles).toEqual([roleEnum.mid, roleEnum.jungle])
+      expect(player.subRole).toBe(roleEnum.jg)
+      expect(player.desiredRoles).toEqual([roleEnum.mid, roleEnum.jg])
       expect(player.isRoleFixed).toBe(true)
     })
   })
