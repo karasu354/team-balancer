@@ -223,10 +223,10 @@ export class TeamBalancer {
 
     const bluePairRating =
       blueAdc.getRatingByRole(roleEnum.bot) +
-      blueSup.getRatingByRole(roleEnum.support)
+      blueSup.getRatingByRole(roleEnum.sup)
     const redPairRating =
       redAdc.getRatingByRole(roleEnum.bot) +
-      redSup.getRatingByRole(roleEnum.support)
+      redSup.getRatingByRole(roleEnum.sup)
 
     return Math.abs(bluePairRating - redPairRating)
   }
