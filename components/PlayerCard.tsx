@@ -1,6 +1,15 @@
 import React from 'react'
 
+import { IconContext } from 'react-icons'
+import {
+  FaChevronDown,
+  FaChevronUp,
+  FaLock,
+  FaStarOfLife,
+} from 'react-icons/fa6'
+
 import { Player } from '../utils/player'
+import { roleEnum } from '../utils/role'
 import PlayerDetailCard from './PlayerDetailCard'
 import PlayerEditCard from './PlayerEditCard'
 
@@ -31,33 +40,67 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
     onCurrentPlayerUpdate(player)
   }
 
+  const lockIconColor = player.isRoleFixed ? 'text-black' : 'text-gray-200'
+
   return (
-    <div
-      className={`w-md cursor-pointer rounded-lg border border-gray-300 p-4 transition ${
-        player.isParticipatingInGame
-          ? 'bg-blue-100'
-          : 'bg-white hover:bg-gray-50'
-      }`}
-      onClick={handleParticipationToggle}
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <p className="text-lg font-bold">{player.name}</p>
-          <p className="text-sm text-gray-500">({player.rating})</p>
-          <p className="text-sm text-gray-500">
-            希望ロール:
-            {['TOP', 'JG', 'MID', 'ADC', 'SUP']
-              .filter((_, index) => player.desiredRoles[index])
-              .join(',')}
-          </p>
+    <div className="w-md rounded border border-gray-400 p-2">
+      <div className="flex justify-between" onClick={handleParticipationToggle}>
+        <div className="justyfy-center flex items-center gap-4">
+          <div>
+            <p className="font-bold">{player.name}</p>
+            <p className="text-xs">({player.displayRank})</p>
+          </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={onToggleExpand}
-            className="text-blue-500 transition hover:text-blue-700"
-          >
-            {isExpanded ? '▲' : '▼'}
-          </button>
+        <div className="justyfy-center flex items-center gap-4">
+          <div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="text-left">Main:</div>
+              <div className="text-left">
+                {player.mainRole === roleEnum.all ? (
+                  <>
+                    <FaStarOfLife className="mr-1 inline-block rotate-30" />
+                  </>
+                ) : (
+                  <span>{player.mainRole}</span>
+                )}
+              </div>
+              {player.mainRole !== roleEnum.all && (
+                <>
+                  <div className="text-left">Sub:</div>
+                  <div className="text-left">
+                    {player.subRole === roleEnum.all ? (
+                      <FaStarOfLife className="mr-1 inline-block rotate-30" />
+                    ) : (
+                      <span>{player.subRole}</span>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center">
+            Role
+            <FaLock className={lockIconColor} />
+          </div>
+          <div className="">
+            {['TOP', 'JG', 'MID', 'BOT', 'SUP'].map((role, _) => (
+              <p
+                key={role}
+                className={`text-xs ${
+                  player.desiredRoles.includes(role as roleEnum)
+                    ? 'text-black'
+                    : 'text-gray-200'
+                }`}
+              >
+                {role}
+              </p>
+            ))}
+          </div>
+          <IconContext.Provider value={{ size: '1rem' }}>
+            <button onClick={onToggleExpand} className="">
+              {isExpanded ? <FaChevronDown /> : <FaChevronUp />}
+            </button>
+          </IconContext.Provider>
         </div>
       </div>
 

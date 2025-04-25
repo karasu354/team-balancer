@@ -44,7 +44,7 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
   }
 
   return (
-    <div className="grid grid-cols-2 gap-0 rounded-lg border border-gray-300">
+    <div className="grid grid-cols-2">
       {players.map((player, index) => (
         <PlayerCard
           key={index}
