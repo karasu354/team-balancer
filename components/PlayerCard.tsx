@@ -45,13 +45,15 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
   return (
     <div className="w-md rounded border border-gray-400 p-2">
       <div className="flex justify-between" onClick={handleParticipationToggle}>
-        <div className="flex items-center justify-center gap-4">
-          <div>
-            <p className="font-bold">{player.name}</p>
+        <div className="flex w-1/2 items-center justify-start pr-2">
+          <div className="max-w-full">
+            <p className="overflow-hidden font-bold text-ellipsis">
+              {player.name}
+            </p>
             <p className="text-xs">({player.displayRank})</p>
           </div>
         </div>
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex w-1/2 items-center justify-center gap-4">
           <div>
             <div className="grid grid-cols-2 gap-2">
               <div className="text-left">Main:</div>
