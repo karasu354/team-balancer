@@ -43,7 +43,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
   const lockIconColor = player.isRoleFixed ? 'text-black' : 'text-gray-200'
 
   return (
-    <div className="w-md rounded border border-gray-400 p-2">
+    <div className="w-md rounded-lg border border-gray-400 bg-white p-2">
       <div className="flex justify-between" onClick={handleParticipationToggle}>
         <div className="flex w-1/2 items-center justify-start pr-2">
           <div className="max-w-full">
@@ -56,11 +56,11 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
         <div className="flex w-1/2 items-center justify-center gap-4">
           <div>
             <div className="grid grid-cols-2 gap-2">
-              <div className="text-left">Main:</div>
+              <div className="text-left">Main</div>
               <div className="text-left">
                 {player.mainRole === roleEnum.all ? (
                   <>
-                    <FaStarOfLife className="mr-1 inline-block rotate-30" />
+                    <FaStarOfLife className="inline-block rotate-30" />
                   </>
                 ) : (
                   <span>{player.mainRole}</span>
@@ -68,10 +68,10 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
               </div>
               {player.mainRole !== roleEnum.all && (
                 <>
-                  <div className="text-left">Sub:</div>
+                  <div className="text-left">Sub</div>
                   <div className="text-left">
                     {player.subRole === roleEnum.all ? (
-                      <FaStarOfLife className="mr-1 inline-block rotate-30" />
+                      <FaStarOfLife className="inline-block rotate-30" />
                     ) : (
                       <span>{player.subRole}</span>
                     )}
@@ -81,7 +81,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
             </div>
           </div>
           <div className="flex items-center">
-            Role
+            <p className="mr-1">Role</p>
             <FaLock className={lockIconColor} />
           </div>
           <div className="">

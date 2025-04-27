@@ -1,7 +1,14 @@
 import React from 'react'
 
+import {
+  FaChevronDown,
+  FaChevronUp,
+  FaLock,
+  FaStarOfLife,
+} from 'react-icons/fa6'
+
 import { Player } from '../utils/player'
-import { roleList } from '../utils/role'
+import { roleEnum, roleList } from '../utils/role'
 
 interface PlayerDetailCardProps {
   currentPlayer: Player
@@ -20,24 +27,51 @@ const PlayerDetailCard: React.FC<PlayerDetailCardProps> = ({
     e.stopPropagation()
     onRemove()
   }
+  const lockIconColor = currentPlayer.isRoleFixed
+    ? 'text-black'
+    : 'text-gray-200'
   return (
-    <div className="mt-4 border-t pt-4">
-      <div className="space-y-2">
-        <p className="text-sm font-bold">プレイヤー情報</p>
+    <div className="p-2">
+      <div className="">
+        <p className="font-bold">プレイヤー情報</p>
         <div className="grid grid-cols-2 gap-2">
-          <p className="text-sm font-medium">名前:</p>
-          <p className="text-sm">{currentPlayer.name}</p>
-          <p className="text-sm font-medium">ティア:</p>
-          <p className="text-sm">{currentPlayer.tier}</p>
-          <p className="text-sm font-medium">ランク:</p>
-          <p className="text-sm">{currentPlayer.rank}</p>
-          <p className="text-sm font-medium">レーティング:</p>
-          <p className="text-sm">{currentPlayer.rating}</p>
-          <p className="text-sm font-medium">希望ロール:</p>
-          <p className="text-sm">
+          <p className="">Player Name:</p>
+          <p className="overflow-hidden text-ellipsis">{currentPlayer.name}</p>
+          <p className="">Rank:</p>
+          <p className="">{currentPlayer.displayRank}</p>
+          <p className="">Main Role:</p>
+          <p className="">
+            {currentPlayer.mainRole === roleEnum.all ? (
+              <>
+                <FaStarOfLife className="mr-1 inline-block rotate-30" />
+              </>
+            ) : (
+              <span>{currentPlayer.mainRole}</span>
+            )}
+          </p>
+          {currentPlayer.mainRole !== roleEnum.all && (
+            <>
+              <p className="">Sub Role:</p>
+              <p className="">
+                {currentPlayer.subRole === roleEnum.all ? (
+                  <>
+                    <FaStarOfLife className="mr-1 inline-block rotate-30" />
+                  </>
+                ) : (
+                  <span>{currentPlayer.mainRole}</span>
+                )}
+              </p>
+            </>
+          )}
+          <p className="">Desired Role:</p>
+          <p className="">
             {roleList
               .filter((_, index) => currentPlayer.desiredRoles[index])
               .join(', ')}
+          </p>
+          <p className="">Role Fixed:</p>
+          <p>
+            <FaLock className={lockIconColor} />
           </p>
         </div>
         <div className="flex justify-end space-x-2">
