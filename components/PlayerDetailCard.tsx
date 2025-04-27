@@ -43,7 +43,7 @@ const PlayerDetailCard: React.FC<PlayerDetailCardProps> = ({
           <p className="">
             {currentPlayer.mainRole === roleEnum.all ? (
               <>
-                <FaStarOfLife className="mr-1 inline-block rotate-30" />
+                <FaStarOfLife className="inline-block rotate-30" />
               </>
             ) : (
               <span>{currentPlayer.mainRole}</span>
@@ -55,10 +55,10 @@ const PlayerDetailCard: React.FC<PlayerDetailCardProps> = ({
               <p className="">
                 {currentPlayer.subRole === roleEnum.all ? (
                   <>
-                    <FaStarOfLife className="mr-1 inline-block rotate-30" />
+                    <FaStarOfLife className="inline-block rotate-30" />
                   </>
                 ) : (
-                  <span>{currentPlayer.mainRole}</span>
+                  <span>{currentPlayer.subRole}</span>
                 )}
               </p>
             </>
