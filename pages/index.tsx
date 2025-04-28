@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
 import DividedTeamTable from '../components/DividedTeamTable'
+import InputText from '../components/Input/InputText'
 import PlayerInputForm from '../components/PlayerInputForm'
 import PlayersTable from '../components/PlayersTable'
 import ServerIdForm from '../components/ServerIdForm'
@@ -45,9 +46,16 @@ const Home = () => {
     handleAppUpdate()
   }
 
+  const [value, setValue] = useState<string>('')
+  useEffect(() => {
+    console.log('value : ', value)
+  }, [value])
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center space-y-4 bg-gray-100 p-4">
       <h1 className="text-2xl font-bold">プレイヤー管理</h1>
+
+      <InputText value={value} setValue={setValue} label="Player Name" />
 
       <PlayerInputForm
         teamBalancer={teamBalancer}
