@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
 import DividedTeamTable from '../components/DividedTeamTable'
+import Dropdown from '../components/Input/Dropdown'
 import InputText from '../components/Input/InputText'
 import PlayerInputForm from '../components/PlayerInputForm'
 import PlayersTable from '../components/PlayersTable'
@@ -56,6 +57,24 @@ const Home = () => {
       <h1 className="text-2xl font-bold">プレイヤー管理</h1>
 
       <InputText value={value} setValue={setValue} label="Player Name" />
+      <Dropdown
+        label="Tier"
+        options={Object.values(rankEnum).map((rank) => ({
+          value: rank,
+          label: rank,
+        }))}
+        value={value}
+        setValue={setValue}
+      />
+      <Dropdown
+        label="Rank"
+        options={Object.values(tierEnum).map((tier) => ({
+          value: tier,
+          label: tier,
+        }))}
+        value={value}
+        setValue={setValue}
+      />
 
       <PlayerInputForm
         teamBalancer={teamBalancer}
