@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
 import DividedTeamTable from '../components/DividedTeamTable'
-import CheckBox from '../components/Input/CheckBox'
-import Dropdown from '../components/Input/Dropdown'
-import InputText from '../components/Input/InputText'
-import Textarea from '../components/Input/Textarea'
+import Tabs from '../components/Navigation/Tabs'
 import PlayerInputForm from '../components/PlayerInputForm'
 import PlayersTable from '../components/PlayersTable'
 import ServerIdForm from '../components/ServerIdForm'
@@ -49,45 +46,12 @@ const Home = () => {
     handleAppUpdate()
   }
 
-  const [value, setValue] = useState<string>('')
-  useEffect(() => {
-    console.log('value : ', value)
-  }, [value])
-  const [values, setValues] = useState<string[]>([])
-
   return (
     <div className="flex min-h-screen flex-col items-center justify-center space-y-4 bg-gray-100 p-4">
+      <div className="w-100">
+        <Tabs labels={['プレイヤー管理', 'サーバーID管理', 'uooo']} />
+      </div>
       <h1 className="text-2xl font-bold">プレイヤー管理</h1>
-
-      <InputText value={value} setValue={setValue} label="Player Name" />
-      <Dropdown
-        label="Tier"
-        options={Object.values(rankEnum).map((rank) => ({
-          value: rank,
-          label: rank,
-        }))}
-        value={value}
-        setValue={setValue}
-      />
-      <Dropdown
-        label="Rank"
-        options={Object.values(tierEnum).map((tier) => ({
-          value: tier,
-          label: tier,
-        }))}
-        value={value}
-        setValue={setValue}
-      />
-      <CheckBox
-        label="Role"
-        options={Object.values(roleEnum).map((role) => ({
-          value: role,
-          label: role,
-        }))}
-        values={values}
-        setValues={setValues}
-      />
-      <Textarea value={value} setValue={setValue} placeholder="placeholder" />
 
       <PlayerInputForm
         teamBalancer={teamBalancer}

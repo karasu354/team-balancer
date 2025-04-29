@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-import { TeamBalancer } from '../utils/teamBalancer'
+import { TeamBalancer } from '../../utils/teamBalancer'
 
 interface ChatLogInputFormProps {
   teamBalancer: TeamBalancer
