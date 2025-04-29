@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
 import DividedTeamTable from '../components/DividedTeamTable'
+import CheckBox from '../components/Input/CheckBox'
 import Dropdown from '../components/Input/Dropdown'
 import InputText from '../components/Input/InputText'
 import PlayerInputForm from '../components/PlayerInputForm'
@@ -51,6 +52,7 @@ const Home = () => {
   useEffect(() => {
     console.log('value : ', value)
   }, [value])
+  const [values, setValues] = useState<string[]>([])
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center space-y-4 bg-gray-100 p-4">
@@ -74,6 +76,15 @@ const Home = () => {
         }))}
         value={value}
         setValue={setValue}
+      />
+      <CheckBox
+        label="Role"
+        options={Object.values(roleEnum).map((role) => ({
+          value: role,
+          label: role,
+        }))}
+        values={values}
+        setValues={setValues}
       />
 
       <PlayerInputForm
