@@ -15,10 +15,8 @@ interface Props {
 const CheckBox: React.FC<Props> = ({ values, setValues, label, options }) => {
   const handleCheck = (optionValue: string) => {
     if (values.includes(optionValue)) {
-      // 選択済みの場合は削除
       setValues(values.filter((value) => value !== optionValue))
     } else {
-      // 未選択の場合は追加
       setValues([...values, optionValue])
     }
   }

@@ -4,6 +4,7 @@ import DividedTeamTable from '../components/DividedTeamTable'
 import CheckBox from '../components/Input/CheckBox'
 import Dropdown from '../components/Input/Dropdown'
 import InputText from '../components/Input/InputText'
+import Textarea from '../components/Input/Textarea'
 import PlayerInputForm from '../components/PlayerInputForm'
 import PlayersTable from '../components/PlayersTable'
 import ServerIdForm from '../components/ServerIdForm'
@@ -86,6 +87,7 @@ const Home = () => {
         values={values}
         setValues={setValues}
       />
+      <Textarea value={value} setValue={setValue} placeholder="placeholder" />
 
       <PlayerInputForm
         teamBalancer={teamBalancer}
