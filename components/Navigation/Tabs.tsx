@@ -9,15 +9,13 @@ interface TabsProps {
 const Tabs: React.FC<TabsProps> = ({ labels, activeTab, onActiveTab }) => {
   return (
     <div className="w-full">
-      {/* Tab Navigation */}
       <div className="relative">
         <ul
           className="relative flex list-none flex-wrap rounded-md bg-gray-200"
           role="list"
         >
-          {/* 背景色の移動用の要素 */}
           <div
-            className={`absolute top-0 left-0 h-full rounded-md ${activeTab >= 0 && 'bg-blue-500'} transition-transform duration-300`}
+            className={`absolute top-0 left-0 h-full rounded-md bg-blue-500 transition-transform duration-300`}
             style={{
               width: `${100 / labels.length}%`,
               transform: `translateX(${activeTab * 100}%)`,

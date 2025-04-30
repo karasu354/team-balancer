@@ -2,7 +2,6 @@ import React from 'react'
 
 import { Player } from '../../utils/player'
 import { rankEnum, tierEnum } from '../../utils/rank'
-// CheckBox コンポーネントをインポート
 import { isNoRankTier } from '../../utils/rank'
 import { roleEnum } from '../../utils/role'
 import { TeamBalancer } from '../../utils/teamBalancer'
