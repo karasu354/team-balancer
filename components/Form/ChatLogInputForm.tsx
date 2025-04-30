@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-import { TeamBalancer } from '../utils/teamBalancer'
+import { TeamBalancer } from '../../utils/teamBalancer'
 
 interface ChatLogInputFormProps {
   teamBalancer: TeamBalancer
@@ -39,7 +39,7 @@ Player2 #meowがロビーから退出しました。`}
         onClick={handleLogSubmit}
         className="rounded bg-blue-500 px-4 py-2 whitespace-nowrap text-white transition hover:bg-blue-600"
       >
-        取り込む
+        Import
       </button>
     </div>
   )

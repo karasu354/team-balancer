@@ -56,6 +56,14 @@ export const calculateRating = (tier: tierEnum, rank: rankEnum): number => {
   return tierScores[tier] + rankScores[rank]
 }
 
+export const isNoRankTier = (tier: tierEnum): boolean => {
+  return (
+    tier === tierEnum.master ||
+    tier === tierEnum.grandmaster ||
+    tier === tierEnum.challenger
+  )
+}
+
 export const isValidTier = (value: string): boolean => {
   return Object.values(tierEnum).includes(value as tierEnum)
 }
