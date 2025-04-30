@@ -1,19 +1,19 @@
 import React from 'react'
 
-interface Option {
+interface Option<T> {
   label: string
-  value: string
+  value: T
 }
 
-interface Props {
-  values: string[]
-  setValues: (values: string[]) => void
+interface Props<T> {
+  values: T[]
+  setValues: (values: T[]) => void
   label: string
-  options: Option[]
+  options: Option<T>[]
 }
 
-const CheckBox: React.FC<Props> = ({ values, setValues, label, options }) => {
-  const handleCheck = (optionValue: string) => {
+const CheckBox = <T,>({ values, setValues, label, options }: Props<T>) => {
+  const handleCheck = (optionValue: T) => {
     if (values.includes(optionValue)) {
       setValues(values.filter((value) => value !== optionValue))
     } else {
@@ -28,7 +28,7 @@ const CheckBox: React.FC<Props> = ({ values, setValues, label, options }) => {
         <nav className="flex justify-between gap-2 p-2">
           {options.map((option) => (
             <div
-              key={option.value}
+              key={option.value as React.Key}
               onClick={() => handleCheck(option.value)}
               className={`min-w-[20px] flex-1 cursor-pointer rounded-md p-1 text-center text-sm transition-colors select-none hover:bg-gray-300 ${
                 values.includes(option.value)

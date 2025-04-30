@@ -24,18 +24,6 @@ const Home = () => {
     setUpdate((prev) => prev + 1)
   }
 
-  const handleAddPlayer = (
-    name: string,
-    tier: tierEnum,
-    rank: rankEnum,
-    mainRole: roleEnum,
-    subRole: roleEnum
-  ) => {
-    const newPlayer = new Player(name, tier, rank, mainRole, subRole)
-    teamBalancer.addPlayer(newPlayer)
-    handleAppUpdate()
-  }
-
   const handleRemovePlayer = (index: number) => {
     teamBalancer.removePlayerByIndex(index)
     handleAppUpdate()
@@ -47,15 +35,10 @@ const Home = () => {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center space-y-4 bg-gray-100 p-4">
-      <div className="w-100">
-        <Tabs labels={['プレイヤー管理', 'サーバーID管理', 'uooo']} />
-      </div>
+    <div className="flex flex-col items-center justify-center space-y-4 bg-gray-100 p-4">
       <h1 className="text-2xl font-bold">プレイヤー管理</h1>
-
       <PlayerInputForm
         teamBalancer={teamBalancer}
-        onAddPlayer={handleAddPlayer}
         onAppUpdate={handleAppUpdate}
       />
 
