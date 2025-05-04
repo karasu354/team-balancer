@@ -23,8 +23,8 @@ export class Player {
   name: string = ''
   isParticipatingInGame: boolean = false
 
-  tier: tierEnum = tierEnum.gold
-  rank: rankEnum = rankEnum.two
+  _tier: tierEnum = tierEnum.gold
+  _rank: rankEnum = rankEnum.two
   displayRank: string = ''
   rating: number = 0
 
@@ -44,7 +44,8 @@ export class Player {
   ) {
     this.id = generateInternalId()
     this.name = name
-    this.setCalculatedRating()
+    this.tier = tier
+    this.rank = rank
     this.mainRole = mainRole
     this.subRole = subRole
   }
@@ -65,6 +66,23 @@ export class Player {
     return player
   }
 
+  get tier(): tierEnum {
+    return this._tier
+  }
+  set tier(value: tierEnum) {
+    this._tier = value
+    this.setCalculatedRating()
+    this.setDisplayRank()
+  }
+  get rank(): rankEnum {
+    return this._rank
+  }
+  set rank(value: rankEnum) {
+    this._rank = value
+    this.setCalculatedRating()
+    this.setDisplayRank()
+  }
+
   getRatingByRole(role: roleEnum): number {
     if (this.mainRole === roleEnum.all || this.mainRole === role) {
       return this.rating
@@ -77,7 +95,18 @@ export class Player {
 
   setCalculatedRating(): void {
     this.rating = calculateRating(this.tier, this.rank)
-    this.displayRank = `${this.tier.toUpperCase()} ${this.rank}`
+  }
+
+  setDisplayRank(): void {
+    if (
+      [tierEnum.master, tierEnum.grandmaster, tierEnum.challenger].includes(
+        this.tier
+      )
+    ) {
+      this.displayRank = this.tier.toUpperCase()
+    } else {
+      this.displayRank = `${this.tier.toUpperCase()} ${this.rank}`
+    }
   }
 
   setDesiredRoleByRole(role: roleEnum): void {

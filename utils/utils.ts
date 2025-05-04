@@ -1,28 +1,19 @@
 export function parseChatLogs(logs: string): string[] {
   const result: string[] = []
-  const lines = logs.split('\n')
-  const joinLogRegex = /^(.+?) #(.+?)がロビーに参加しました。$/
-  const leaveLogRegex = /^(.+?) #(.+?)がロビーから退出しました。$/
+  const joinLogRegex = /^(.+?) #\d+がロビーに参加しました。$/
+  const leaveLogRegex = /^(.+?) #\d+がロビーから退出しました。$/
 
-  lines.forEach((line) => {
+  logs.split('\n').forEach((line) => {
     const trimmedLine = line.trim()
-    const colonIndex = trimmedLine.indexOf(':')
-    if (colonIndex !== -1 && trimmedLine.lastIndexOf('#', colonIndex) === -1)
-      return
 
-    const joinMatch = trimmedLine.match(joinLogRegex)
-    if (joinMatch) {
-      const [name] = joinMatch.slice(1, 2)
-      result.push(name)
-      return
-    }
-
-    const leaveMatch = trimmedLine.match(leaveLogRegex)
-    if (leaveMatch) {
-      const [name] = leaveMatch.slice(1, 2)
-      const index = result.findIndex((n) => n === name)
-      if (index !== -1) {
-        result.splice(index, 1)
+    if (joinLogRegex.test(trimmedLine)) {
+      const name = trimmedLine.match(joinLogRegex)?.[1]
+      if (name) result.push(name)
+    } else if (leaveLogRegex.test(trimmedLine)) {
+      const name = trimmedLine.match(leaveLogRegex)?.[1]
+      if (name) {
+        const index = result.indexOf(name)
+        if (index !== -1) result.splice(index, 1)
       }
     }
   })

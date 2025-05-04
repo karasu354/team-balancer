@@ -67,7 +67,7 @@ const PlayerInfoDisplay: React.FC<PlayerInfoDisplayProps> = ({ player }) => {
                   className={`size-6 ${
                     player.desiredRoles.includes(role)
                       ? 'text-yellow-400 opacity-100'
-                      : 'text-gray-600 opacity-30'
+                      : 'text-gray-600 opacity-10'
                   }`}
                 />
               )

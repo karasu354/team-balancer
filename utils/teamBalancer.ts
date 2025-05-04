@@ -48,9 +48,6 @@ export class TeamBalancer {
     teamBalancer.players = playersJson.players.map((player) =>
       Player.fromJson(player)
     )
-    teamBalancer.players.forEach((player) => {
-      player.isParticipatingInGame = true
-    })
     return teamBalancer
   }
 
@@ -83,9 +80,9 @@ export class TeamBalancer {
   }
 
   addPlayersByLog(logs: string): void {
-    const parsedLogs = parseChatLogs(logs)
-    if (parsedLogs.length === 0) return
+    if (!logs.trim()) return
 
+    const parsedLogs = parseChatLogs(logs)
     parsedLogs.forEach((name) => {
       if (!this.players.some((player) => player.name === name)) {
         const newPlayer = new Player(name)

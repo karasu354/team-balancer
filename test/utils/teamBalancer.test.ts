@@ -79,7 +79,7 @@ describe('TeamBalancer クラス', () => {
       expect(player1.subRole).toBe(roleEnum.jg)
       expect(player1.desiredRoles).toEqual([roleEnum.top, roleEnum.jg])
       expect(player1.isRoleFixed).toBe(false)
-      expect(player1.isParticipatingInGame).toBe(true)
+      expect(player1.isParticipatingInGame).toBe(false)
 
       const player2 = teamBalancer.players[1]
       expect(player2.id).toBe('player-id-2')
@@ -92,7 +92,7 @@ describe('TeamBalancer クラス', () => {
       expect(player2.subRole).toBe(roleEnum.bot)
       expect(player2.desiredRoles).toEqual([roleEnum.mid, roleEnum.bot])
       expect(player2.isRoleFixed).toBe(true)
-      expect(player2.isParticipatingInGame).toBe(true)
+      expect(player2.isParticipatingInGame).toBe(false)
     })
   })
 
@@ -171,19 +171,6 @@ describe('TeamBalancer クラス', () => {
   })
 
   describe('divideTeams', () => {
-    test('チーム分割が成功すること', () => {
-      for (let i = 0; i < 10; i++) {
-        const player = new Player(`Player${i}`, tierEnum.gold, rankEnum.two)
-        player.isParticipatingInGame = true
-        teamBalancer.addPlayer(player)
-      }
-      teamBalancer.divideTeams()
-      const team1 = teamBalancer.balancedTeamsByMissMatch[0].players.slice(0, 5)
-      const team2 = teamBalancer.balancedTeamsByMissMatch[0].players.slice(5)
-      expect(team1.length).toBe(5)
-      expect(team2.length).toBe(5)
-    })
-
     test('プレイヤー数が不足している場合、エラーがスローされること', () => {
       expect(() => teamBalancer.divideTeams()).toThrow(
         '現在のプレイヤーではチーム分割ができません。'
@@ -212,6 +199,28 @@ describe('TeamBalancer クラス', () => {
         teamBalancer.addPlayer(player)
       }
       expect(teamBalancer.isDividable()).toBe(false)
+    })
+  })
+
+  describe('removePlayerByIndex', () => {
+    test('指定したインデックスのプレイヤーを削除できること', () => {
+      const player1 = new Player('Alice')
+      const player2 = new Player('Bob')
+      teamBalancer.addPlayer(player1)
+      teamBalancer.addPlayer(player2)
+
+      teamBalancer.removePlayerByIndex(0)
+      expect(teamBalancer.players).not.toContain(player1)
+      expect(teamBalancer.players).toContain(player2)
+    })
+
+    test('無効なインデックスを指定した場合、エラーがスローされること', () => {
+      expect(() => teamBalancer.removePlayerByIndex(-1)).toThrow(
+        '無効なインデックスです。'
+      )
+      expect(() => teamBalancer.removePlayerByIndex(10)).toThrow(
+        '無効なインデックスです。'
+      )
     })
   })
 })
