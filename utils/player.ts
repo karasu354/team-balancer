@@ -44,7 +44,7 @@ export class Player {
   ) {
     this.id = generateInternalId()
     this.name = name
-    this.setRank(tier, rank)
+    this.setCalculatedRating()
     this.mainRole = mainRole
     this.subRole = subRole
   }
@@ -75,11 +75,9 @@ export class Player {
     return this.rating * Player.ROLE_RATING_MULTIPLIER_FOR_NOT_DESIRED
   }
 
-  setRank(tier: tierEnum, rank: rankEnum): void {
-    this.tier = tier
-    this.rank = rank
-    this.rating = calculateRating(tier, rank)
-    this.displayRank = `${tier.toUpperCase()} ${rank}`
+  setCalculatedRating(): void {
+    this.rating = calculateRating(this.tier, this.rank)
+    this.displayRank = `${this.tier.toUpperCase()} ${this.rank}`
   }
 
   setDesiredRoleByRole(role: roleEnum): void {

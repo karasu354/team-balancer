@@ -34,24 +34,31 @@ export function factorial(n: number): number {
   return n <= 1 ? 1 : n * factorial(n - 1)
 }
 
-export function generateRandomPermutations(
-  array: number[],
+export function generateRandomPermutations<T>(
+  array: T[],
   count: number
-): number[][] {
+): T[][] {
   if (array.length === 0) return []
-  const result: Set<string> = new Set()
-  const maxCount = factorial(array.length)
 
-  while (result.size < maxCount && result.size < count) {
-    const shuffled = [...array]
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-    }
-    result.add(shuffled.join(','))
+  const permute = (arr: T[], m: T[] = []): T[][] => {
+    if (arr.length === 0) return [m]
+    return arr.flatMap((_, i) => {
+      const rest = [...arr.slice(0, i), ...arr.slice(i + 1)]
+      return permute(rest, [...m, arr[i]])
+    })
   }
 
-  return Array.from(result).map((str) => str.split(',').map(Number))
+  const shuffle = <T>(arr: T[]): T[] => {
+    const result = [...arr]
+    for (let i = result.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[result[i], result[j]] = [result[j], result[i]]
+    }
+    return result
+  }
+
+  const allPermutations = shuffle(permute(array))
+  return allPermutations.slice(0, Math.min(count, allPermutations.length))
 }
 
 export function generateInternalId(): string {

@@ -1,15 +1,12 @@
 import React from 'react'
 
 import { IconContext } from 'react-icons'
-import {
-  FaChevronDown,
-  FaChevronUp,
-  FaLock,
-  FaStarOfLife,
-} from 'react-icons/fa6'
+import { FaCheckSquare } from 'react-icons/fa'
+import { FaChevronDown, FaRegSquare } from 'react-icons/fa6'
 
 import { Player } from '../utils/player'
-import { roleEnum, roleList } from '../utils/role'
+import PlayerInfoDisplay from './Display/PlayerInfoDisplay'
+import PlayerNameDisplay from './Display/PlayerNameDisplay'
 import PlayerDetailCard from './PlayerDetailCard'
 import PlayerEditCard from './PlayerEditCard'
 
@@ -40,90 +37,68 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
     onCurrentPlayerUpdate(player)
   }
 
-  const lockIconColor = player.isRoleFixed ? 'text-black' : 'text-gray-200'
-
   return (
-    <div className="w-md rounded-lg border border-gray-400 bg-white p-2">
-      <div className="flex justify-between" onClick={handleParticipationToggle}>
-        <div className="flex w-1/2 items-center justify-start pr-2">
-          <div className="max-w-full">
-            <p className="overflow-hidden font-bold text-ellipsis">
-              {player.name}
-            </p>
-            <p className="text-xs">({player.displayRank})</p>
-          </div>
+    <div className="h-min w-md overflow-hidden rounded border border-gray-400 bg-white">
+      <div className="flex">
+        <div
+          className="flex w-10 cursor-pointer items-center justify-center border-r border-gray-300 bg-gray-200 hover:brightness-80"
+          onClick={handleParticipationToggle}
+          title="Toggle Participation"
+        >
+          <IconContext.Provider
+            value={{ size: '1.5rem', className: 'text-gray-600' }}
+          >
+            {player.isParticipatingInGame ? <FaCheckSquare /> : <FaRegSquare />}
+          </IconContext.Provider>
         </div>
-        <div className="flex w-1/2 items-center justify-center gap-4">
-          <div>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="text-left">Main</div>
-              <div className="text-left">
-                {player.mainRole === roleEnum.all ? (
-                  <>
-                    <FaStarOfLife className="inline-block rotate-30" />
-                  </>
-                ) : (
-                  <span>{player.mainRole}</span>
-                )}
-              </div>
-              {player.mainRole !== roleEnum.all && (
-                <>
-                  <div className="text-left">Sub</div>
-                  <div className="text-left">
-                    {player.subRole === roleEnum.all ? (
-                      <FaStarOfLife className="inline-block rotate-30" />
-                    ) : (
-                      <span>{player.subRole}</span>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-          <div className="flex items-center">
-            <p className="mr-1">Role</p>
-            <FaLock className={lockIconColor} />
-          </div>
-          <div className="">
-            {roleList.map((role, _) => (
-              <p
-                key={role}
-                className={`text-xs ${
-                  player.desiredRoles.includes(role as roleEnum)
-                    ? 'text-black'
-                    : 'text-gray-200'
-                }`}
-              >
-                {role}
-              </p>
-            ))}
-          </div>
+
+        <div className="flex flex-1 flex-col overflow-hidden p-2 select-none">
+          <PlayerNameDisplay player={player} />
+          <PlayerInfoDisplay player={player} />
+        </div>
+
+        <div
+          className="flex min-w-5 flex-shrink-0 cursor-pointer items-center justify-center bg-gray-400 hover:brightness-80"
+          onClick={onToggleExpand}
+        >
           <IconContext.Provider value={{ size: '1rem' }}>
-            <button onClick={onToggleExpand} className="">
-              {isExpanded ? <FaChevronDown /> : <FaChevronUp />}
+            <button
+              className={`text-gray-300 transition-transform duration-200 ${
+                isExpanded ? 'rotate-180' : 'rotate-0'
+              }`}
+            >
+              <FaChevronDown />
             </button>
           </IconContext.Provider>
         </div>
       </div>
 
-      {isExpanded && !isEditMode && (
-        <PlayerDetailCard
-          currentPlayer={player}
-          onEditModeToggle={handleEditModeToggle}
-          onPlayerUpdate={onCurrentPlayerUpdate}
-          onRemove={onRemove}
-        />
-      )}
+      <div
+        className={`transition-all duration-200 select-none ${
+          isExpanded
+            ? 'max-h-screen opacity-100'
+            : 'max-h-0 overflow-hidden opacity-0'
+        }`}
+      >
+        {!isEditMode && (
+          <PlayerDetailCard
+            currentPlayer={player}
+            onEditModeToggle={handleEditModeToggle}
+            onPlayerUpdate={onCurrentPlayerUpdate}
+            onRemove={onRemove}
+          />
+        )}
 
-      {isExpanded && isEditMode && (
-        <PlayerEditCard
-          currentPlayer={player}
-          setEditablePlayer={(updatedPlayer) =>
-            onCurrentPlayerUpdate(updatedPlayer)
-          }
-          onEditModeToggle={handleEditModeToggle}
-        />
-      )}
+        {isEditMode && (
+          <PlayerEditCard
+            currentPlayer={player}
+            setEditablePlayer={(updatedPlayer) =>
+              onCurrentPlayerUpdate(updatedPlayer)
+            }
+            onEditModeToggle={handleEditModeToggle}
+          />
+        )}
+      </div>
     </div>
   )
 }

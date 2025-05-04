@@ -16,7 +16,7 @@ export interface PlayersJson {
 export class TeamBalancer {
   private static readonly TEAM_SIZE = 5
   private static readonly TOTAL_PLAYERS = 50
-  private static readonly MAX_TEAM_ATTEMPTS = 100000
+  private static readonly MAX_TEAM_ATTEMPTS = 5000000
   private static readonly PLAYERS_VERSION = '0.0.1'
 
   id: string = ''

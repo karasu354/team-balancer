@@ -1,0 +1,5 @@
+export { default as TopRoleIcon } from './lol/TopRoleIcon'
+export { default as SupRoleIcon } from './lol/SupRoleIcon'
+export { default as MidRoleIcon } from './lol/MidRoleIcon'
+export { default as JgRoleIcon } from './lol/JgRoleIcon'
+export { default as BotRoleIcon } from './lol/BotRoleIcon'
