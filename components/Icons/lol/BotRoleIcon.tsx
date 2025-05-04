@@ -2,7 +2,7 @@ import React from 'react'
 
 import IconBase from '../IconBase'
 
-const TopRoleIcon: React.FC<{
+const BotRoleIcon: React.FC<{
   className?: string
   color?: string
   size?: number
@@ -37,4 +37,4 @@ const TopRoleIcon: React.FC<{
   )
 }
 
-export default TopRoleIcon
+export default BotRoleIcon

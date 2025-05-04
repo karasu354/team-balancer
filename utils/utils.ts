@@ -29,6 +29,10 @@ export function generateRandomPermutations<T>(
   array: T[],
   count: number
 ): T[][] {
+  if (array.length > 10) {
+    throw new Error('配列サイズが大きすぎます。最大サイズは10です。')
+  }
+
   if (array.length === 0) return []
 
   const permute = (arr: T[], m: T[] = []): T[][] => {
