@@ -29,6 +29,7 @@ const SinglePlayerInputForm: React.FC<SinglePlayerInputFormProps> = ({
       Object.assign(updatedPlayer, prevPlayer, { [key]: value })
       if (key === 'tier' || key === 'rank') {
         updatedPlayer.setCalculatedRating()
+        updatedPlayer.setDisplayRank()
       }
       return updatedPlayer
     })
