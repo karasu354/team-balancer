@@ -33,7 +33,7 @@ describe('Player', () => {
     })
 
     test('レーティングが正しく計算されること', () => {
-      expect(player.rating).toBe(1400) // GOLD II のレーティング
+      expect(player.rating).toBe(1400)
     })
 
     test('IDが生成されること', () => {
@@ -73,12 +73,64 @@ describe('Player', () => {
     })
   })
 
-  describe('setRank', () => {
-    test('ティアとランクを正しく設定できること', () => {
-      player.setRank(tierEnum.platinum, rankEnum.one)
+  describe('tier setter', () => {
+    test('ティアを設定するとレーティングと表示ランクが更新されること', () => {
+      player.tier = tierEnum.platinum
       expect(player.tier).toBe(tierEnum.platinum)
+      expect(player.rating).toBe(1800)
+      expect(player.displayRank).toBe('PLATINUM II')
+    })
+  })
+
+  describe('rank setter', () => {
+    test('ランクを設定するとレーティングと表示ランクが更新されること', () => {
+      player.rank = rankEnum.one
       expect(player.rank).toBe(rankEnum.one)
-      expect(player.rating).toBe(1900)
+      expect(player.rating).toBe(1500)
+      expect(player.displayRank).toBe('GOLD I')
+    })
+  })
+
+  describe('getRatingByRole', () => {
+    test('メインロールの場合、正しいレーティングを返す', () => {
+      player.mainRole = roleEnum.top
+      expect(player.getRatingByRole(roleEnum.top)).toBe(player.rating)
+    })
+
+    test('サブロールの場合、正しいレーティングを返す', () => {
+      player.mainRole = roleEnum.top
+      player.subRole = roleEnum.jg
+      expect(player.getRatingByRole(roleEnum.jg)).toBe(player.rating * 0.9)
+    })
+
+    test('希望ロールでない場合、正しいレーティングを返す', () => {
+      player.mainRole = roleEnum.top
+      player.subRole = roleEnum.jg
+      expect(player.getRatingByRole(roleEnum.mid)).toBe(player.rating * 0.8)
+    })
+  })
+
+  describe('setCalculatedRating', () => {
+    test('tier と rank に基づいて rating を正しく計算する', () => {
+      player.tier = tierEnum.platinum
+      player.rank = rankEnum.one
+      player.setCalculatedRating()
+      expect(player.rating).toBe(1900) // プラチナ1のレーティング
+    })
+  })
+
+  describe('setDisplayRank', () => {
+    test('ティアがマスター以上の場合、ランクなしで表示されること', () => {
+      player.tier = tierEnum.master
+      player.setDisplayRank()
+      expect(player.displayRank).toBe('MASTER')
+    })
+
+    test('ティアがマスター未満の場合、ランク付きで表示されること', () => {
+      player.tier = tierEnum.gold
+      player.rank = rankEnum.two
+      player.setDisplayRank()
+      expect(player.displayRank).toBe('GOLD II')
     })
   })
 

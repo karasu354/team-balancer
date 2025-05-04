@@ -16,7 +16,7 @@ export interface PlayersJson {
 export class TeamBalancer {
   private static readonly TEAM_SIZE = 5
   private static readonly TOTAL_PLAYERS = 50
-  private static readonly MAX_TEAM_ATTEMPTS = 100000
+  private static readonly MAX_TEAM_ATTEMPTS = 5000000
   private static readonly PLAYERS_VERSION = '0.0.1'
 
   id: string = ''
@@ -48,9 +48,6 @@ export class TeamBalancer {
     teamBalancer.players = playersJson.players.map((player) =>
       Player.fromJson(player)
     )
-    teamBalancer.players.forEach((player) => {
-      player.isParticipatingInGame = true
-    })
     return teamBalancer
   }
 
@@ -83,9 +80,9 @@ export class TeamBalancer {
   }
 
   addPlayersByLog(logs: string): void {
-    const parsedLogs = parseChatLogs(logs)
-    if (parsedLogs.length === 0) return
+    if (!logs.trim()) return
 
+    const parsedLogs = parseChatLogs(logs)
     parsedLogs.forEach((name) => {
       if (!this.players.some((player) => player.name === name)) {
         const newPlayer = new Player(name)

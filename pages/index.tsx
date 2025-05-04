@@ -1,13 +1,9 @@
 import React, { useEffect, useState } from 'react'
 
 import DividedTeamTable from '../components/DividedTeamTable'
-import Tabs from '../components/Navigation/Tabs'
 import PlayerInputForm from '../components/PlayerInputForm'
 import PlayersTable from '../components/PlayersTable'
 import ServerIdForm from '../components/ServerIdForm'
-import { Player } from '../utils/player'
-import { rankEnum, tierEnum } from '../utils/rank'
-import { roleEnum } from '../utils/role'
 import { TeamBalancer } from '../utils/teamBalancer'
 
 const Home = () => {
@@ -18,6 +14,7 @@ const Home = () => {
 
   useEffect(() => {
     console.log('count : ', updateCount)
+    console.log('teamBalancer : ', teamBalancer)
   }, [updateCount])
 
   const handleAppUpdate = () => {
