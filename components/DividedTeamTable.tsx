@@ -2,13 +2,19 @@ import React, { useState } from 'react'
 
 import { roleList } from '../utils/role'
 import { TeamBalancer } from '../utils/teamBalancer'
+import { roleList } from '../utils/role'
+import { TeamBalancer } from '../utils/teamBalancer'
 
 interface DividedTeamTableProps {
+  teamBalancer: TeamBalancer
+  onAppUpdate: () => void
   teamBalancer: TeamBalancer
   onAppUpdate: () => void
 }
 
 const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
+  teamBalancer,
+  onAppUpdate,
   teamBalancer,
   onAppUpdate,
 }) => {
@@ -24,6 +30,8 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
     setIsLoading(true)
     try {
       await new Promise((resolve) => setTimeout(resolve, 2000))
+      teamBalancer.divideTeams()
+      onAppUpdate()
       teamBalancer.divideTeams()
       onAppUpdate()
     } catch (error) {
@@ -42,11 +50,13 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
       .map(
         (lane, index) =>
           `${lane}: ${activeBalancedTeam.players[index].name || 'N/A'}`
+          `${lane}: ${activeBalancedTeam.players[index].name || 'N/A'}`
       )
       .join('\n')
     const redTeam = lanes
       .map(
         (lane, index) =>
+          `${lane}: ${activeBalancedTeam.players[index + 5].name || 'N/A'}`
           `${lane}: ${activeBalancedTeam.players[index + 5].name || 'N/A'}`
       )
       .join('\n')
@@ -66,7 +76,10 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
           onClick={handleDivideTeams}
           disabled={isLoading || isDivideButtonDisabled}
           className={`rounded px-4 py-2 ${
+          className={`rounded px-4 py-2 ${
             isLoading || isDivideButtonDisabled
+              ? 'cursor-not-allowed bg-gray-400 text-gray-700'
+              : 'bg-green-500 text-white transition hover:bg-green-600'
               ? 'cursor-not-allowed bg-gray-400 text-gray-700'
               : 'bg-green-500 text-white transition hover:bg-green-600'
           }`}
@@ -75,6 +88,11 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
         </button>
         <button
           onClick={handleCopyToClipboard}
+          disabled={activeBalancedTeam.players.length === 0}
+          className={`rounded px-4 py-2 ${
+            activeBalancedTeam.players.length === 0
+              ? 'cursor-not-allowed bg-gray-400 text-gray-700'
+              : 'bg-blue-500 text-white transition hover:bg-blue-600'
           disabled={activeBalancedTeam.players.length === 0}
           className={`rounded px-4 py-2 ${
             activeBalancedTeam.players.length === 0
@@ -112,11 +130,15 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
 
         <div className="flex-1 rounded-lg border border-gray-300 p-4">
           {activeBalancedTeam.players.length === 10 && (
+        <div className="flex-1 rounded-lg border border-gray-300 p-4">
+          {activeBalancedTeam.players.length === 10 && (
             <div>
+              <p>Rating Difference {activeBalancedTeam.evaluationScore}</p>
               <p>Rating Difference {activeBalancedTeam.evaluationScore}</p>
               <div className="flex">
                 <div className="w-1/3">
                   <div className="mb-4 font-bold">Lane</div>
+                  {roleList.map((lane) => (
                   {roleList.map((lane) => (
                     <div key={lane} className="mb-2 font-medium">
                       {lane}
@@ -128,7 +150,10 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
                     Blue Team
                   </div>
                   {roleList.map((lane, index) => (
+                  {roleList.map((lane, index) => (
                     <div key={lane} className="mb-2">
+                      {activeBalancedTeam.players[index].name || 'N/A'} (
+                      {activeBalancedTeam.players[index].rating})
                       {activeBalancedTeam.players[index].name || 'N/A'} (
                       {activeBalancedTeam.players[index].rating})
                     </div>
@@ -139,7 +164,10 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
                     Red Team
                   </div>
                   {roleList.map((lane, index) => (
+                  {roleList.map((lane, index) => (
                     <div key={lane} className="mb-2">
+                      {activeBalancedTeam.players[index + 5].name || 'N/A'} (
+                      {activeBalancedTeam.players[index + 5].rating})
                       {activeBalancedTeam.players[index + 5].name || 'N/A'} (
                       {activeBalancedTeam.players[index + 5].rating})
                     </div>
