@@ -29,7 +29,6 @@ const ServerIdForm: React.FC<ServerIdFormProps> = ({
         alert('チームデータが見つかりませんでした。')
       }
     } catch (error) {
-      console.error('Error fetching team data:', error)
       alert('チームデータの取得に失敗しました。')
     } finally {
       setTimeout(() => setIsLoading(false), 2000)
@@ -45,7 +44,6 @@ const ServerIdForm: React.FC<ServerIdFormProps> = ({
       await setTeamData(serverId, playersInfo)
       alert('チームデータを保存しました。')
     } catch (error) {
-      console.error('Error saving team data:', error)
       alert('チームデータの保存に失敗しました。')
     } finally {
       setTimeout(() => setIsLoading(false), 2000)
@@ -56,7 +54,7 @@ const ServerIdForm: React.FC<ServerIdFormProps> = ({
     <div className="mb-4 flex items-center space-x-4">
       <input
         type="text"
-        placeholder="サーバーIDを入力"
+        placeholder="Input ID"
         value={serverId}
         onChange={(e) => setServerId(e.target.value)}
         className="w-96 rounded border p-2"
@@ -71,7 +69,7 @@ const ServerIdForm: React.FC<ServerIdFormProps> = ({
             : 'bg-blue-500 text-white transition hover:bg-blue-600'
         }`}
       >
-        {isLoading ? '読み込み中...' : '呼び出し'}
+        {isLoading ? 'Loading...' : 'Import'}
       </button>
 
       <button
@@ -83,7 +81,7 @@ const ServerIdForm: React.FC<ServerIdFormProps> = ({
             : 'bg-green-500 text-white transition hover:bg-green-600'
         }`}
       >
-        {isLoading ? '保存中...' : '保存'}
+        {isLoading ? 'Saving...' : 'Save'}
       </button>
     </div>
   )

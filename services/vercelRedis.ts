@@ -8,7 +8,6 @@ export class VercelRedis {
 
   constructor() {
     this.client = createClient({ url: process.env.REDIS_URL })
-    this.client.on('error', (err) => console.error('Redis Client Error:', err))
   }
 
   public async connect() {
