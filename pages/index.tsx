@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 
 import DividedTeamTable from '../components/DividedTeamTable'
+import IdForm from '../components/IdForm'
 import PlayerInputForm from '../components/PlayerInputForm'
 import PlayersTable from '../components/PlayersTable'
-import ServerIdForm from '../components/ServerIdForm'
 import { TeamBalancer } from '../utils/teamBalancer'
 
 const Home = () => {
@@ -33,7 +33,7 @@ const Home = () => {
         onAppUpdate={handleAppUpdate}
       />
 
-      <ServerIdForm
+      <IdForm
         teamBalancer={teamBalancer}
         onUpdateTeamBalancer={handleUpdateTeamBalancer}
         onAppUpdate={handleAppUpdate}

@@ -19,6 +19,12 @@ export class TeamBalancer {
   private static readonly MAX_TEAM_ATTEMPTS = 5000000
   private static readonly PLAYERS_VERSION = '0.0.1'
 
+  // エラーメッセージの定数化
+  private static readonly ERROR_MESSAGES = {
+    MAX_PLAYERS: 'これ以上プレイヤーを追加できません。最大人数に達しました。',
+    INVALID_INDEX: '無効なインデックスです。',
+  }
+
   id: string = ''
   playersTotalCount: number = 0
   players: Player[] = []
@@ -62,9 +68,7 @@ export class TeamBalancer {
 
   addPlayer(player: Player): void {
     if (this.players.length >= TeamBalancer.TOTAL_PLAYERS) {
-      throw new Error(
-        'これ以上プレイヤーを追加できません。最大人数に達しました。'
-      )
+      throw new Error(TeamBalancer.ERROR_MESSAGES.MAX_PLAYERS)
     }
     if (this.players.some((p) => p.name === player.name)) {
       return
@@ -74,7 +78,7 @@ export class TeamBalancer {
 
   removePlayerByIndex(index: number): void {
     if (index < 0 || index >= this.players.length) {
-      throw new Error('無効なインデックスです。')
+      throw new Error(TeamBalancer.ERROR_MESSAGES.INVALID_INDEX)
     }
     this.players.splice(index, 1)
   }
