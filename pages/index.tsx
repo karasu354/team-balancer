@@ -13,8 +13,6 @@ const Home = () => {
   const [updateCount, setUpdate] = useState<number>(0)
 
   useEffect(() => {
-    console.log('count : ', updateCount)
-    console.log('teamBalancer : ', teamBalancer)
   }, [updateCount])
 
   const handleAppUpdate = () => {

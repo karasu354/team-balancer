@@ -29,7 +29,6 @@ const ServerIdForm: React.FC<ServerIdFormProps> = ({
         alert('チームデータが見つかりませんでした。')
       }
     } catch (error) {
-      console.error('Error fetching team data:', error)
       alert('チームデータの取得に失敗しました。')
     } finally {
       setTimeout(() => setIsLoading(false), 2000)
@@ -45,7 +44,6 @@ const ServerIdForm: React.FC<ServerIdFormProps> = ({
       await setTeamData(serverId, playersInfo)
       alert('チームデータを保存しました。')
     } catch (error) {
-      console.error('Error saving team data:', error)
       alert('チームデータの保存に失敗しました。')
     } finally {
       setTimeout(() => setIsLoading(false), 2000)
