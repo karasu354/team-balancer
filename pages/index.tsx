@@ -27,7 +27,7 @@ const Home = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-4 bg-gray-100 p-4">
+    <div className="flex flex-col items-center justify-center space-y-4 bg-gray-100 p-4 text-gray-900">
       <PlayerInputForm
         teamBalancer={teamBalancer}
         onAppUpdate={handleAppUpdate}
