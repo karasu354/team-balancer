@@ -10,9 +10,7 @@ const Home = () => {
   const [teamBalancer, setTeamBalancer] = useState<TeamBalancer>(
     new TeamBalancer()
   )
-  const [updateCount, setUpdate] = useState<number>(0)
-
-  useEffect(() => {}, [updateCount])
+  const [_, setUpdate] = useState<number>(0)
 
   const handleAppUpdate = () => {
     setUpdate((prev) => prev + 1)
