@@ -1,7 +1,7 @@
 export function parseChatLogs(logs: string): string[] {
   const result: string[] = []
-  const joinLogRegex = /^(.+?) #\d+がロビーに参加しました。$/
-  const leaveLogRegex = /^(.+?) #\d+がロビーから退出しました。$/
+  const joinLogRegex = /^(.+?) #(.+?)+がロビーに参加しました。$/
+  const leaveLogRegex = /^(.+?) #(.+?)+がロビーから退出しました。$/
 
   logs.split('\n').forEach((line) => {
     const trimmedLine = line.trim()
