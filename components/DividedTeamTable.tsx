@@ -71,7 +71,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
               : 'bg-green-500 text-white transition hover:bg-green-600'
           }`}
         >
-          {isLoading ? '分けています...' : 'チームを分ける'}
+          {isLoading ? 'Running...' : 'Divide Teams'}
         </button>
         <button
           onClick={handleCopyToClipboard}
@@ -82,7 +82,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
               : 'bg-blue-500 text-white transition hover:bg-blue-600'
           }`}
         >
-          結果をコピー
+          Copy to Clipboard
         </button>
       </div>
 
@@ -105,7 +105,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
                   : ''
               }`}
             >
-              {key}人ミスマッチ
+              {key}-person mismatch
             </button>
           ))}
         </div>
