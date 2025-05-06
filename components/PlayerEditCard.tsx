@@ -149,13 +149,13 @@ const PlayerEditCard: React.FC<PlayerEditCardProps> = ({
             onClick={handleSave}
             className="rounded bg-green-500 px-4 py-2 text-white transition hover:bg-green-600"
           >
-            保存
+            Save
           </button>
           <button
             onClick={onEditModeToggle}
             className="rounded bg-red-500 px-4 py-2 text-white transition hover:bg-gray-600"
           >
-            キャンセル
+            Cancel
           </button>
         </div>
       </div>

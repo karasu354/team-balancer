@@ -37,5 +37,8 @@
     "ts-jest": "^29.2.4",
     "tsx": "^4.19.3",
     "typescript": "^5"
+  },
+  "overrides": {
+    "glob": "^11.0.0"
   }
 }

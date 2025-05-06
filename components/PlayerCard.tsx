@@ -7,13 +7,18 @@ import { FaChevronDown, FaRegSquare } from 'react-icons/fa6'
 import { Player } from '../utils/player'
 import PlayerInfoDisplay from './Display/PlayerInfoDisplay'
 import PlayerNameDisplay from './Display/PlayerNameDisplay'
+import PlayerDeleteCard from './PlayerDeleteCard'
 import PlayerDetailCard from './PlayerDetailCard'
 import PlayerEditCard from './PlayerEditCard'
 
 interface PlayerCardProps {
   player: Player
   isExpanded: boolean
+  isEditMode: boolean
+  isDeleteMode: boolean
   onToggleExpand: (e: React.MouseEvent) => void
+  onEditModeToggle: (e: React.MouseEvent) => void
+  onDeleteModeToggle: (e: React.MouseEvent) => void
   onCurrentPlayerUpdate: (updatedPlayer: Player) => void
   onRemove: () => void
 }
@@ -21,17 +26,14 @@ interface PlayerCardProps {
 const PlayerCard: React.FC<PlayerCardProps> = ({
   player,
   isExpanded,
+  isEditMode,
+  isDeleteMode,
   onToggleExpand,
+  onEditModeToggle,
+  onDeleteModeToggle,
   onCurrentPlayerUpdate,
   onRemove,
 }) => {
-  const [isEditMode, setIsEditMode] = React.useState(false)
-
-  const handleEditModeToggle = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setIsEditMode((prev) => !prev)
-  }
-
   const handleParticipationToggle = () => {
     player.isParticipatingInGame = !player.isParticipatingInGame
     onCurrentPlayerUpdate(player)
@@ -80,22 +82,29 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
             : 'max-h-0 overflow-hidden opacity-0'
         }`}
       >
-        {!isEditMode && (
+        {!isDeleteMode && !isEditMode && (
           <PlayerDetailCard
             currentPlayer={player}
-            onEditModeToggle={handleEditModeToggle}
-            onPlayerUpdate={onCurrentPlayerUpdate}
-            onRemove={onRemove}
+            onEditModeToggle={onEditModeToggle}
+            onDeleteModeToggle={onDeleteModeToggle}
           />
         )}
 
-        {isEditMode && (
+        {!isDeleteMode && isEditMode && (
           <PlayerEditCard
             currentPlayer={player}
             setEditablePlayer={(updatedPlayer) =>
               onCurrentPlayerUpdate(updatedPlayer)
             }
-            onEditModeToggle={handleEditModeToggle}
+            onEditModeToggle={onEditModeToggle}
+          />
+        )}
+
+        {isDeleteMode && (
+          <PlayerDeleteCard
+            playerName={player.name}
+            onDelete={onRemove}
+            onDeleteModeToggle={onDeleteModeToggle}
           />
         )}
       </div>

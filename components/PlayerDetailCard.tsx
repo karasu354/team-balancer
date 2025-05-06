@@ -1,39 +1,28 @@
 import React from 'react'
 
-import {
-  FaChevronDown,
-  FaChevronUp,
-  FaLock,
-  FaStarOfLife,
-} from 'react-icons/fa6'
+import { FaLock, FaStarOfLife } from 'react-icons/fa6'
 
 import { Player } from '../utils/player'
 import { roleEnum, roleList } from '../utils/role'
 
 interface PlayerDetailCardProps {
   currentPlayer: Player
-  onPlayerUpdate: (updatedPlayer: Player) => void
   onEditModeToggle: (e: React.MouseEvent) => void
-  onRemove: () => void
+  onDeleteModeToggle: (e: React.MouseEvent) => void
 }
 
 const PlayerDetailCard: React.FC<PlayerDetailCardProps> = ({
   currentPlayer,
   onEditModeToggle,
-  onPlayerUpdate,
-  onRemove,
+  onDeleteModeToggle,
 }) => {
-  const handleRemove = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    onRemove()
-  }
   const lockIconColor = currentPlayer.isRoleFixed
     ? 'text-black'
     : 'text-gray-200'
   return (
     <div className="p-2">
       <div className="">
-        <p className="font-bold">プレイヤー情報</p>
+        <p className="font-bold">Player Info</p>
         <div className="grid grid-cols-2 gap-2">
           <p className="">Player Name:</p>
           <p className="overflow-hidden text-ellipsis">{currentPlayer.name}</p>
@@ -79,13 +68,13 @@ const PlayerDetailCard: React.FC<PlayerDetailCardProps> = ({
             onClick={onEditModeToggle}
             className="rounded bg-blue-500 px-4 py-2 text-white transition hover:bg-blue-600"
           >
-            編集
+            Edit
           </button>
           <button
-            onClick={handleRemove}
+            onClick={onDeleteModeToggle}
             className="rounded bg-red-500 px-4 py-2 text-white transition hover:bg-red-600"
           >
-            削除
+            Delete
           </button>
         </div>
       </div>
