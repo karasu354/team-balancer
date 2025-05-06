@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 
+import { Player } from '../utils/player'
 import { roleList } from '../utils/role'
 import { TeamBalancer } from '../utils/teamBalancer'
 
@@ -7,6 +8,20 @@ interface DividedTeamTableProps {
   teamBalancer: TeamBalancer
   onAppUpdate: () => void
 }
+
+const getButtonClass = (isDisabled: boolean, active: boolean = false) =>
+  `rounded px-4 py-2 ${
+    isDisabled
+      ? 'cursor-not-allowed bg-gray-400 text-gray-700'
+      : active
+        ? 'bg-blue-500 text-white'
+        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+  }`
+
+const generateTeamText = (team: Player[], lanes: string[]): string =>
+  lanes
+    .map((lane, index) => `${lane}: ${team[index]?.name || 'N/A'}`)
+    .join('\n')
 
 const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
   teamBalancer,
@@ -36,22 +51,16 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
   }
 
   const handleCopyToClipboard = () => {
-    const activeBalancedTeam = balancedTeamsByMissMatch[activeTab]
     const lanes = roleList
-    const blueTeam = lanes
-      .map(
-        (lane, index) =>
-          `${lane}: ${activeBalancedTeam.players[index].name || 'N/A'}`
-      )
-      .join('\n')
-    const redTeam = lanes
-      .map(
-        (lane, index) =>
-          `${lane}: ${activeBalancedTeam.players[index + 5].name || 'N/A'}`
-      )
-      .join('\n')
-
-    const result = `Blue Team\n${blueTeam}\n\nRed Team\n${redTeam}`
+    const blueTeamText = generateTeamText(
+      activeBalancedTeam.players.slice(0, 5),
+      lanes
+    )
+    const redTeamText = generateTeamText(
+      activeBalancedTeam.players.slice(5, 10),
+      lanes
+    )
+    const result = `Blue Team\n${blueTeamText}\n\nRed Team\n${redTeamText}`
     navigator.clipboard.writeText(result)
     alert('チーム結果をクリップボードにコピーしました！')
   }
@@ -95,15 +104,10 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
               disabled={
                 balancedTeamsByMissMatch[Number(key)].players.length === 0
               }
-              className={`rounded px-4 py-2 ${
+              className={getButtonClass(
+                balancedTeamsByMissMatch[Number(key)].players.length === 0,
                 Number(key) === activeTab
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-200 text-gray-700'
-              } ${
-                balancedTeamsByMissMatch[Number(key)].players.length === 0
-                  ? 'cursor-not-allowed opacity-50'
-                  : ''
-              }`}
+              )}
             >
               {key}-person mismatch
             </button>
