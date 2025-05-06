@@ -12,7 +12,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
   teamBalancer,
   onAppUpdate,
 }) => {
-  const balancedTeamsByMissMatch = teamBalancer.balancedTeamsByMissMatch
+  const balancedTeamsByMisMatch = teamBalancer.balancedTeamsByMisMatch
   const [activeTab, setActiveTab] = useState<number>(0)
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -36,7 +36,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
   }
 
   const handleCopyToClipboard = () => {
-    const activeBalancedTeam = balancedTeamsByMissMatch[activeTab]
+    const activeBalancedTeam = balancedTeamsByMisMatch[activeTab]
     const lanes = roleList
     const blueTeam = lanes
       .map(
@@ -56,7 +56,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
     alert('チーム結果をクリップボードにコピーしました！')
   }
 
-  const activeBalancedTeam = balancedTeamsByMissMatch[activeTab]
+  const activeBalancedTeam = balancedTeamsByMisMatch[activeTab]
   const isDivideButtonDisabled = teamBalancer.isDividable() === false
 
   return (
@@ -71,7 +71,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
               : 'bg-green-500 text-white transition hover:bg-green-600'
           }`}
         >
-          {isLoading ? '分けています...' : 'チームを分ける'}
+          {isLoading ? 'Dividing teams...' : 'Divide Teams'}
         </button>
         <button
           onClick={handleCopyToClipboard}
@@ -82,30 +82,30 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
               : 'bg-blue-500 text-white transition hover:bg-blue-600'
           }`}
         >
-          結果をコピー
+          Copy Member
         </button>
       </div>
 
       <div className="flex">
         <div className="mr-4 flex flex-col space-y-2">
-          {Object.keys(balancedTeamsByMissMatch).map((key) => (
+          {Object.keys(balancedTeamsByMisMatch).map((key) => (
             <button
               key={key}
               onClick={() => handleTabChange(Number(key))}
               disabled={
-                balancedTeamsByMissMatch[Number(key)].players.length === 0
+                balancedTeamsByMisMatch[Number(key)].players.length === 0
               }
               className={`rounded px-4 py-2 ${
                 Number(key) === activeTab
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-200 text-gray-700'
               } ${
-                balancedTeamsByMissMatch[Number(key)].players.length === 0
+                balancedTeamsByMisMatch[Number(key)].players.length === 0
                   ? 'cursor-not-allowed opacity-50'
                   : ''
               }`}
             >
-              {key}人ミスマッチ
+              Mismatch Player : {key}
             </button>
           ))}
         </div>

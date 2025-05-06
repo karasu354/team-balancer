@@ -18,10 +18,10 @@ describe('TeamBalancer クラス', () => {
     })
 
     test('初期化時にチーム分割データが正しく初期化されていること', () => {
-      expect(Object.keys(teamBalancer.balancedTeamsByMissMatch).length).toBe(11)
-      for (const key in teamBalancer.balancedTeamsByMissMatch) {
-        expect(teamBalancer.balancedTeamsByMissMatch[key].players).toEqual([])
-        expect(teamBalancer.balancedTeamsByMissMatch[key].evaluationScore).toBe(
+      expect(Object.keys(teamBalancer.balancedTeamsByMisMatch).length).toBe(11)
+      for (const key in teamBalancer.balancedTeamsByMisMatch) {
+        expect(teamBalancer.balancedTeamsByMisMatch[key].players).toEqual([])
+        expect(teamBalancer.balancedTeamsByMisMatch[key].evaluationScore).toBe(
           Infinity
         )
       }
@@ -221,6 +221,66 @@ describe('TeamBalancer クラス', () => {
       expect(() => teamBalancer.removePlayerByIndex(10)).toThrow(
         '無効なインデックスです。'
       )
+    })
+  })
+
+  describe('addPlayersByLog', () => {
+    test('ログからプレイヤーを正しく追加できること', () => {
+      const logs = `
+        Alice #1234がロビーに参加しました。
+        Bob #5678がロビーに参加しました。
+      `
+      teamBalancer.addPlayersByLog(logs)
+
+      expect(teamBalancer.players.length).toBe(2)
+      expect(teamBalancer.players[0].name).toBe('Alice')
+      expect(teamBalancer.players[1].name).toBe('Bob')
+    })
+
+    test('ログに重複するプレイヤーが含まれている場合、重複を除外して追加すること', () => {
+      const logs = `
+        Alice #1234がロビーに参加しました。
+        Alice #1234がロビーに参加しました。
+        Bob #5678がロビーに参加しました。
+      `
+      teamBalancer.addPlayersByLog(logs)
+
+      expect(teamBalancer.players.length).toBe(2)
+      expect(teamBalancer.players[0].name).toBe('Alice')
+      expect(teamBalancer.players[1].name).toBe('Bob')
+    })
+
+    test('空のログを渡した場合、プレイヤーが追加されないこと', () => {
+      const logs = ''
+      teamBalancer.addPlayersByLog(logs)
+
+      expect(teamBalancer.players.length).toBe(0)
+    })
+
+    test('無関係なログが無視されること', () => {
+      const logs = `
+        Alice #1234がロビーに参加しました。
+        無関係なログメッセージ
+        Bob #5678がロビーに参加しました。
+        Alice: サーバーが再起動されました。
+      `
+      teamBalancer.addPlayersByLog(logs)
+
+      expect(teamBalancer.players.length).toBe(2)
+      expect(teamBalancer.players[0].name).toBe('Alice')
+      expect(teamBalancer.players[1].name).toBe('Bob')
+    })
+
+    test('ロビーに参加した後、全員が退出した場合、プレイヤーが追加されないこと', () => {
+      const logs = `
+        Alice #1234がロビーに参加しました。
+        Bob #5678がロビーに参加しました。
+        Alice #1234がロビーから退出しました。
+        Bob #5678がロビーから退出しました。
+      `
+      teamBalancer.addPlayersByLog(logs)
+
+      expect(teamBalancer.players.length).toBe(0)
     })
   })
 })

@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { TeamBalancer } from '../../utils/teamBalancer'
+import Textarea from '../Input/Textarea'
 
 interface ChatLogInputFormProps {
   teamBalancer: TeamBalancer
@@ -23,17 +24,15 @@ const ChatLogInputForm: React.FC<ChatLogInputFormProps> = ({
 
   return (
     <div className="mb-4 flex w-full max-w-4xl flex-col space-y-2">
-      <textarea
+      <Textarea
         value={logInput}
-        onChange={(e) => setLogInput(e.target.value)}
+        setValue={setLogInput}
         placeholder={`Player1 #JP1がロビーに参加しました。
 Player2 #meowがロビーに参加しました。
 Player1 #JP1がロビーから退出しました。
 Player3 #catがロビーに参加しました。
 Player4 #dogがロビーに参加しました。
 Player2 #meowがロビーから退出しました。`}
-        className="w-full resize-none rounded border border-gray-300 p-2"
-        rows={4}
       />
       <button
         onClick={handleLogSubmit}

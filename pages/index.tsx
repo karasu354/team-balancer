@@ -10,7 +10,7 @@ const Home = () => {
   const [teamBalancer, setTeamBalancer] = useState<TeamBalancer>(
     new TeamBalancer()
   )
-  const [updateCount, setUpdate] = useState<number>(0)
+  const [_, setUpdate] = useState<number>(0)
 
   const handleAppUpdate = () => {
     setUpdate((prev) => prev + 1)
@@ -28,7 +28,6 @@ const Home = () => {
 
   return (
     <div className="flex flex-col items-center justify-center space-y-4 bg-gray-100 p-4">
-      <h1 className="text-2xl font-bold">プレイヤー管理</h1>
       <PlayerInputForm
         teamBalancer={teamBalancer}
         onAppUpdate={handleAppUpdate}
