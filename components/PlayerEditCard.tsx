@@ -128,7 +128,6 @@ const PlayerEditCard: React.FC<PlayerEditCardProps> = ({
           }))}
         />
 
-        {/* Role Fixed */}
         <div className="flex items-center space-x-2">
           <input
             type="checkbox"
@@ -143,7 +142,6 @@ const PlayerEditCard: React.FC<PlayerEditCardProps> = ({
           </label>
         </div>
 
-        {/* Buttons */}
         <div className="flex justify-end space-x-2">
           <button
             onClick={handleSave}
