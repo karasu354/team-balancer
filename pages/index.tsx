@@ -12,8 +12,7 @@ const Home = () => {
   )
   const [updateCount, setUpdate] = useState<number>(0)
 
-  useEffect(() => {
-  }, [updateCount])
+  useEffect(() => {}, [updateCount])
 
   const handleAppUpdate = () => {
     setUpdate((prev) => prev + 1)
