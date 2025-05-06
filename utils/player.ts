@@ -1,88 +1,134 @@
-import { calcurateRating, rankEnum, tierEnum } from './rank'
+import { calculateRating, rankEnum, tierEnum } from './rank'
+import { roleEnum } from './role'
+import { generateInternalId } from './utils'
 
 export interface PlayerJson {
+  id: string
   name: string
-  tagLine: string
-  desiredRoles: boolean[]
-  isRoleFixed: boolean
-  tier: string
-  rank: string
-  displayRank: string
-  rating: number
-}
-export class Player {
-  readonly name: string
-  readonly tagLine: string
-  isParticipatingInGame: boolean = false
-  desiredRoles: boolean[] = Array(5).fill(true)
-  isRoleFixed: boolean = false
   tier: tierEnum
   rank: rankEnum
+  displayRank: string
+  rating: number
+  mainRole: roleEnum
+  subRole: roleEnum
+  desiredRoles: roleEnum[]
+  isRoleFixed: boolean
+}
+
+export class Player {
+  private static readonly ROLE_RATING_MULTIPLIER_FOR_SUB = 0.9
+  private static readonly ROLE_RATING_MULTIPLIER_FOR_NOT_DESIRED = 0.8
+
+  id: string = ''
+  name: string = ''
+  isParticipatingInGame: boolean = false
+
+  _tier: tierEnum = tierEnum.gold
+  _rank: rankEnum = rankEnum.two
   displayRank: string = ''
   rating: number = 0
 
+  mainRole: roleEnum
+  subRole: roleEnum
+  desiredRoles: roleEnum[] = Object.values(roleEnum).filter(
+    (role) => role !== roleEnum.all
+  )
+  isRoleFixed: boolean = false
+
   constructor(
-    name: string,
-    tagLine: string,
+    name: string = '',
     tier: tierEnum = tierEnum.gold,
-    rank: rankEnum = rankEnum.two
+    rank: rankEnum = rankEnum.two,
+    mainRole: roleEnum = roleEnum.all,
+    subRole: roleEnum = roleEnum.all
   ) {
+    this.id = generateInternalId()
     this.name = name
-    this.tagLine = tagLine
     this.tier = tier
     this.rank = rank
-    this.setRank(this.tier, this.rank)
+    this.mainRole = mainRole
+    this.subRole = subRole
   }
 
-  /**
-   * 希望ロールの更新
-   * @param index ロール番号 (0:TOP, 1:JUNGLE, 2:MID, 3:ADC, 4:SUPPORT)
-   */
-  setDesiredRoleByIndex(index: number): void {
-    if (index < 0 || index >= this.desiredRoles.length) {
-      throw new Error('Invalid role index.')
+  static fromJson(playerJson: PlayerJson): Player {
+    const player = new Player(
+      playerJson.name,
+      playerJson.tier,
+      playerJson.rank,
+      playerJson.mainRole,
+      playerJson.subRole
+    )
+    player.id = playerJson.id
+    player.displayRank = playerJson.displayRank
+    player.rating = playerJson.rating
+    player.desiredRoles = playerJson.desiredRoles
+    player.isRoleFixed = playerJson.isRoleFixed
+    return player
+  }
+
+  get tier(): tierEnum {
+    return this._tier
+  }
+  set tier(value: tierEnum) {
+    this._tier = value
+    this.setCalculatedRating()
+    this.setDisplayRank()
+  }
+  get rank(): rankEnum {
+    return this._rank
+  }
+  set rank(value: rankEnum) {
+    this._rank = value
+    this.setCalculatedRating()
+    this.setDisplayRank()
+  }
+
+  getRatingByRole(role: roleEnum): number {
+    if (this.mainRole === roleEnum.all || this.mainRole === role) {
+      return this.rating
     }
-    this.desiredRoles[index] = !this.desiredRoles[index]
+    if (this.subRole === roleEnum.all || this.subRole === role) {
+      return this.rating * Player.ROLE_RATING_MULTIPLIER_FOR_SUB
+    }
+    return this.rating * Player.ROLE_RATING_MULTIPLIER_FOR_NOT_DESIRED
   }
 
-  /**
-   * ランクの設定、レーティング計算、ランク表示の更新
-   * @param tier ティア (例: tierEnum.gold)
-   * @param rank ランク (例: rankEnum.two)
-   */
-  setRank(tier: tierEnum, rank: rankEnum): void {
+  setCalculatedRating(): void {
+    this.rating = calculateRating(this.tier, this.rank)
+  }
+
+  setDisplayRank(): void {
     if (
-      !Object.values(tierEnum).includes(tier) ||
-      !Object.values(rankEnum).includes(rank)
+      [tierEnum.master, tierEnum.grandmaster, tierEnum.challenger].includes(
+        this.tier
+      )
     ) {
-      throw new Error('無効なティアまたはランクです')
+      this.displayRank = this.tier.toUpperCase()
+    } else {
+      this.displayRank = `${this.tier.toUpperCase()} ${this.rank}`
     }
-    this.tier = tier
-    this.rank = rank
-    this.rating = calcurateRating(tier, rank)
-
-    this.displayRank =
-      this.tier === tierEnum.master ||
-      this.tier === tierEnum.grandmaster ||
-      this.tier === tierEnum.challenger
-        ? this.tier
-        : `${this.tier} ${this.rank}`
   }
 
-  /**
-   * プレイヤー情報を取得
-   * @returns プレイヤー情報のJSON形式
-   */
+  setDesiredRoleByRole(role: roleEnum): void {
+    if (this.desiredRoles.includes(role)) {
+      this.desiredRoles = this.desiredRoles.filter((r) => r !== role)
+    } else {
+      this.desiredRoles.push(role)
+    }
+  }
+
   get playerInfo(): PlayerJson {
     return {
+      id: this.id,
       name: this.name,
-      tagLine: this.tagLine,
-      desiredRoles: this.desiredRoles,
-      isRoleFixed: this.isRoleFixed,
       tier: this.tier,
       rank: this.rank,
       displayRank: this.displayRank,
       rating: this.rating,
+      mainRole: this.mainRole,
+      subRole: this.subRole,
+      desiredRoles: this.desiredRoles,
+      isRoleFixed: this.isRoleFixed,
     }
   }
 }

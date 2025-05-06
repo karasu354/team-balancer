@@ -1,40 +1,54 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import DividedTeamTable from '../components/DividedTeamTable'
+import PlayerInputForm from '../components/PlayerInputForm'
 import PlayersTable from '../components/PlayersTable'
-import { TeamDivider } from '../utils/teamDivider'
+import ServerIdForm from '../components/ServerIdForm'
+import { TeamBalancer } from '../utils/teamBalancer'
 
 const Home = () => {
-  const [teamDivider] = useState(new TeamDivider()) // TeamDividerのインスタンスを作成
-  const [, setUpdate] = useState(0) // 再レンダリング用
-  const [, setApiKey] = useState('') // APIキーの状態管理
+  const [teamBalancer, setTeamBalancer] = useState<TeamBalancer>(
+    new TeamBalancer()
+  )
+  const [updateCount, setUpdate] = useState<number>(0)
 
-  const handleApiKeySubmit = (key: string) => {
-    setApiKey(key) // APIキーを保存
+  const handleAppUpdate = () => {
+    setUpdate((prev) => prev + 1)
   }
 
-  const handlePlayersUpdate = () => {
-    setUpdate((prev) => prev + 1) // 状態を更新して再レンダリング
+  const handleRemovePlayer = (index: number) => {
+    teamBalancer.removePlayerByIndex(index)
+    handleAppUpdate()
   }
 
-  const handleTeamsUpdate = () => {
-    setUpdate((prev) => prev + 1) // チーム分け後の再レンダリング
+  const handleUpdateTeamBalancer = (newTeamBalancer: TeamBalancer) => {
+    setTeamBalancer(newTeamBalancer)
+    handleAppUpdate()
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4 space-y-4">
-      {/* APIキー入力フォーム
-      <ApiKeyForm onApiKeySubmit={handleApiKeySubmit} />
-      */}
-
+    <div className="flex flex-col items-center justify-center space-y-4 bg-gray-100 p-4">
       <h1 className="text-2xl font-bold">プレイヤー管理</h1>
-      <PlayersTable
-        teamDivider={teamDivider}
-        onPlayersUpdate={handlePlayersUpdate}
+      <PlayerInputForm
+        teamBalancer={teamBalancer}
+        onAppUpdate={handleAppUpdate}
       />
+
+      <ServerIdForm
+        teamBalancer={teamBalancer}
+        onUpdateTeamBalancer={handleUpdateTeamBalancer}
+        onAppUpdate={handleAppUpdate}
+      />
+
+      <PlayersTable
+        teamBalancer={teamBalancer}
+        onRemovePlayerByIndex={handleRemovePlayer}
+        onAppUpdate={handleAppUpdate}
+      />
+
       <DividedTeamTable
-        teamDivider={teamDivider}
-        onTeamsUpdate={handleTeamsUpdate}
+        teamBalancer={teamBalancer}
+        onAppUpdate={handleAppUpdate}
       />
     </div>
   )

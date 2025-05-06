@@ -1,0 +1,162 @@
+openapi: 3.0.3
+info:
+  title: Team Balancer API
+  description: API for managing team player data.
+  version: 0.0.1
+servers:
+  - url: http://localhost:3000/api
+    description: Local development server
+paths:
+  /teams/{id}:
+    get:
+      summary: Get team player data
+      description: Retrieve the player data for a specific team by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the team.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved team data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayersJson'
+              example:
+                version: '1.0'
+                players:
+                  - name: 'Alice'
+                    desiredRoles: [true, false, true, false, true]
+                    isRoleFixed: false
+                    tier: 'GOLD'
+                    rank: 'II'
+                    displayRank: 'GOLD II'
+                    rating: 1400
+        '400':
+          description: Invalid or missing team ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Invalid or missing team ID'
+        '404':
+          description: Team not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Team not found'
+    put:
+      summary: Update team player data
+      description: Save or update the player data for a specific team by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the team.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlayersJson'
+            example:
+              version: '1.0'
+              players:
+                - name: 'Bob'
+                  desiredRoles: [true, true, false, false, true]
+                  isRoleFixed: true
+                  tier: 'PLATINUM'
+                  rank: 'I'
+                  displayRank: 'PLATINUM I'
+                  rating: 1900
+      responses:
+        '200':
+          description: Successfully updated team data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+              example:
+                message: 'Team data saved successfully'
+        '400':
+          description: Invalid request body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Invalid request body'
+        '405':
+          description: Method not allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Method PUT Not Allowed'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Internal Server Error'
+components:
+  schemas:
+    PlayersJson:
+      type: object
+      properties:
+        version:
+          type: string
+          example: '1.0'
+        players:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlayerJson'
+    PlayerJson:
+      type: object
+      properties:
+        name:
+          type: string
+          example: 'Alice'
+        desiredRoles:
+          type: array
+          items:
+            type: boolean
+          example: [true, false, true, false, true]
+        isRoleFixed:
+          type: boolean
+          example: false
+        tier:
+          type: string
+          example: 'GOLD'
+        rank:
+          type: string
+          example: 'II'
+        displayRank:
+          type: string
+          example: 'GOLD II'
+        rating:
+          type: number
+          example: 1400
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: 'Error message'
+    Success:
+      type: object
+      properties:
+        message:
+          type: string
+          example: 'Success message'

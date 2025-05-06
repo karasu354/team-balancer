@@ -38,13 +38,7 @@ const rankScores: Record<rankEnum, number> = {
   [rankEnum.four]: 0,
 }
 
-/**
- * ティアとランクからレーティングを計算する
- * @param tier ティア (例: tierEnum.gold)
- * @param rank ランク (例: rankEnum.two)
- * @returns レーティング (数値)
- */
-export const calcurateRating = (tier: tierEnum, rank: rankEnum): number => {
+export const calculateRating = (tier: tierEnum, rank: rankEnum): number => {
   if (
     !Object.values(tierEnum).includes(tier) ||
     !Object.values(rankEnum).includes(rank)
@@ -52,7 +46,6 @@ export const calcurateRating = (tier: tierEnum, rank: rankEnum): number => {
     throw new Error('無効なティアまたはランクです')
   }
 
-  // 上位ティアはランクを考慮しない
   if (
     tier === tierEnum.master ||
     tier === tierEnum.grandmaster ||
@@ -63,36 +56,26 @@ export const calcurateRating = (tier: tierEnum, rank: rankEnum): number => {
   return tierScores[tier] + rankScores[rank]
 }
 
-/**
- * 文字列が tierEnum のいずれかに該当するかを判定する
- * @param value 判定する文字列
- * @returns 該当する場合は true、それ以外は false
- */
+export const isNoRankTier = (tier: tierEnum): boolean => {
+  return (
+    tier === tierEnum.master ||
+    tier === tierEnum.grandmaster ||
+    tier === tierEnum.challenger
+  )
+}
+
 export const isValidTier = (value: string): boolean => {
   return Object.values(tierEnum).includes(value as tierEnum)
 }
 
-/**
- * 文字列が rankEnum のいずれかに該当するかを判定する
- * @param value 判定する文字列
- * @returns 該当する場合は true、それ以外は false
- */
 export const isValidRank = (value: string): boolean => {
   return Object.values(rankEnum).includes(value as rankEnum)
 }
 
-/**
- * ティアのリストを取得する
- * @returns ティアのリスト
- */
 export const getTierList = (): string[] => {
   return Object.values(tierEnum)
 }
 
-/**
- * ランクのリストを取得する
- * @returns ランクのリスト
- */
 export const getRankList = (): string[] => {
   return Object.values(rankEnum)
 }

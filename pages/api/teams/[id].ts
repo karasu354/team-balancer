@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 
 import { VercelRedis } from '../../../services/vercelRedis'
-import { PlayersJson } from '../../../utils/teamDivider'
+import { PlayersJson } from '../../../utils/teamBalancer'
 
 export default async function handler(
   req: NextApiRequest,
@@ -17,7 +17,6 @@ export default async function handler(
 
   try {
     if (req.method === 'GET') {
-      // GET: チームデータを取得
       await redis.connect()
       const teamData = await redis.getTeamPlayers(id)
       await redis.disconnect()
@@ -28,7 +27,6 @@ export default async function handler(
 
       return res.status(200).json(teamData)
     } else if (req.method === 'PUT') {
-      // PUT: チームデータを登録または更新
       const body: PlayersJson = req.body
 
       if (!body || !Array.isArray(body.players)) {
@@ -45,7 +43,6 @@ export default async function handler(
     res.setHeader('Allow', ['GET', 'PUT'])
     return res.status(405).json({ error: `Method ${req.method} Not Allowed` })
   } catch (error) {
-    console.error('Error handling request:', error)
     return res.status(500).json({ error: 'Internal Server Error' })
   }
 }

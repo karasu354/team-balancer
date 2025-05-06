@@ -1,96 +1,113 @@
 import React from 'react'
 
+import { IconContext } from 'react-icons'
+import { FaCheckSquare } from 'react-icons/fa'
+import { FaChevronDown, FaRegSquare } from 'react-icons/fa6'
+
 import { Player } from '../utils/player'
+import PlayerInfoDisplay from './Display/PlayerInfoDisplay'
+import PlayerNameDisplay from './Display/PlayerNameDisplay'
+import PlayerDeleteCard from './PlayerDeleteCard'
+import PlayerDetailCard from './PlayerDetailCard'
+import PlayerEditCard from './PlayerEditCard'
 
 interface PlayerCardProps {
-  player: Player | null
-  onToggleRole?: (roleIndex: number) => void
-  onRemove?: () => void
-  onEdit?: () => void
-  onToggleParticipation?: () => void // 参加フラグの切り替え
-  onToggleRoleFixed?: () => void // isRoleFixedフラグの切り替え
+  player: Player
+  isExpanded: boolean
+  isEditMode: boolean
+  isDeleteMode: boolean
+  onToggleExpand: (e: React.MouseEvent) => void
+  onEditModeToggle: (e: React.MouseEvent) => void
+  onDeleteModeToggle: (e: React.MouseEvent) => void
+  onCurrentPlayerUpdate: (updatedPlayer: Player) => void
+  onRemove: () => void
 }
 
 const PlayerCard: React.FC<PlayerCardProps> = ({
   player,
-  onToggleRole,
+  isExpanded,
+  isEditMode,
+  isDeleteMode,
+  onToggleExpand,
+  onEditModeToggle,
+  onDeleteModeToggle,
+  onCurrentPlayerUpdate,
   onRemove,
-  onEdit,
-  onToggleParticipation,
-  onToggleRoleFixed,
 }) => {
+  const handleParticipationToggle = () => {
+    player.isParticipatingInGame = !player.isParticipatingInGame
+    onCurrentPlayerUpdate(player)
+  }
+
   return (
-    <div
-      className={`p-2 border-b border-gray-300 flex items-center justify-between h-20 ${
-        player?.isParticipatingInGame ? 'bg-green-100' : 'bg-gray-100'
-      }`}
-    >
-      {player ? (
-        <>
-          {/* 参加フラグ */}
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={player.isParticipatingInGame}
-              onChange={onToggleParticipation}
-              className="w-5 h-5 cursor-pointer"
-            />
-          </div>
-
-          {/* プレイヤー情報 */}
-          <div className="flex-1">
-            <div className="flex items-center space-x-2">
-              <button
-                className="text-blue-500 hover:text-blue-700 transition text-sm"
-                onClick={onEdit}
-              >
-                ✎
-              </button>
-              <p className="font-bold whitespace-nowrap">{player.name}</p>
-            </div>
-            <p className="text-sm text-gray-500">
-              {player.displayRank} ({player.rating})
-            </p>
-          </div>
-
-          {/* ロール選択 */}
-          <div className="flex space-x-2">
-            {['TOP', 'JG', 'MID', 'ADC', 'SUP'].map((role, roleIndex) => (
-              <label key={role} className="flex items-center space-x-1">
-                <input
-                  type="checkbox"
-                  checked={player.desiredRoles[roleIndex]}
-                  onChange={() => onToggleRole?.(roleIndex)}
-                />
-                <span className="text-xs">{role}</span>
-              </label>
-            ))}
-          </div>
-
-          {/* isRoleFixedフラグ */}
-          <div className="flex items-center space-x-2">
-            <label className="flex items-center space-x-1">
-              <input
-                type="checkbox"
-                checked={player.isRoleFixed}
-                onChange={onToggleRoleFixed}
-                className="w-5 h-5 cursor-pointer"
-              />
-              <span className="text-xs">固定</span>
-            </label>
-          </div>
-
-          {/* 削除ボタン */}
-          <button
-            className="w-8 h-8 flex items-center justify-center text-red-500 rounded-full hover:bg-red-500 hover:text-white hover:border-transparent transition"
-            onClick={onRemove}
+    <div className="h-min w-md overflow-hidden rounded border border-gray-400 bg-white">
+      <div className="flex">
+        <div
+          className="flex w-10 cursor-pointer items-center justify-center border-r border-gray-300 bg-gray-200 hover:brightness-80"
+          onClick={handleParticipationToggle}
+          title="Toggle Participation"
+        >
+          <IconContext.Provider
+            value={{ size: '1.5rem', className: 'text-gray-600' }}
           >
-            x
-          </button>
-        </>
-      ) : (
-        <div className="flex-1 text-center text-gray-400">No Player</div>
-      )}
+            {player.isParticipatingInGame ? <FaCheckSquare /> : <FaRegSquare />}
+          </IconContext.Provider>
+        </div>
+
+        <div className="flex flex-1 flex-col overflow-hidden p-2 select-none">
+          <PlayerNameDisplay player={player} />
+          <PlayerInfoDisplay player={player} />
+        </div>
+
+        <div
+          className="flex min-w-5 flex-shrink-0 cursor-pointer items-center justify-center bg-gray-400 hover:brightness-80"
+          onClick={onToggleExpand}
+        >
+          <IconContext.Provider value={{ size: '1rem' }}>
+            <button
+              className={`text-gray-300 transition-transform duration-200 ${
+                isExpanded ? 'rotate-180' : 'rotate-0'
+              }`}
+            >
+              <FaChevronDown />
+            </button>
+          </IconContext.Provider>
+        </div>
+      </div>
+
+      <div
+        className={`transition-all duration-200 select-none ${
+          isExpanded
+            ? 'max-h-screen opacity-100'
+            : 'max-h-0 overflow-hidden opacity-0'
+        }`}
+      >
+        {!isDeleteMode && !isEditMode && (
+          <PlayerDetailCard
+            currentPlayer={player}
+            onEditModeToggle={onEditModeToggle}
+            onDeleteModeToggle={onDeleteModeToggle}
+          />
+        )}
+
+        {!isDeleteMode && isEditMode && (
+          <PlayerEditCard
+            currentPlayer={player}
+            setEditablePlayer={(updatedPlayer) =>
+              onCurrentPlayerUpdate(updatedPlayer)
+            }
+            onEditModeToggle={onEditModeToggle}
+          />
+        )}
+
+        {isDeleteMode && (
+          <PlayerDeleteCard
+            playerName={player.name}
+            onDelete={onRemove}
+            onDeleteModeToggle={onDeleteModeToggle}
+          />
+        )}
+      </div>
     </div>
   )
 }

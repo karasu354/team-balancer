@@ -1,46 +1,46 @@
 import {
-  calcurateRating,
+  calculateRating,
   isValidRank,
   isValidTier,
   rankEnum,
   tierEnum,
 } from '../../utils/rank'
 
-describe('calcurateRating', () => {
+describe('calculateRating', () => {
   test('ランクが GOLD III のとき、計算が正しいこと', () => {
     const tier = tierEnum.gold
     const rank = rankEnum.three
-    expect(calcurateRating(tier, rank)).toBe(1300)
+    expect(calculateRating(tier, rank)).toBe(1300)
   })
 
   test('ランクが CHALLENGER のとき、計算が正しいこと (ランクを無視)', () => {
     const tier = tierEnum.challenger
-    const rank = rankEnum.three // ランクは無視される
-    expect(calcurateRating(tier, rank)).toBe(3600)
+    const rank = rankEnum.three
+    expect(calculateRating(tier, rank)).toBe(3600)
   })
 
   test('ランクが MASTER のとき、計算が正しいこと (ランクを無視)', () => {
     const tier = tierEnum.master
-    const rank = rankEnum.one // ランクは無視される
-    expect(calcurateRating(tier, rank)).toBe(2800)
+    const rank = rankEnum.one
+    expect(calculateRating(tier, rank)).toBe(2800)
   })
 
   test('ランクが PLATINUM I のとき、計算が正しいこと', () => {
     const tier = tierEnum.platinum
     const rank = rankEnum.one
-    expect(calcurateRating(tier, rank)).toBe(1900)
+    expect(calculateRating(tier, rank)).toBe(1900)
   })
 
   test('ランクが EMERALD IV のとき、計算が正しいこと', () => {
     const tier = tierEnum.emerald
     const rank = rankEnum.four
-    expect(calcurateRating(tier, rank)).toBe(2000)
+    expect(calculateRating(tier, rank)).toBe(2000)
   })
 
   test('無効なティアを渡した場合、エラーをスローする', () => {
     const tier = 'invalidTier' as tierEnum
     const rank = rankEnum.one
-    expect(() => calcurateRating(tier, rank)).toThrow(
+    expect(() => calculateRating(tier, rank)).toThrow(
       '無効なティアまたはランクです'
     )
   })
@@ -48,7 +48,7 @@ describe('calcurateRating', () => {
   test('無効なランクを渡した場合、エラーをスローする', () => {
     const tier = tierEnum.gold
     const rank = 'invalidRank' as rankEnum
-    expect(() => calcurateRating(tier, rank)).toThrow(
+    expect(() => calculateRating(tier, rank)).toThrow(
       '無効なティアまたはランクです'
     )
   })
