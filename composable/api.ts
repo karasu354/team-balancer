@@ -8,7 +8,6 @@ export async function getTeamData(teamId: string): Promise<PlayersJson | null> {
   })
 
   if (!response.ok) {
-    console.error(`Failed to fetch team data: ${response.statusText}`)
     return null
   }
 
