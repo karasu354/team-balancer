@@ -25,8 +25,6 @@ const MidRoleIcon: React.FC<{
         opacity={0.2}
       />
       <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
         d="M271.382 43.2903L48.7417 265.93H0.702637V222.785L223.488 0H271.382V43.2903Z"
         fill="currentColor"
       />

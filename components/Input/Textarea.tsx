@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 
 interface Props {
   value: string
@@ -14,7 +14,7 @@ const Textarea: React.FC<Props> = ({ value, setValue, placeholder }) => {
         value={value}
         placeholder={placeholder || ''}
         onChange={(e) => setValue(e.target.value)}
-        className="h-32 w-80 resize-none rounded-md border-2 border-gray-400 bg-white p-2 text-gray-900 outline-none focus:border-blue-500"
+        className="h-50 w-full resize-none rounded-md border-2 border-gray-400 bg-white p-2 text-gray-900 outline-none focus:border-blue-500"
         required
       />
     </div>

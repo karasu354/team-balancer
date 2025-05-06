@@ -22,19 +22,19 @@ export class TeamBalancer {
   id: string = ''
   playersTotalCount: number = 0
   players: Player[] = []
-  balancedTeamsByMissMatch: Record<
+  balancedTeamsByMisMatch: Record<
     number,
     { players: Player[]; evaluationScore: number }
   > = {}
 
   constructor() {
     this.id = generateInternalId()
-    this._resetBalancedTeamsByMissMatch()
+    this._resetBalancedTeamsByMisMatch()
   }
 
-  private _resetBalancedTeamsByMissMatch(): void {
+  private _resetBalancedTeamsByMisMatch(): void {
     for (let i = 0; i <= TeamBalancer.TEAM_SIZE * 2; i++) {
-      this.balancedTeamsByMissMatch[i] = {
+      this.balancedTeamsByMisMatch[i] = {
         players: [],
         evaluationScore: Infinity,
       }
@@ -106,7 +106,7 @@ export class TeamBalancer {
     const participatePlayers = this.players.filter(
       (p) => p.isParticipatingInGame
     )
-    this._resetBalancedTeamsByMissMatch()
+    this._resetBalancedTeamsByMisMatch()
     const shufflePatterns = generateRandomPermutations(
       Array.from({ length: TeamBalancer.TEAM_SIZE * 2 }, (_, i) => i),
       TeamBalancer.MAX_TEAM_ATTEMPTS
@@ -120,9 +120,9 @@ export class TeamBalancer {
       if (mismatchCount === -1) continue
       if (
         evaluationScore <
-        this.balancedTeamsByMissMatch[mismatchCount].evaluationScore
+        this.balancedTeamsByMisMatch[mismatchCount].evaluationScore
       ) {
-        this.balancedTeamsByMissMatch[mismatchCount] = {
+        this.balancedTeamsByMisMatch[mismatchCount] = {
           players,
           evaluationScore,
         }
