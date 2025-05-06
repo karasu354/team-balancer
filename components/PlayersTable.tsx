@@ -17,9 +17,13 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
 }) => {
   const players = teamBalancer.players
   const [isExpandedList, setIsExpandedList] = useState<boolean[]>([])
+  const [isEditModeList, setIsEditModeList] = useState<boolean[]>([])
+  const [isDeleteModeList, setIsDeleteModeList] = useState<boolean[]>([])
 
   useEffect(() => {
     setIsExpandedList(Array(players.length).fill(false))
+    setIsEditModeList(Array(players.length).fill(false))
+    setIsDeleteModeList(Array(players.length).fill(false))
   }, [players.length])
 
   const handleToggleExpand = (e: React.MouseEvent, index: number) => {
@@ -28,6 +32,22 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
       prev.map((isExpanded, i) => (i === index ? !isExpanded : isExpanded))
     )
     onAppUpdate()
+  }
+
+  const handleToggleEditMode = (e: React.MouseEvent, index: number) => {
+    e.stopPropagation()
+    setIsEditModeList((prev) =>
+      prev.map((isEditMode, i) => (i === index ? !isEditMode : isEditMode))
+    )
+  }
+
+  const handleToggleDeleteMode = (e: React.MouseEvent, index: number) => {
+    e.stopPropagation()
+    setIsDeleteModeList((prev) =>
+      prev.map((isDeleteMode, i) =>
+        i === index ? !isDeleteMode : isDeleteMode
+      )
+    )
   }
 
   const handleUpdatePlayer = (index: number, updatedPlayer: Player) => {
@@ -50,7 +70,15 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
           key={index}
           player={player}
           isExpanded={isExpandedList[index]}
+          isEditMode={isEditModeList[index]}
+          isDeleteMode={isDeleteModeList[index]}
           onToggleExpand={(e: React.MouseEvent) => handleToggleExpand(e, index)}
+          onEditModeToggle={(e: React.MouseEvent) =>
+            handleToggleEditMode(e, index)
+          }
+          onDeleteModeToggle={(e: React.MouseEvent) =>
+            handleToggleDeleteMode(e, index)
+          }
           onCurrentPlayerUpdate={(updatedPlayer) =>
             handleUpdatePlayer(index, updatedPlayer)
           }
