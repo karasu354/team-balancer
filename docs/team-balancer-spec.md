@@ -154,6 +154,14 @@ $$
 - ドメインロジックは `utils/` に集約し、UI層への分散を避ける
 - Jest によるユニットテストを継続する
 - E2Eテストは Playwright を採用し、`e2e/` に配置する
+- GitHub Actions の CI で以下を自動実行する
+  - `npm run format:test`
+  - `npm run typecheck`
+  - `npm run test:unit`
+  - `npm run test:e2e:fast`
+  - `npm run build`
+- `develop` / `main` への push 時はビルド成果物をアーティファクトとして保存する
+- Redis 実接続の E2E は手動 workflow で実行する
 - 仕様変更時は `docs/` と実装を同一変更単位で更新する
 
 ---
@@ -186,6 +194,15 @@ $$
 - Redis 方針:
   - Fast E2E では API モックを使い、日常実行の安定性を優先する
   - Integration E2E では実Redisを使い、保存/復元の実経路を検証する
+
+### CI/CD 運用
+
+- CI workflow: `.github/workflows/test.yaml`
+  - `pull_request` / `push`（`develop`, `main`）で実行
+  - 同一ブランチの重複実行は `concurrency` で自動キャンセル
+- Integration workflow: `.github/workflows/e2e-integration.yaml`
+  - `workflow_dispatch`（手動起動）のみ
+  - `REDIS_URL` secret が未設定の場合は明示的に失敗させる
 
 ---
 

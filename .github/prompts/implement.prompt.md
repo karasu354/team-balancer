@@ -5,6 +5,27 @@ description: '機能を utils → components → composable → pages/api の順
 
 # 機能実装
 
+## 実行前ガード（必須）
+
+以下をすべて満たす場合のみ実装を開始してください。
+
+1. `.steering/` 配下に作業フォルダが1件以上存在する
+2. 最新フォルダ（`YYYYMMDD-[連番]-[機能名]` で最大のもの）が特定できる
+3. 最新フォルダに `requirements.md` / `design.md` / `tasks.md` が存在する
+
+上記を満たさない場合は**実装を中止**し、次の形式で返答してください。
+
+```
+実装を開始できません。
+理由:
+- 最新の .steering が存在しない、または requirements.md / design.md / tasks.md が不足しています。
+
+対応:
+- 先に /requirements を実行して .steering を作成してください。
+```
+
+この中止ケースでは、コード変更・ファイル作成を行わないこと。
+
 `.steering/` ディレクトリ内の要件・設計・タスクを必ず参照し、それに従って実装してください：
 
 - `requirements.md` — 何を実装するか（機能要件・制約）
@@ -12,6 +33,20 @@ description: '機能を utils → components → composable → pages/api の順
 - `tasks.md` — どのタスクを対象とするか（未完了チェックボックスを確認）
 
 実装完了後は、`tasks.md` の対応するチェックボックスを完了済みに更新してください。
+
+---
+
+## このプロンプトの境界線
+
+- やること:
+	- 最新 `.steering` の `tasks.md` にある未完了タスクを実装する
+	- 実装に対応するテスト・ドキュメント更新を行う
+	- 実装完了タスクを `tasks.md` で完了に更新する
+- やらないこと:
+	- `.steering` の新規作成（これは `/requirements` の責務）
+	- タスク分解の再設計（これは `/task-breakdown` の責務）
+	- レビュー専用の指摘出力（これは `/review` の責務）
+	- コミットメッセージ生成（これは `/commit-message` の責務）
 
 ---
 

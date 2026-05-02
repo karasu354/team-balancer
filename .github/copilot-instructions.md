@@ -235,6 +235,19 @@ npm run test:unit
   - Fast E2E: API モックで Redis 非依存に実行
   - Integration E2E: `REDIS_URL` を設定し実Redisで保存/復元を検証
 
+### CI/CD（GitHub Actions）
+
+- CI workflow は `.github/workflows/test.yaml` を利用する
+- PR / push（`develop`, `main`）で以下を実行する
+  - `npm run format:test`
+  - `npm run typecheck`
+  - `npm run test:unit`
+  - `npm run test:e2e:fast`
+  - `npm run build`
+- Integration E2E は `.github/workflows/e2e-integration.yaml` で手動実行する
+- Integration E2E 実行時は `REDIS_URL` secret を必須とする
+- 同一ブランチで重複実行が発生した場合は `concurrency` で最新実行を優先する
+
 ---
 
 ## セキュリティ・運用

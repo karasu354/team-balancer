@@ -37,15 +37,15 @@
 
 ## 3. カスタムプロンプト一覧
 
-| プロンプト | 主な用途 | いつ使うか | 主なアウトプット |
-|---|---|---|---|
-| `/requirements` | 要件・設計・タスクの初期作成 | 新機能や新改善を着手するとき | `.steering/YYYYMMDD-[連番]-[機能名]/` + `requirements.md` + `design.md` + `tasks.md` |
-| `/task-breakdown` | タスクの具体化と順序整理 | 要件はあるが実装手順が粗いとき | フェーズ別・見積もり付き `tasks.md` |
-| `/implement` | タスクに沿った実装 | 実装フェーズに入るとき | コード変更 + `tasks.md` チェック更新 |
-| `/debug-assist` | バグ原因調査と最小修正案の提示 | テスト失敗や不具合再現時 | 原因、修正案、再発防止策 |
-| `/review` | 変更差分の品質レビュー | 実装後、PR前 | Critical / Warning / Info の指摘 |
-| `/refactor-check` | リファクタリング候補の抽出 | 品質改善の候補出しをしたいとき | 優先度付き改善リスト |
-| `/commit-message` | コミットメッセージ作成 | `.steering` 1件の実装をコミットするとき | `.steering` 1件に対する Conventional Commits 形式のメッセージ1件 |
+| プロンプト | 主な用途 | いつ使うか | 主なアウトプット | 境界線（やらないこと） |
+|---|---|---|---|---|
+| `/requirements` | 要件・設計・タスクの初期作成 | 新機能や新改善を着手するとき | `.steering/YYYYMMDD-[連番]-[機能名]/` + `requirements.md` + `design.md` + `tasks.md` | アプリ本体コードの実装変更 |
+| `/task-breakdown` | タスクの具体化と順序整理 | 要件はあるが実装手順が粗いとき | フェーズ別・見積もり付き `tasks.md` | コード実装・テスト実装 |
+| `/implement` | タスクに沿った実装 | 実装フェーズに入るとき | コード変更 + `tasks.md` チェック更新 | `.steering` 新規作成・レビュー出力・コミット文生成 |
+| `/debug-assist` | バグ原因調査と最小修正案の提示 | テスト失敗や不具合再現時 | 原因、修正案、再発防止策 | ファイル編集の実行 |
+| `/review` | 変更差分の品質レビュー | 実装後、PR前 | Critical / Warning / Info の指摘 | ファイル編集の実行 |
+| `/refactor-check` | リファクタリング候補の抽出 | 品質改善の候補出しをしたいとき | 優先度付き改善リスト | ファイル編集の実行 |
+| `/commit-message` | コミットメッセージ作成 | `.steering` 1件の実装をコミットするとき | `.steering` 1件に対する Conventional Commits 形式のメッセージ1件 | コード変更・複数 `.steering` の統合 |
 
 ---
 
@@ -102,12 +102,20 @@
 ### Step 3: 実装を進める
 
 - 実行プロンプト: `/implement`
+- 実行前条件:
+  - `.steering/` 配下に最新フォルダが存在する
+  - 最新フォルダに `requirements.md` / `design.md` / `tasks.md` が揃っている
+  - 未実行の場合は先に `/requirements` を実行する
 - 入力例: 「e2e テストについて実装してください」
 - 主なアウトプット例:
 	- `playwright.config.ts` 作成
 	- `e2e/*.spec.ts` 作成
 	- `package.json` のスクリプト追加
 	- `tasks.md` の該当チェック更新
+
+実行前条件を満たさない場合の期待挙動:
+
+- `/implement` は実装を中止し、`/requirements` 実行を案内する
 
 ### Step 4: 失敗時に原因調査する
 
@@ -151,6 +159,7 @@
 - 新機能を作る: /requirements → /task-breakdown → /implement → /review → /commit-message
 - バグ修正をしたい: /debug-assist → /implement → /review → /commit-message
 - 既存コードを点検したい: /refactor-check → （必要なら）/requirements → /task-breakdown → /implement
+- CI/CD を整備したい: /requirements → /task-breakdown → /implement → /review → /commit-message
 
 ---
 
@@ -170,6 +179,7 @@
 - 実装を行ったら tasks.md のチェックを更新する
 - 仕様変更がある場合は docs/team-balancer-spec.md を同じ変更で更新する
 - API変更がある場合は docs/team-balancer.v1.yaml を同じ変更で更新する
+- CI/CD を変更した場合は `.github/workflows/` と `docs/` を同一変更で更新する
 
 ---
 
