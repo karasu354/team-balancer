@@ -87,12 +87,6 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
     }
   }
 
-  const handleToggleParticipation = (index: number) => {
-    teamBalancer.players[index].isParticipatingInGame =
-      !teamBalancer.players[index].isParticipatingInGame
-    onAppUpdate()
-  }
-
   const handleDraftChange = (index: number, updated: Player) => {
     setDraftPlayers((prev) => prev.map((p, i) => (i === index ? updated : p)))
     setIsDirty(true)
