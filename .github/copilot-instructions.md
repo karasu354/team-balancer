@@ -203,6 +203,7 @@ docs/
 
 - テストはリポジトリルート（`team-balancer/`）で実行する
 - 変更したロジックに対応するテストを優先して実行する
+- テストディレクトリは `test/` を正準とし、`tests/` は新設しない
 
 ```bash
 # ✅ Good
@@ -212,7 +213,7 @@ npm run test:unit
 # テストを実行しないままコミット
 ```
 
-- 実装後の標準検証順は `npm run format` → `npm run format:test` → `npm run test` とする
+- 実装後の標準検証順は `npm run format` → `npm run format:test` → `npm run test` → `npm run test:e2e:fast` とする
 
 ### ユニットテスト（Jest）
 

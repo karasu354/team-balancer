@@ -44,11 +44,13 @@ description: '機能を utils → components → composable → pages/api の順
 npm run format
 npm run format:test
 npm run test
+npm run test:e2e:fast
 ```
 
 - `npm run format:test` が失敗した場合は、整形・修正後に再実行する
 - `npm run test` が失敗した場合は、失敗原因を修正して再実行する
-- 3つのコマンドが成功するまで、タスクを完了扱いにしない
+- `npm run test:e2e:fast` が失敗した場合は、失敗原因を修正して再実行する
+- 4つのコマンドが成功するまで、タスクを完了扱いにしない
 
 ---
 

@@ -174,6 +174,7 @@ $$
 
 - 配置: `test/utils/*.test.ts`
 - 実行: `npm run test:unit`
+- テストディレクトリ方針: `test/` を正準とし、`tests/` は使用しない
 - 主対象:
   - `utils/teamBalancer.ts`
   - `utils/player.ts`
@@ -205,6 +206,13 @@ $$
 - Integration workflow: `.github/workflows/e2e-integration.yaml`
   - `workflow_dispatch`（手動起動）のみ
   - `REDIS_URL` secret が未設定の場合は明示的に失敗させる
+
+### ローカル最終検証手順
+
+- `npm run format`
+- `npm run format:test`
+- `npm run test`
+- `npm run test:e2e:fast`
 
 ---
 

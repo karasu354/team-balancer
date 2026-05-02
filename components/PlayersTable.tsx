@@ -67,7 +67,7 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
     <div className="grid grid-cols-2 gap-1">
       {players.map((player, index) => (
         <PlayerCard
-          key={index}
+          key={player.id}
           player={player}
           isExpanded={isExpandedList[index]}
           isEditMode={isEditModeList[index]}
