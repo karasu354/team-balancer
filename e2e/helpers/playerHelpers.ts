@@ -7,6 +7,10 @@ import { Page } from '@playwright/test'
 export const addPlayer = async (page: Page, name: string): Promise<void> => {
   await page.getByLabel('Player Name').fill(name)
   await page.getByRole('button', { name: 'Add Player' }).click()
+
+  // Divide Teams は「参加中プレイヤーが10人」で有効になるため、
+  // E2E では追加直後に参加トグルを ON に統一する。
+  await page.getByTitle('Toggle Participation').last().click()
 }
 
 /**

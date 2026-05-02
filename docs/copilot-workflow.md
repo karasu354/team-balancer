@@ -46,6 +46,7 @@
 | `/review` | 変更差分の品質レビュー | 実装後、PR前 | Critical / Warning / Info の指摘 | ファイル編集の実行 |
 | `/refactor-check` | リファクタリング候補の抽出 | 品質改善の候補出しをしたいとき | 優先度付き改善リスト | ファイル編集の実行 |
 | `/commit-message` | コミットメッセージ作成 | `.steering` 1件の実装をコミットするとき | `.steering` 1件に対する Conventional Commits 形式のメッセージ1件 | コード変更・複数 `.steering` の統合 |
+| `/pr-description` | PR本文の初稿作成 | コミット後に PR を作るとき | `.github/PULL_REQUEST_TEMPLATE.md` 準拠の本文 | コード変更・コミットメッセージ生成 |
 
 ---
 
@@ -62,6 +63,7 @@
 | `/review` | レビュー対象の差分範囲 | 優先観点（バグ/型/セキュリティ） | 「[対象差分] をレビュー。特に [観点] を重視。」 |
 | `/refactor-check` | 対象ディレクトリ | 優先度、非対象 | 「[対象ディレクトリ] の改善候補を抽出。今回は [非対象] を除外。」 |
 | `/commit-message` | 対象 `.steering` フォルダ（1件） | 変更要約、type希望 | 「[.steering パス] 分のコミットメッセージを1件作成。要約は [要約]。」 |
+| `/pr-description` | 対象 `.steering` フォルダ（1件） | 背景、変更点、テスト結果 | 「[.steering パス] の PR 本文を作成。背景は [背景]。」 |
 
 ### よく使う入力例
 
@@ -152,6 +154,31 @@
 	- コミットメッセージ 1件
 	- （必要時）本文
 
+### Step 8: PR本文を作成して PR を作る
+
+- 実行プロンプト: `/pr-description`
+- 入力例: 「`.steering/20260503-04-pr-quality-and-test-stabilization/` の PR 本文を作って」
+- 本文テンプレート: `.github/PULL_REQUEST_TEMPLATE.md`
+- PR作成コマンド:
+
+```bash
+gh pr create --title "<commit title>" --body-file /tmp/pr-body.md
+```
+
+- 運用ルール:
+  - タイトルは Conventional Commits 形式に合わせる
+  - 本文はテンプレートの必須項目を空欄にしない
+  - 最低限 `背景 / 変更内容 / テスト結果 / 影響範囲 / レビューポイント` を含める
+
+### Step 9: format チェックを実行する
+
+- 実行コマンド: `npm run format:test`
+- 失敗時の修正コマンド: `npm run format`
+- 再確認: `npm run format:test`
+- 補足:
+	- PR前の最終確認として `format:test` を必ず実行する
+	- 生成差分が広い場合は、今回の `.steering` 対象に含めるべきかを確認してからコミットする
+
 ---
 
 ## 6. 目的別の最短ルート
@@ -177,6 +204,7 @@
 - 1つの .steering フォルダは、1つの開発テーマに限定する
 - 1つの .steering フォルダに対して、コミットは1件にする
 - 実装を行ったら tasks.md のチェックを更新する
+- PR前に `npm run format:test` を実行し、失敗時は `npm run format` で整形して再実行する
 - 仕様変更がある場合は docs/team-balancer-spec.md を同じ変更で更新する
 - API変更がある場合は docs/team-balancer.v1.yaml を同じ変更で更新する
 - CI/CD を変更した場合は `.github/workflows/` と `docs/` を同一変更で更新する
@@ -192,3 +220,4 @@
 - `.github/prompts/review.prompt.md`
 - `.github/prompts/refactor-check.prompt.md`
 - `.github/prompts/commit-message.prompt.md`
+- `.github/prompts/pr-description.prompt.md`

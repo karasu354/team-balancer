@@ -142,6 +142,9 @@ if (array.length > 10) {
 - ブランチ名は `feature/`, `fix/`, `docs/` のプレフィックスをつける
 - 1コミットは1つの変更に限定する
 - `.steering` フォルダ1件に対してコミットは1件にする
+- PRタイトルは Conventional Commits 形式の要約を使う
+- PR本文は `.github/PULL_REQUEST_TEMPLATE.md` に沿って作成する
+- PR作成時は `gh pr create --title --body-file` の利用を推奨する
 
 ---
 
@@ -262,9 +265,11 @@ npm run test:unit
 
 - 仕様変更が `docs/` に反映されている
 - `npm run test:unit` が成功している
+- `npm run test:e2e:fast` が成功している
 - 変更箇所に対応するテストが追加または更新されている
 - API変更時に `docs/team-balancer.v1.yaml` が更新されている
 - Conventional Commits 形式でコミットされている
+- PR本文が `.github/PULL_REQUEST_TEMPLATE.md` の必須項目を満たしている
 
 ---
 

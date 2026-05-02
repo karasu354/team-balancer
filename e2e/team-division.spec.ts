@@ -11,8 +11,12 @@ test('10人いるときチーム分割が実行できる', async ({ page }) => {
   await page.getByRole('button', { name: 'Divide Teams' }).click()
 
   // 分割完了まで待機（最大10秒）
-  await expect(page.getByText('Blue')).toBeVisible({ timeout: 10000 })
-  await expect(page.getByText('Red')).toBeVisible({ timeout: 10000 })
+  await expect(page.getByText('Blue Team', { exact: true })).toBeVisible({
+    timeout: 10000,
+  })
+  await expect(page.getByText('Red Team', { exact: true })).toBeVisible({
+    timeout: 10000,
+  })
 })
 
 // E-5: 参加プレイヤーが10人未満のとき分割ボタンが非活性
