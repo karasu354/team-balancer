@@ -6,6 +6,10 @@ import { addPlayer, addTenPlayers } from './helpers/playerHelpers'
 test('10人いるときチーム分割が実行できる', async ({ page }) => {
   await page.goto('/')
 
+  await expect(
+    page.getByRole('heading', { name: '3. チーム分割' })
+  ).toBeVisible()
+
   await addTenPlayers(page)
 
   await page.getByRole('button', { name: 'Divide Teams' }).click()
@@ -22,6 +26,10 @@ test('10人いるときチーム分割が実行できる', async ({ page }) => {
 // E-5: 参加プレイヤーが10人未満のとき分割ボタンが非活性
 test('10人未満のとき Divide Teams ボタンが非活性', async ({ page }) => {
   await page.goto('/')
+
+  await expect(
+    page.getByText('分割条件: 参加中プレイヤー 10人', { exact: false })
+  ).toBeVisible()
 
   await addPlayer(page, 'OnlyOnePlayer')
 

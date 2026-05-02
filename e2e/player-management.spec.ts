@@ -11,3 +11,18 @@ test('プレイヤーを1人追加すると一覧に表示される', async ({ p
     page.locator('p.font-bold', { hasText: 'TestPlayer' }).first()
   ).toBeVisible()
 })
+
+// E-6: サンプルデータ投入で10人が一覧に追加される
+test('サンプルデータを投入すると10人が一覧に追加される', async ({ page }) => {
+  await page.goto('/')
+
+  await page
+    .getByRole('button', { name: 'サンプルデータを投入（10人）' })
+    .click()
+
+  await expect(
+    page.locator('p.font-bold', { hasText: 'Sample_Top1' }).first()
+  ).toBeVisible()
+  await expect(page.getByText('Total:').first()).toBeVisible()
+  await expect(page.getByText('10').first()).toBeVisible()
+})

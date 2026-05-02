@@ -28,6 +28,9 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
   onAppUpdate,
 }) => {
   const balancedTeamsByMissMatch = teamBalancer.balancedTeamsByMissMatch
+  const participatingPlayersCount = teamBalancer.players.filter(
+    (player) => player.isParticipatingInGame
+  ).length
   const [activeTab, setActiveTab] = useState<number>(0)
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -69,8 +72,12 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
   const isDivideButtonDisabled = teamBalancer.isDividable() === false
 
   return (
-    <div className="w-full max-w-4xl">
-      <div className="mb-4 flex justify-center space-x-4">
+    <div className="w-full">
+      <div className="mb-3 rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-600">
+        分割条件: 参加中プレイヤー 10人（現在 {participatingPlayersCount}/10）
+      </div>
+
+      <div className="mb-4 flex flex-wrap justify-center gap-2 md:justify-start">
         <button
           onClick={handleDivideTeams}
           disabled={isLoading || isDivideButtonDisabled}
@@ -95,8 +102,8 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
         </button>
       </div>
 
-      <div className="flex">
-        <div className="mr-4 flex flex-col space-y-2">
+      <div className="flex flex-col gap-3 md:flex-row">
+        <div className="flex gap-2 overflow-x-auto pb-1 md:mr-2 md:flex-col md:gap-2 md:overflow-visible md:pb-0">
           {Object.keys(balancedTeamsByMissMatch).map((key) => (
             <button
               key={key}
@@ -114,21 +121,28 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
           ))}
         </div>
 
-        <div className="flex-1 rounded-lg border border-gray-300 p-4">
+        <div className="flex-1 rounded-lg border border-slate-300 bg-white p-4">
           {activeBalancedTeam.players.length === 10 && (
             <div>
-              <p>Rating Difference {activeBalancedTeam.evaluationScore}</p>
-              <div className="flex">
-                <div className="w-1/3">
-                  <div className="mb-4 font-bold">Lane</div>
+              <p className="mb-3 text-sm text-slate-600">
+                Rating Difference:{' '}
+                <span className="font-semibold text-slate-900">
+                  {activeBalancedTeam.evaluationScore.toFixed(2)}
+                </span>
+              </p>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div>
+                  <div className="mb-3 border-b border-slate-200 pb-1 font-bold">
+                    Lane
+                  </div>
                   {roleList.map((lane) => (
-                    <div key={lane} className="mb-2 font-medium">
+                    <div key={lane} className="mb-2 font-medium text-slate-700">
                       {lane}
                     </div>
                   ))}
                 </div>
-                <div className="w-1/3">
-                  <div className="mb-4 text-xl font-bold text-blue-500">
+                <div>
+                  <div className="mb-3 border-b border-blue-100 pb-1 text-xl font-bold text-blue-500">
                     Blue Team
                   </div>
                   {roleList.map((lane, index) => (
@@ -138,8 +152,8 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
                     </div>
                   ))}
                 </div>
-                <div className="w-1/3">
-                  <div className="mb-4 text-xl font-bold text-red-500">
+                <div>
+                  <div className="mb-3 border-b border-red-100 pb-1 text-xl font-bold text-red-500">
                     Red Team
                   </div>
                   {roleList.map((lane, index) => (
@@ -150,6 +164,13 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
                   ))}
                 </div>
               </div>
+            </div>
+          )}
+
+          {activeBalancedTeam.players.length !== 10 && (
+            <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center text-sm text-slate-600">
+              まだ分割結果がありません。10人揃えたうえで「Divide
+              Teams」を実行してください。
             </div>
           )}
         </div>

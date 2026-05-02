@@ -41,10 +41,9 @@ test('存在しない ID で読み込むとエラーが表示される', async (
   const idForm = page.locator('div').filter({ has: idInput }).first()
   await idInput.fill('nonexistent-id-xyz-12345')
 
-  // alert をキャプチャする
-  const alertPromise = page.waitForEvent('dialog')
   await idForm.getByRole('button', { name: 'Import' }).click()
-  const dialog = await alertPromise
-  expect(dialog.message()).toContain('見つかりません')
-  await dialog.dismiss()
+
+  await expect(
+    page.getByText('チームデータが見つかりませんでした。')
+  ).toBeVisible()
 })

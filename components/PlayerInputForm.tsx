@@ -17,7 +17,11 @@ const PlayerInputForm: React.FC<PlayerInputFormProps> = ({
   const [activeTab, setActiveTab] = useState<number>(0)
 
   return (
-    <div className="w-full max-w-4xl">
+    <div className="w-full">
+      <div className="mb-2 text-xs text-slate-500">
+        入力方式を選択してください（Single: 1人ずつ / Multi:
+        チャットログから一括追加）
+      </div>
       <div className="pb-4">
         <Tabs
           labels={['Single', 'Multi']}
@@ -25,7 +29,7 @@ const PlayerInputForm: React.FC<PlayerInputFormProps> = ({
           onActiveTab={setActiveTab}
         />
       </div>
-      <div className="">
+      <div>
         {activeTab === 0 ? (
           <SinglePlayerInputForm
             teamBalancer={teamBalancer}

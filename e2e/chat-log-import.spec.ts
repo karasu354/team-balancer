@@ -14,7 +14,7 @@ test('チャットログ取り込みで複数プレイヤーが追加される',
   await page.getByRole('button', { name: 'Multi' }).click()
 
   await page.locator('#textarea-field').fill(CHAT_LOG)
-  await page.getByRole('button', { name: 'Import' }).first().click()
+  await page.getByTestId('import-chat-log').click()
 
   await expect(
     page.locator('p.font-bold', { hasText: 'Player01' }).first()

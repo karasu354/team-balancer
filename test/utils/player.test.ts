@@ -1,4 +1,4 @@
-import { Player } from '../../utils/player'
+import { Player, generateSamplePlayers } from '../../utils/player'
 import { rankEnum, tierEnum } from '../../utils/rank'
 import { roleEnum } from '../../utils/role'
 import { generateInternalId } from '../../utils/utils'
@@ -166,5 +166,28 @@ describe('Player', () => {
       expect(info.desiredRoles).toEqual([roleEnum.top])
       expect(info.isRoleFixed).toBe(false)
     })
+  })
+})
+
+describe('generateSamplePlayers', () => {
+  test('10人のプレイヤーが生成されること', () => {
+    const samples = generateSamplePlayers()
+    expect(samples).toHaveLength(10)
+  })
+
+  test('全員が isParticipatingInGame = true であること', () => {
+    const samples = generateSamplePlayers()
+    expect(samples.every((p) => p.isParticipatingInGame)).toBe(true)
+  })
+
+  test('全員に一意の id が設定されること', () => {
+    const samples = generateSamplePlayers()
+    const ids = samples.map((p) => p.id)
+    expect(new Set(ids).size).toBe(10)
+  })
+
+  test('全員の rating が 0 より大きいこと', () => {
+    const samples = generateSamplePlayers()
+    expect(samples.every((p) => p.rating > 0)).toBe(true)
   })
 })
