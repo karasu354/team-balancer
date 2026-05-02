@@ -183,8 +183,9 @@ PRタイトルの良い例/悪い例:
   1. `npm run format`
   2. `npm run format:test`
   3. `npm run test`
+  4. `npm run test:e2e:fast`
 - 補足:
-  - PR前の最終確認として上記3コマンドを必ず実行する
+  - PR前の最終確認として上記4コマンドを必ず実行する
   - 生成差分が広い場合は、今回の `.steering` 対象に含めるべきかを確認してからコミットする
 
 ---
@@ -212,7 +213,8 @@ PRタイトルの良い例/悪い例:
 - 1つの .steering フォルダは、1つの開発テーマに限定する
 - 1つの .steering フォルダに対して、コミットは1件にする
 - 実装を行ったら tasks.md のチェックを更新する
-- PR前に `npm run format` → `npm run format:test` → `npm run test` を実行する
+- PR前に `npm run format` → `npm run format:test` → `npm run test` → `npm run test:e2e:fast` を実行する
+- テストディレクトリは `test/` を正準とし、`tests/` は新設しない
 - 仕様変更がある場合は docs/team-balancer-spec.md を同じ変更で更新する
 - API変更がある場合は docs/team-balancer.v1.yaml を同じ変更で更新する
 - CI/CD を変更した場合は `.github/workflows/` と `docs/` を同一変更で更新する
