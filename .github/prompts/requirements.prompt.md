@@ -82,8 +82,8 @@ description: '要件定義。実装したい機能を伝えると .steering/ デ
 ## このプロンプトの境界線
 
 - やること:
-    - `.steering/YYYYMMDD-[連番]-[機能名]/` を作成し、`requirements.md` / `design.md` / `tasks.md` を作る
+  - `.steering/YYYYMMDD-[連番]-[機能名]/` を作成し、`requirements.md` / `design.md` / `tasks.md` を作る
 - やらないこと:
-    - アプリ本体コード（`utils/`, `components/`, `composable/`, `pages/api/`）の実装変更
-    - テストコードの実装変更
-    - 既存タスクの実装実行（これは `/implement` の責務）
+  - アプリ本体コード（`utils/`, `components/`, `composable/`, `pages/api/`）の実装変更
+  - テストコードの実装変更
+  - 既存タスクの実装実行（これは `/implement` の責務）

@@ -16,7 +16,13 @@ test('チャットログ取り込みで複数プレイヤーが追加される',
   await page.locator('#textarea-field').fill(CHAT_LOG)
   await page.getByRole('button', { name: 'Import' }).first().click()
 
-  await expect(page.locator('p.font-bold', { hasText: 'Player01' }).first()).toBeVisible()
-  await expect(page.locator('p.font-bold', { hasText: 'Player02' }).first()).toBeVisible()
-  await expect(page.locator('p.font-bold', { hasText: 'Player05' }).first()).toBeVisible()
+  await expect(
+    page.locator('p.font-bold', { hasText: 'Player01' }).first()
+  ).toBeVisible()
+  await expect(
+    page.locator('p.font-bold', { hasText: 'Player02' }).first()
+  ).toBeVisible()
+  await expect(
+    page.locator('p.font-bold', { hasText: 'Player05' }).first()
+  ).toBeVisible()
 })

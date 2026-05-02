@@ -36,17 +36,33 @@ description: '機能を utils → components → composable → pages/api の順
 
 ---
 
+## 実装完了時の最終確認（必須）
+
+コミット前に、必ず以下をこの順で実行してください。
+
+```bash
+npm run format
+npm run format:test
+npm run test
+```
+
+- `npm run format:test` が失敗した場合は、整形・修正後に再実行する
+- `npm run test` が失敗した場合は、失敗原因を修正して再実行する
+- 3つのコマンドが成功するまで、タスクを完了扱いにしない
+
+---
+
 ## このプロンプトの境界線
 
 - やること:
-	- 最新 `.steering` の `tasks.md` にある未完了タスクを実装する
-	- 実装に対応するテスト・ドキュメント更新を行う
-	- 実装完了タスクを `tasks.md` で完了に更新する
+  - 最新 `.steering` の `tasks.md` にある未完了タスクを実装する
+  - 実装に対応するテスト・ドキュメント更新を行う
+  - 実装完了タスクを `tasks.md` で完了に更新する
 - やらないこと:
-	- `.steering` の新規作成（これは `/requirements` の責務）
-	- タスク分解の再設計（これは `/task-breakdown` の責務）
-	- レビュー専用の指摘出力（これは `/review` の責務）
-	- コミットメッセージ生成（これは `/commit-message` の責務）
+  - `.steering` の新規作成（これは `/requirements` の責務）
+  - タスク分解の再設計（これは `/task-breakdown` の責務）
+  - レビュー専用の指摘出力（これは `/review` の責務）
+  - コミットメッセージ生成（これは `/commit-message` の責務）
 
 ---
 
@@ -68,11 +84,13 @@ description: '機能を utils → components → composable → pages/api の順
 ## 実装ルール
 
 ### TypeScript
+
 - `strict: true` 準拠：`any` 禁止、戻り値型を必ず明示
 - 既存の型（`PlayersJson`, `PlayerJson`, `Player`, `TeamBalancer` 等）を再利用する
 - `as` キャストは原則禁止（使う場合はコメントで理由を説明）
 
 ### ドメインロジック（`utils/`）
+
 - チーム分割ロジックは `utils/teamBalancer.ts` に集約する
 - プレイヤーロジックは `utils/player.ts` に集約する
 - 副作用のない純粋関数のみ `utils/utils.ts` に置く
@@ -81,6 +99,7 @@ description: '機能を utils → components → composable → pages/api の順
 - `fromJson` / `playersInfo` の入出力互換性を壊さない
 
 ### React コンポーネント（`components/`）
+
 - Props は必ず型定義する：`interface XxxProps { ... }`
 - イベントハンドラは型を明示する：`React.MouseEvent`, `React.ChangeEvent` 等
 - ビジネスロジックをコンポーネントに書かない（`utils/` に委譲）
@@ -88,12 +107,14 @@ description: '機能を utils → components → composable → pages/api の順
 - Tailwind CSS のみ（インラインスタイル禁止）
 
 ### API Routes（`pages/api/`）
+
 - 入力値の型と必須項目を必ず検証する
 - HTTP ステータスを適切に返す（400 / 404 / 405 / 500）
 - 機密情報・内部スタックトレースをレスポンスに含めない
 - API 仕様を変更した場合は `docs/team-balancer.v1.yaml` を同時更新する
 
 ### ユニットテスト（`test/utils/`）
+
 - `utils/` の変更には必ず対応するテストを追加・更新する
 - 境界値を必ずカバーする：0件・10件・11件・50件
 - 実行：`npm run test:unit`

@@ -73,15 +73,15 @@ const IdForm: React.FC<IdFormProps> = ({ onAppUpdate }) => {
 
 ## 命名規則
 
-| 対象 | ルール | 例 |
-|---|---|---|
-| Reactコンポーネント | PascalCase | `PlayerInputForm.tsx` |
-| ユーティリティ関数 | camelCase | `generateInternalId` |
-| ドメインクラス | PascalCase | `TeamBalancer` |
-| 型 / interface | PascalCase | `PlayersJson`, `PlayerJson` |
-| 変数 / 関数 | camelCase | `handleDivideTeams` |
-| 定数 | SCREAMING_SNAKE_CASE もしくは `static readonly` | `MAX_TEAM_ATTEMPTS` |
-| CSSクラス | Tailwind ユーティリティを使用 | - |
+| 対象                | ルール                                          | 例                          |
+| ------------------- | ----------------------------------------------- | --------------------------- |
+| Reactコンポーネント | PascalCase                                      | `PlayerInputForm.tsx`       |
+| ユーティリティ関数  | camelCase                                       | `generateInternalId`        |
+| ドメインクラス      | PascalCase                                      | `TeamBalancer`              |
+| 型 / interface      | PascalCase                                      | `PlayersJson`, `PlayerJson` |
+| 変数 / 関数         | camelCase                                       | `handleDivideTeams`         |
+| 定数                | SCREAMING_SNAKE_CASE もしくは `static readonly` | `MAX_TEAM_ATTEMPTS`         |
+| CSSクラス           | Tailwind ユーティリティを使用                   | -                           |
 
 ---
 
@@ -212,6 +212,8 @@ npm run test:unit
 # テストを実行しないままコミット
 ```
 
+- 実装後の標準検証順は `npm run format` → `npm run format:test` → `npm run test` とする
+
 ### ユニットテスト（Jest）
 
 - テストファイルは `test/` 配下に配置する
@@ -264,6 +266,9 @@ npm run test:unit
 ## PR前チェックリスト
 
 - 仕様変更が `docs/` に反映されている
+- `npm run format` を実行している
+- `npm run format:test` が成功している
+- `npm run test` が成功している
 - `npm run test:unit` が成功している
 - `npm run test:e2e:fast` が成功している
 - 変更箇所に対応するテストが追加または更新されている

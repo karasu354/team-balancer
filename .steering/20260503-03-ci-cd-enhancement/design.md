@@ -5,6 +5,7 @@
 GitHub Actions を以下の2系統で運用する。
 
 1. CI（自動）
+
    - トリガー: `pull_request`, `push`（`develop`, `main`）
    - 実行内容: format check, typecheck, unit test, fast e2e, build
    - 特徴: branch concurrency を有効化し、古い実行を自動キャンセル
@@ -21,12 +22,12 @@ CD 準備（配布・検証）を行う。
 
 ## 影響ディレクトリと責務分離
 
-| ディレクトリ | 変更内容 |
-|---|---|
+| ディレクトリ         | 変更内容                                         |
+| -------------------- | ------------------------------------------------ |
 | `.github/workflows/` | CI workflow と integration workflow を追加・更新 |
-| `package.json` | CI 用の typecheck スクリプトを追加 |
-| `docs/` | CI/CD 運用手順の追記 |
-| `.github/` | Copilot 指示書に CI/CD の運用ルールを追記 |
+| `package.json`       | CI 用の typecheck スクリプトを追加               |
+| `docs/`              | CI/CD 運用手順の追記                             |
+| `.github/`           | Copilot 指示書に CI/CD の運用ルールを追記        |
 
 `utils/`, `components/`, `composable/`, `pages/api/` は変更しない。
 

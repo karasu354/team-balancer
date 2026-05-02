@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
-import { addTenPlayers } from './helpers/playerHelpers'
 import { setupTeamApiMock } from './helpers/apiMock'
+import { addTenPlayers } from './helpers/playerHelpers'
 
 // E-3: ID保存→読み込みでプレイヤー一覧が復元される（Fast E2E: API モック）
 test('ID保存→読み込みでプレイヤー一覧が復元される', async ({ page }) => {
@@ -13,7 +13,10 @@ test('ID保存→読み込みでプレイヤー一覧が復元される', async 
   await page.goto('/')
   await addTenPlayers(page)
 
-  const idForm = page.locator('div').filter({ has: page.getByPlaceholder('Input ID') }).first()
+  const idForm = page
+    .locator('div')
+    .filter({ has: page.getByPlaceholder('Input ID') })
+    .first()
   const idInput = page.getByPlaceholder('Input ID')
   await idInput.fill(testId)
   await idForm.getByRole('button', { name: 'Save' }).click()

@@ -17,7 +17,9 @@ const ensureIntegrationEnv = (): void => {
 }
 
 // E-3: ID保存→読み込みでプレイヤー一覧が復元される（Integration: 実Redis）
-test('@integration ID保存→読み込みでプレイヤー一覧が復元される', async ({ page }) => {
+test('@integration ID保存→読み込みでプレイヤー一覧が復元される', async ({
+  page,
+}) => {
   ensureIntegrationEnv()
 
   const testId = `e2e-integration-${Date.now()}`
@@ -37,7 +39,9 @@ test('@integration ID保存→読み込みでプレイヤー一覧が復元さ�
 })
 
 // E-6: 存在しない ID で読み込んだときエラーが表示される（Integration: 実Redis）
-test('@integration 存在しない ID で読み込むとエラーが表示される', async ({ page }) => {
+test('@integration 存在しない ID で読み込むとエラーが表示される', async ({
+  page,
+}) => {
   ensureIntegrationEnv()
 
   await page.goto('/')

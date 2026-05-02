@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:test": "prettier --check .",
+    "test": "npm run test:unit",
     "test:unit": "jest",
     "test:e2e": "playwright test --grep-invert @integration",
     "test:e2e:fast": "playwright test --grep-invert @integration",

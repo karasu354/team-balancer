@@ -37,13 +37,13 @@ E2E は Playwright を継続採用し、実行モードを2つに分離する。
 
 ## 影響ディレクトリと責務分離
 
-| ディレクトリ | 変更内容 |
-|---|---|
-| `e2e/` | Fast/Integration のデータ保存系テストを分離 |
-| `e2e/helpers/` | API モック用ヘルパーを追加 |
-| `package.json` | `test:e2e:fast` / `test:e2e:integration` スクリプトを追加 |
-| `docs/team-balancer-spec.md` | Redis を含む E2E 運用方針を明記 |
-| `.github/copilot-instructions.md` | E2E 実行モードと Redis 前提条件を追記 |
+| ディレクトリ                      | 変更内容                                                  |
+| --------------------------------- | --------------------------------------------------------- |
+| `e2e/`                            | Fast/Integration のデータ保存系テストを分離               |
+| `e2e/helpers/`                    | API モック用ヘルパーを追加                                |
+| `package.json`                    | `test:e2e:fast` / `test:e2e:integration` スクリプトを追加 |
+| `docs/team-balancer-spec.md`      | Redis を含む E2E 運用方針を明記                           |
+| `.github/copilot-instructions.md` | E2E 実行モードと Redis 前提条件を追記                     |
 
 `utils/`, `components/`, `composable/`, `pages/api/` は原則変更しない。
 
