@@ -10,7 +10,7 @@ import InputText from './Input/InputText'
 interface PlayerEditCardProps {
   currentPlayer: Player
   setEditablePlayer: (player: Player) => void
-  onEditModeToggle: (e: React.MouseEvent) => void
+  onEditModeToggle?: (e: React.MouseEvent) => void
 }
 
 const PlayerEditCard: React.FC<PlayerEditCardProps> = ({
@@ -48,10 +48,12 @@ const PlayerEditCard: React.FC<PlayerEditCardProps> = ({
     }
   }
 
+  const roleFixedId = `role-fixed-${currentPlayer.id}`
+
   const handleSave = (e: React.MouseEvent) => {
     e.stopPropagation()
     setEditablePlayer(player)
-    onEditModeToggle(e)
+    onEditModeToggle?.(e)
   }
 
   return (
@@ -135,9 +137,9 @@ const PlayerEditCard: React.FC<PlayerEditCardProps> = ({
             onChange={(e) =>
               updatePlayerProperty('isRoleFixed', e.target.checked)
             }
-            id="role-fixed-toggle"
+            id={roleFixedId}
           />
-          <label htmlFor="role-fixed-toggle" className="text-sm">
+          <label htmlFor={roleFixedId} className="text-sm">
             Role Fixed
           </label>
         </div>
@@ -149,12 +151,14 @@ const PlayerEditCard: React.FC<PlayerEditCardProps> = ({
           >
             Save
           </button>
-          <button
-            onClick={onEditModeToggle}
-            className="rounded bg-red-500 px-4 py-2 text-white transition hover:bg-gray-600"
-          >
-            Cancel
-          </button>
+          {onEditModeToggle && (
+            <button
+              onClick={onEditModeToggle}
+              className="rounded bg-red-500 px-4 py-2 text-white transition hover:bg-gray-600"
+            >
+              Cancel
+            </button>
+          )}
         </div>
       </div>
     </div>

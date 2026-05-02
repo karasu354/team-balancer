@@ -132,3 +132,91 @@ export class Player {
     }
   }
 }
+
+// アプリの操作に慣れるためのサンプルデータ（10人分）を生成する
+export const generateSamplePlayers = (): Player[] => {
+  const configs: {
+    name: string
+    tier: tierEnum
+    rank: rankEnum
+    mainRole: roleEnum
+    subRole: roleEnum
+  }[] = [
+    {
+      name: 'Sample_Top1',
+      tier: tierEnum.diamond,
+      rank: rankEnum.two,
+      mainRole: roleEnum.top,
+      subRole: roleEnum.mid,
+    },
+    {
+      name: 'Sample_Jg1',
+      tier: tierEnum.emerald,
+      rank: rankEnum.one,
+      mainRole: roleEnum.jg,
+      subRole: roleEnum.top,
+    },
+    {
+      name: 'Sample_Mid1',
+      tier: tierEnum.emerald,
+      rank: rankEnum.three,
+      mainRole: roleEnum.mid,
+      subRole: roleEnum.bot,
+    },
+    {
+      name: 'Sample_Bot1',
+      tier: tierEnum.platinum,
+      rank: rankEnum.one,
+      mainRole: roleEnum.bot,
+      subRole: roleEnum.sup,
+    },
+    {
+      name: 'Sample_Sup1',
+      tier: tierEnum.gold,
+      rank: rankEnum.one,
+      mainRole: roleEnum.sup,
+      subRole: roleEnum.jg,
+    },
+    {
+      name: 'Sample_Top2',
+      tier: tierEnum.gold,
+      rank: rankEnum.two,
+      mainRole: roleEnum.top,
+      subRole: roleEnum.jg,
+    },
+    {
+      name: 'Sample_Jg2',
+      tier: tierEnum.silver,
+      rank: rankEnum.one,
+      mainRole: roleEnum.jg,
+      subRole: roleEnum.mid,
+    },
+    {
+      name: 'Sample_Mid2',
+      tier: tierEnum.gold,
+      rank: rankEnum.three,
+      mainRole: roleEnum.mid,
+      subRole: roleEnum.top,
+    },
+    {
+      name: 'Sample_Bot2',
+      tier: tierEnum.platinum,
+      rank: rankEnum.two,
+      mainRole: roleEnum.bot,
+      subRole: roleEnum.mid,
+    },
+    {
+      name: 'Sample_Sup2',
+      tier: tierEnum.silver,
+      rank: rankEnum.two,
+      mainRole: roleEnum.sup,
+      subRole: roleEnum.bot,
+    },
+  ]
+
+  return configs.map(({ name, tier, rank, mainRole, subRole }) => {
+    const player = new Player(name, tier, rank, mainRole, subRole)
+    player.isParticipatingInGame = true
+    return player
+  })
+}
