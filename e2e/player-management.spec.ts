@@ -7,5 +7,7 @@ test('プレイヤーを1人追加すると一覧に表示される', async ({ p
   await page.getByLabel('Player Name').fill('TestPlayer')
   await page.getByRole('button', { name: 'Add Player' }).click()
 
-  await expect(page.getByText('TestPlayer')).toBeVisible()
+  await expect(
+    page.locator('p.font-bold', { hasText: 'TestPlayer' }).first()
+  ).toBeVisible()
 })

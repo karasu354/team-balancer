@@ -63,8 +63,8 @@ description: 'タスク分解。機能要件をレイヤー別タスクに分解
 ## このプロンプトの境界線
 
 - やること:
-	- 対象 `.steering/*/tasks.md` の分解・再編・見積もり更新
+  - 対象 `.steering/*/tasks.md` の分解・再編・見積もり更新
 - やらないこと:
-	- アプリ本体コードやテストの実装変更
-	- `.steering` の新規作成（これは `/requirements` の責務）
-	- コミットメッセージ確定（これは `/commit-message` の責務）
+  - アプリ本体コードやテストの実装変更
+  - `.steering` の新規作成（これは `/requirements` の責務）
+  - コミットメッセージ確定（これは `/commit-message` の責務）

@@ -16,22 +16,22 @@ playwright.config.ts  # Playwright 設定ファイル
 
 ユニットテスト（Jest）との関係:
 
-| 種別 | ツール | 対象 | 実行タイミング |
-|---|---|---|---|
-| ユニットテスト | Jest | `utils/` のドメインロジック | 常時 |
-| E2E テスト | Playwright | ページ操作・API連携・画面表示 | デプロイ前 |
+| 種別           | ツール     | 対象                          | 実行タイミング |
+| -------------- | ---------- | ----------------------------- | -------------- |
+| ユニットテスト | Jest       | `utils/` のドメインロジック   | 常時           |
+| E2E テスト     | Playwright | ページ操作・API連携・画面表示 | デプロイ前     |
 
 ---
 
 ## 影響ディレクトリと責務分離
 
-| ディレクトリ | 変更内容 |
-|---|---|
-| `e2e/` | 新規作成。テストファイル・補助関数を配置 |
-| `playwright.config.ts` | 新規作成。baseURL・ブラウザ設定・開発サーバー起動設定 |
-| `package.json` | `test:e2e` / `test:e2e:headed` / `test:e2e:debug` スクリプト追加。`@playwright/test` 追加 |
-| `docs/team-balancer-spec.md` | E2E テスト方針を「将来対応」→「実装済み」へ更新 |
-| `.github/copilot-instructions.md` | E2E テスト手順を「将来実装予定」→「実装済み」へ更新 |
+| ディレクトリ                      | 変更内容                                                                                  |
+| --------------------------------- | ----------------------------------------------------------------------------------------- |
+| `e2e/`                            | 新規作成。テストファイル・補助関数を配置                                                  |
+| `playwright.config.ts`            | 新規作成。baseURL・ブラウザ設定・開発サーバー起動設定                                     |
+| `package.json`                    | `test:e2e` / `test:e2e:headed` / `test:e2e:debug` スクリプト追加。`@playwright/test` 追加 |
+| `docs/team-balancer-spec.md`      | E2E テスト方針を「将来対応」→「実装済み」へ更新                                           |
+| `.github/copilot-instructions.md` | E2E テスト手順を「将来実装予定」→「実装済み」へ更新                                       |
 
 `utils/`, `components/`, `composable/`, `pages/api/` の変更はなし。
 
@@ -71,9 +71,7 @@ export default defineConfig({
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
   },
-  projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-  ],
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   // 開発サーバーを自動起動
   webServer: {
     command: 'npm run dev',

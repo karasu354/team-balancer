@@ -13,10 +13,16 @@ test('チャットログ取り込みで複数プレイヤーが追加される',
   // Multi タブへ切り替え
   await page.getByRole('button', { name: 'Multi' }).click()
 
-  await page.getByRole('textbox').fill(CHAT_LOG)
-  await page.getByRole('button', { name: 'Import' }).click()
+  await page.locator('#textarea-field').fill(CHAT_LOG)
+  await page.getByRole('button', { name: 'Import' }).first().click()
 
-  await expect(page.getByText('Player01')).toBeVisible()
-  await expect(page.getByText('Player02')).toBeVisible()
-  await expect(page.getByText('Player05')).toBeVisible()
+  await expect(
+    page.locator('p.font-bold', { hasText: 'Player01' }).first()
+  ).toBeVisible()
+  await expect(
+    page.locator('p.font-bold', { hasText: 'Player02' }).first()
+  ).toBeVisible()
+  await expect(
+    page.locator('p.font-bold', { hasText: 'Player05' }).first()
+  ).toBeVisible()
 })
