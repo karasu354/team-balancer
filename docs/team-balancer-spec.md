@@ -153,7 +153,7 @@ $$
 - `any` 型の使用を禁止する（不明型は `unknown` + 型ガードで扱う）
 - ドメインロジックは `utils/` に集約し、UI層への分散を避ける
 - Jest によるユニットテストを継続する
-- E2Eテストは将来導入予定とし、導入時に要件へ反映する
+- E2Eテストは Playwright を採用し、`e2e/` に配置する
 - 仕様変更時は `docs/` と実装を同一変更単位で更新する
 
 ---
@@ -171,13 +171,21 @@ $$
   - `utils/role.ts`
   - `utils/utils.ts`
 
-### E2Eテスト（将来対応）
+### E2Eテスト
 
-- 候補: Playwright
-- 想定配置: `e2e/*.spec.ts`
-- 想定検証:
+- ツール: **Playwright**
+- 配置: `e2e/*.spec.ts`
+- 実行:
+  - `npm run test:e2e`（基本実行）
+  - `npm run test:e2e:fast`（Redis 非依存）
+  - `npm run test:e2e:integration`（Redis 実接続）
+- 検証対象:
   - プレイヤー追加〜分割〜保存/復元の主要シナリオ
   - 10人条件とエラーハンドリング
+  - クリップボードコピー
+- Redis 方針:
+  - Fast E2E では API モックを使い、日常実行の安定性を優先する
+  - Integration E2E では実Redisを使い、保存/復元の実経路を検証する
 
 ---
 

@@ -141,6 +141,7 @@ if (array.length > 10) {
   - `chore:` ビルド・設定変更
 - ブランチ名は `feature/`, `fix/`, `docs/` のプレフィックスをつける
 - 1コミットは1つの変更に限定する
+- `.steering` フォルダ1件に対してコミットは1件にする
 
 ---
 
@@ -161,12 +162,12 @@ docs/
 
 ### 作業単位ドキュメント（`.steering/`）
 
-- 機能追加・改善ごとに `.steering/[YYYYMMDD]-[開発タイトル]/` を作成する
+- 機能追加・改善ごとに `.steering/[YYYYMMDD]-[連番]-[開発タイトル]/` を作成する
 - 必要に応じて次の3ファイルを作成する
 
 ```text
 .steering/
-└── 20260502-team-balance-improvement/
+└── 20260502-01-team-balance-improvement/
     ├── requirements.md
     ├── design.md
     └── tasks.md
@@ -219,15 +220,20 @@ npm run test:unit
 npm run test:unit
 ```
 
-### E2Eテスト（将来実装予定）
+### E2Eテスト（Playwright）
 
-- **現時点では未実装**。ただし将来導入を前提に方針を維持する
-- 導入時は Playwright を候補とし、テストファイルは `e2e/` に `*.spec.ts` で配置する
-- 導入後の基本コマンド例（予定）:
+- テストファイルは `e2e/` に `*.spec.ts` で配置する
+- 基本コマンド:
   - `npm run test:e2e`
+  - `npm run test:e2e:fast`
+  - `npm run test:e2e:integration`
   - `npm run test:e2e:headed`
   - `npm run test:e2e:debug`
-- 開発サーバーとのポート競合を避ける運用を定める
+- `playwright.config.ts` の `webServer` で開発サーバーを自動起動する
+- 開発サーバーのポートは 3000 を使用し、`reuseExistingServer: true` で競合を回避する
+- Redis 依存シナリオは二段運用とする:
+  - Fast E2E: API モックで Redis 非依存に実行
+  - Integration E2E: `REDIS_URL` を設定し実Redisで保存/復元を検証
 
 ---
 

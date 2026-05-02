@@ -13,6 +13,13 @@
 - チームデータの保存と呼び出し（Redisを使用）
 - ユーザーフレンドリーなインターフェース
 
+## 開発ドキュメント
+
+- Copilot を使った開発手順: docs/copilot-workflow.md
+- 仕様書: docs/team-balancer-spec.md
+- API仕様: docs/team-balancer.v1.yaml
+- 実装ルール: .github/copilot-instructions.md
+
 ## 導入方法
 
 ### 必要条件
