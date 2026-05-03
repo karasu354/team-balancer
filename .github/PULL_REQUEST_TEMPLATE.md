@@ -15,6 +15,7 @@
 <!-- 実行したコマンドと結果を記載 -->
 
 - [ ] npm run test:unit
+- [ ] npm run format:test
 - [ ] npm run typecheck
 - [ ] npm run test:e2e:fast
 - [ ] その他（必要時のみ）
