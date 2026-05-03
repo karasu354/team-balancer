@@ -20,10 +20,21 @@ type MockResponse = NextApiResponse & {
   body: unknown
 }
 
+type MinimalRequest = {
+  method: string
+  query: Record<string, unknown>
+  body?: unknown
+}
+
+const toNextApiRequest = (request: MinimalRequest): NextApiRequest => {
+  // テスト用の最小構造体を NextApiRequest として扱うため、unknown ブリッジで明示的に変換する
+  return request as unknown as NextApiRequest
+}
+
 const createMockResponse = (): MockResponse => {
   const response = {
     statusCode: 200,
-    body: null,
+    body: null as unknown,
     setHeader: jest.fn(),
     status(code: number) {
       this.statusCode = code
@@ -35,13 +46,27 @@ const createMockResponse = (): MockResponse => {
     },
   }
 
-  // テスト用モックのため、NextApiResponse 互換へ最小限キャストする
-  return response as MockResponse
+  // テスト用モックのため、unknown ブリッジで NextApiResponse 互換へ変換する
+  return response as unknown as MockResponse
 }
 
 describe('pages/api/teams/[id]', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+  })
+
+  test('id が未指定の場合に 400 を返すこと', async () => {
+    const req = {
+      method: 'GET',
+      query: {},
+    }
+    const res = createMockResponse()
+
+    await handler(toNextApiRequest(req), res)
+
+    expect(res.statusCode).toBe(400)
+    expect(res.body).toEqual({ error: 'Invalid or missing team ID' })
+    expect(mockRedis.connect).not.toHaveBeenCalled()
   })
 
   test('不正な PUT ボディで 400 を返すこと', async () => {
@@ -53,10 +78,28 @@ describe('pages/api/teams/[id]', () => {
     // テスト用モックのため、NextApiRequest 互換へ最小限キャストする
     const res = createMockResponse()
 
-    await handler(req as NextApiRequest, res)
+    await handler(toNextApiRequest(req), res)
 
     expect(res.statusCode).toBe(400)
     expect(res.body).toEqual({ error: 'Invalid request body' })
+  })
+
+  test('未対応メソッドで 405 を返すこと', async () => {
+    const req = {
+      method: 'PATCH',
+      query: { id: 'team-1' },
+    }
+    const res = createMockResponse()
+
+    await handler(toNextApiRequest(req), res)
+
+    expect(res.setHeader).toHaveBeenCalledWith('Allow', [
+      'GET',
+      'PUT',
+      'DELETE',
+    ])
+    expect(res.statusCode).toBe(405)
+    expect(res.body).toEqual({ error: 'Method PATCH Not Allowed' })
   })
 
   test('Redis 例外発生時に 500 を返すこと', async () => {
@@ -68,7 +111,7 @@ describe('pages/api/teams/[id]', () => {
     }
     const res = createMockResponse()
 
-    await handler(req as NextApiRequest, res)
+    await handler(toNextApiRequest(req), res)
 
     expect(res.statusCode).toBe(500)
     expect(res.body).toEqual({ error: 'Internal Server Error' })
@@ -88,7 +131,7 @@ describe('pages/api/teams/[id]', () => {
     }
     const res = createMockResponse()
 
-    await handler(req as NextApiRequest, res)
+    await handler(toNextApiRequest(req), res)
 
     expect(res.statusCode).toBe(400)
     expect(res.body).toEqual({ error: 'Invalid request body' })
@@ -148,7 +191,7 @@ describe('pages/api/teams/[id]', () => {
     }
     const res = createMockResponse()
 
-    await handler(req as NextApiRequest, res)
+    await handler(toNextApiRequest(req), res)
 
     expect(res.statusCode).toBe(200)
     expect(mockRedis.setTeamPlayers).toHaveBeenCalled()
@@ -167,7 +210,7 @@ describe('pages/api/teams/[id]', () => {
     }
     const res = createMockResponse()
 
-    await handler(req as NextApiRequest, res)
+    await handler(toNextApiRequest(req), res)
 
     expect(res.statusCode).toBe(400)
     expect(res.body).toEqual({ error: 'Invalid or missing history ID' })

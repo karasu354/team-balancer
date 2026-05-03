@@ -10,6 +10,7 @@
     "format": "prettier --write .",
     "format:test": "prettier --check .",
     "test": "npm run test:unit",
+    "test:ci": "npm run format:test && npm run typecheck && npm run test && npm run test:e2e:fast",
     "test:unit": "jest",
     "test:e2e": "playwright test --grep-invert @integration",
     "test:e2e:fast": "playwright test --grep-invert @integration",
