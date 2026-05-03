@@ -1,7 +1,7 @@
 import { Player } from '../../utils/player'
 import { rankEnum, tierEnum } from '../../utils/rank'
 import { roleEnum } from '../../utils/role'
-import { TeamBalancer } from '../../utils/teamBalancer'
+import { PlayersJson, TeamBalancer } from '../../utils/teamBalancer'
 import { generateInternalId } from '../../utils/utils'
 
 describe('TeamBalancer クラス', () => {
@@ -24,6 +24,9 @@ describe('TeamBalancer クラス', () => {
         expect(teamBalancer.balancedTeamsByMissMatch[key].evaluationScore).toBe(
           Infinity
         )
+        expect(
+          teamBalancer.balancedTeamsByMissMatch[key].mismatchDetails
+        ).toEqual([])
       }
     })
   })
@@ -119,6 +122,42 @@ describe('TeamBalancer クラス', () => {
       const loaded = TeamBalancer.fromJson(legacyJson)
       expect(loaded.matchHistories).toEqual([])
     })
+
+    test('旧履歴で mismatchDetails 欠損でも読み込みできること', () => {
+      const legacyJson: PlayersJson = {
+        id: 'legacy-team-id',
+        version: '0.0.1',
+        playersTotalCount: 1,
+        players: [
+          {
+            id: 'legacy-player-id-1',
+            name: 'LegacyAlice',
+            tier: tierEnum.gold,
+            rank: rankEnum.two,
+            displayRank: 'GOLD II',
+            rating: 1400,
+            mainRole: roleEnum.top,
+            subRole: roleEnum.jg,
+            desiredRoles: [roleEnum.top],
+            isRoleFixed: false,
+          },
+        ],
+        matchHistories: [
+          {
+            id: 'history-1',
+            playedAt: new Date().toISOString(),
+            winnerTeam: 'blue',
+            mismatchCount: 1,
+            teamsSnapshot: [],
+            playerResults: [],
+          },
+        ],
+      }
+
+      const loaded = TeamBalancer.fromJson(legacyJson)
+      expect(loaded.matchHistories).toHaveLength(1)
+      expect(loaded.matchHistories[0].mismatchDetails).toEqual([])
+    })
   })
 
   describe('playersInfo', () => {
@@ -200,6 +239,99 @@ describe('TeamBalancer クラス', () => {
       expect(() => teamBalancer.divideTeams()).toThrow(
         '現在のプレイヤーではチーム分割ができません。'
       )
+    })
+
+    test('同一入力で連続実行しても分割結果が安定すること', () => {
+      for (let i = 0; i < 10; i++) {
+        const player = new Player(`Player${i}`)
+        player.isParticipatingInGame = true
+        teamBalancer.addPlayer(player)
+      }
+
+      const getFirstBalancedPlayers = (): Player[] => {
+        for (let mismatch = 0; mismatch <= 10; mismatch++) {
+          const candidate = teamBalancer.balancedTeamsByMissMatch[mismatch]
+          if (candidate.players.length === 10) {
+            return candidate.players
+          }
+        }
+
+        throw new Error('有効な分割結果が見つかりません。')
+      }
+
+      teamBalancer.divideTeams()
+      const firstResult = getFirstBalancedPlayers().map((player) => player.id)
+
+      teamBalancer.divideTeams()
+      const secondResult = getFirstBalancedPlayers().map((player) => player.id)
+
+      expect(secondResult).toEqual(firstResult)
+    })
+
+    test('固定ロール制約で候補がない場合はエラーになること', () => {
+      for (let i = 0; i < 10; i++) {
+        const player = new Player(`Player${i}`)
+        player.isParticipatingInGame = true
+        player.desiredRoles = [roleEnum.top]
+        player.isRoleFixed = true
+        teamBalancer.addPlayer(player)
+      }
+
+      expect(() => teamBalancer.divideTeams()).toThrow(
+        '条件を満たすチーム分割候補が見つかりません。'
+      )
+    })
+
+    test('ミスマッチ対象者の内訳を保持できること', () => {
+      for (let i = 0; i < 10; i++) {
+        const player = new Player(`Player${i}`)
+        player.isParticipatingInGame = true
+        player.desiredRoles = [roleEnum.top]
+        player.isRoleFixed = false
+        teamBalancer.addPlayer(player)
+      }
+
+      teamBalancer.divideTeams()
+
+      const candidate = Object.values(
+        teamBalancer.balancedTeamsByMissMatch
+      ).find((team) => team.players.length === 10)
+      expect(candidate).toBeDefined()
+
+      if (!candidate) {
+        throw new Error('有効な分割結果が見つかりません。')
+      }
+
+      expect(candidate.players).toHaveLength(10)
+      expect(candidate.mismatchDetails.length).toBeGreaterThan(0)
+
+      candidate.mismatchDetails.forEach((detail) => {
+        expect(detail.playerId).toBeTruthy()
+        expect(detail.playerName).toBeTruthy()
+        expect(detail.desiredRoles.length).toBeGreaterThan(0)
+        expect(detail.desiredRoles.includes(detail.assignedRole)).toBe(false)
+      })
+    })
+
+    test('ミスマッチ比較表示で使う評価スコアが候補ごとに保持されること', () => {
+      for (let i = 0; i < 10; i++) {
+        const player = new Player(`Player${i}`)
+        player.isParticipatingInGame = true
+        teamBalancer.addPlayer(player)
+      }
+
+      teamBalancer.divideTeams()
+
+      const availableCandidates = Object.values(
+        teamBalancer.balancedTeamsByMissMatch
+      ).filter((candidate) => candidate.players.length === 10)
+
+      expect(availableCandidates.length).toBeGreaterThan(0)
+      expect(
+        availableCandidates.every((candidate) =>
+          Number.isFinite(candidate.evaluationScore)
+        )
+      ).toBe(true)
     })
   })
 

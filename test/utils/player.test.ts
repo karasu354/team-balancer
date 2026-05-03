@@ -190,4 +190,23 @@ describe('generateSamplePlayers', () => {
     const samples = generateSamplePlayers()
     expect(samples.every((p) => p.rating > 0)).toBe(true)
   })
+
+  test('希望ロールが1〜2件で、ALLが含まれないこと', () => {
+    const samples = generateSamplePlayers()
+    expect(
+      samples.every(
+        (p) =>
+          p.desiredRoles.length >= 1 &&
+          p.desiredRoles.length <= 2 &&
+          !p.desiredRoles.includes(roleEnum.all)
+      )
+    ).toBe(true)
+  })
+
+  test('固定希望が全員固定/全員非固定にならないこと', () => {
+    const samples = generateSamplePlayers()
+    const fixedCount = samples.filter((p) => p.isRoleFixed).length
+    expect(fixedCount).toBeGreaterThan(0)
+    expect(fixedCount).toBeLessThan(samples.length)
+  })
 })

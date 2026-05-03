@@ -43,14 +43,16 @@ description: '機能を utils → components → composable → pages/api の順
 ```bash
 npm run format
 npm run format:test
+npm run typecheck
 npm run test
-npm run test:e2e:fast
+npm run test:e2e
 ```
 
 - `npm run format:test` が失敗した場合は、整形・修正後に再実行する
+- `npm run typecheck` が失敗した場合は、型エラーを修正して再実行する
 - `npm run test` が失敗した場合は、失敗原因を修正して再実行する
-- `npm run test:e2e:fast` が失敗した場合は、失敗原因を修正して再実行する
-- 4つのコマンドが成功するまで、タスクを完了扱いにしない
+- `npm run test:e2e` が失敗した場合は、失敗原因を修正して再実行する
+- 5つのコマンドが成功するまで、タスクを完了扱いにしない
 
 ---
 

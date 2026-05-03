@@ -42,4 +42,4 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run integration E2E tests
-        run: npm run test:e2e:integration
+        run: npm run test:e2e

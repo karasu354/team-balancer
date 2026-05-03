@@ -143,7 +143,7 @@ if (array.length > 10) {
 - 1コミットは1つの変更に限定する
 - `.steering` フォルダ1件に対してコミットは1件にする
 - PRタイトルは Conventional Commits 形式の要約を使う
-- PR本文は `.github/PULL_REQUEST_TEMPLATE.md` に沿って作成する
+- PR本文は `/pr-description` プロンプトで生成する
 - PR作成時は `gh pr create --title --body-file` の利用を推奨する
 
 ---
@@ -213,7 +213,7 @@ npm run test:unit
 # テストを実行しないままコミット
 ```
 
-- 実装後の標準検証順は `npm run format` → `npm run format:test` → `npm run typecheck` → `npm run test` → `npm run test:e2e:fast` とする
+- 実装後の標準検証順は `npm run format` → `npm run format:test` → `npm run typecheck` → `npm run test` → `npm run test:e2e` とする
 - CI と同一セットの簡易実行として `npm run test:ci` を利用してよい
 
 ### ユニットテスト（Jest）
@@ -231,16 +231,13 @@ npm run test:unit
 
 - テストファイルは `e2e/` に `*.spec.ts` で配置する
 - 基本コマンド:
-  - `npm run test:e2e`
-  - `npm run test:e2e:fast`
-  - `npm run test:e2e:integration`
-  - `npm run test:e2e:headed`
-  - `npm run test:e2e:debug`
+  - `npm run test:e2e`（ヘッドレス・通常実行）
+  - `npm run test:e2e:headed`（ブラウザ表示あり・目視確認用）
 - `playwright.config.ts` の `webServer` で開発サーバーを自動起動する
 - 開発サーバーのポートは 3000 を使用し、`reuseExistingServer: true` で競合を回避する
 - Redis 依存シナリオは二段運用とする:
-  - Fast E2E: API モックで Redis 非依存に実行
-  - Integration E2E: `REDIS_URL` を設定し実Redisで保存/復元を検証
+  - Fast E2E: `E2E_USE_REAL_REDIS=false`（デフォルト）で API モックにより Redis 非依存に実行。`@integration` テストは自動スキップされる
+  - Integration E2E: `E2E_USE_REAL_REDIS=true` で `@integration` テストのみ実行し、`REDIS_URL` を設定し実Redisで保存/復元を検証
 
 ### CI/CD（GitHub Actions）
 
@@ -249,7 +246,7 @@ npm run test:unit
   - `npm run format:test`
   - `npm run typecheck`
   - `npm run test`
-  - `npm run test:e2e:fast`
+  - `npm run test:e2e`
   - `npm run build`
 - `.github/workflows/*.yaml` の `uses` はタグではなくコミットハッシュへ固定する
 - Integration E2E は `.github/workflows/e2e-integration.yaml` で手動実行する
@@ -274,11 +271,11 @@ npm run test:unit
 - `npm run typecheck` が成功している
 - `npm run test` が成功している
 - `npm run test:unit` が成功している
-- `npm run test:e2e:fast` が成功している
+- `npm run test:e2e` が成功している
 - 変更箇所に対応するテストが追加または更新されている
 - API変更時に `docs/team-balancer.v1.yaml` が更新されている
 - Conventional Commits 形式でコミットされている
-- PR本文が `.github/PULL_REQUEST_TEMPLATE.md` の必須項目を満たしている
+- PR本文に背景 / 変更内容 / テスト結果 / 影響範囲 / レビューポイントが含まれている
 
 ---
 

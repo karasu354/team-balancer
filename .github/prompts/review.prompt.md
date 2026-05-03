@@ -1,5 +1,5 @@
 ---
-agent: 'review-agent'
+agent: 'agent'
 description: 'コードレビュー。型安全・セキュリティ・テスト・ドキュメント更新漏れを確認し、重要度順で指摘する'
 ---
 

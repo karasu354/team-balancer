@@ -46,7 +46,7 @@
 | `/review`         | 変更差分の品質レビュー         | 実装後、PR前                            | Critical / Warning / Info の指摘                                                     | ファイル編集の実行                                 |
 | `/refactor-check` | リファクタリング候補の抽出     | 品質改善の候補出しをしたいとき          | 優先度付き改善リスト                                                                 | ファイル編集の実行                                 |
 | `/commit-message` | コミットメッセージ作成         | `.steering` 1件の実装をコミットするとき | `.steering` 1件に対する Conventional Commits 形式のメッセージ1件                     | コード変更・複数 `.steering` の統合                |
-| `/pr-description` | PR本文の初稿作成               | コミット後に PR を作るとき              | `.github/PULL_REQUEST_TEMPLATE.md` 準拠の本文                                        | コード変更・コミットメッセージ生成                 |
+| `/pr-description` | PR本文の初稿作成               | コミット後に PR を作るとき              | `.steering` から直接生成する PR 本文                                                 | コード変更・コミットメッセージ生成                 |
 
 ---
 
@@ -158,7 +158,7 @@
 
 - 実行プロンプト: `/pr-description`
 - 入力例: 「`.steering/20260503-04-pr-quality-and-test-stabilization/` の PR 本文を作って」
-- 本文テンプレート: `.github/PULL_REQUEST_TEMPLATE.md`
+- 必須項目: `背景 / 変更内容 / テスト結果 / 影響範囲 / レビューポイント`
 - PR作成コマンド:
 
 ```bash
@@ -184,10 +184,10 @@ PRタイトルの良い例/悪い例:
   2. `npm run format:test`
   3. `npm run typecheck`
   4. `npm run test`
-  5. `npm run test:e2e:fast`
+  5. `npm run test:e2e`
 - 補足:
   - PR前の最終確認として上記5コマンドを必ず実行する
-  - 同一セットは `npm run test:ci` でも実行できる（`format:test` + `typecheck` + `test` + `test:e2e:fast`）
+  - 同一セットは `npm run test:ci` でも実行できる（`format:test` + `typecheck` + `test` + `test:e2e`）
   - 生成差分が広い場合は、今回の `.steering` 対象に含めるべきかを確認してからコミットする
 
 ---
@@ -215,7 +215,7 @@ PRタイトルの良い例/悪い例:
 - 1つの .steering フォルダは、1つの開発テーマに限定する
 - 1つの .steering フォルダに対して、コミットは1件にする
 - 実装を行ったら tasks.md のチェックを更新する
-- PR前に `npm run format` → `npm run format:test` → `npm run typecheck` → `npm run test` → `npm run test:e2e:fast` を実行する
+- PR前に `npm run format` → `npm run format:test` → `npm run typecheck` → `npm run test` → `npm run test:e2e` を実行する
 - テストディレクトリは `test/` を正準とし、`tests/` は新設しない
 - 仕様変更がある場合は docs/team-balancer-spec.md を同じ変更で更新する
 - API変更がある場合は docs/team-balancer.v1.yaml を同じ変更で更新する
