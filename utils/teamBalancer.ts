@@ -64,9 +64,85 @@ export interface MatchHistory {
   mismatchDetails?: MismatchDetail[]
 }
 
+export const MAX_MATCH_HISTORIES = 50
+
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === 'object' && value !== null
+}
+
+const isLaneRole = (value: unknown): value is LaneRole => {
+  return (
+    value === roleEnum.top ||
+    value === roleEnum.jg ||
+    value === roleEnum.mid ||
+    value === roleEnum.bot ||
+    value === roleEnum.sup
+  )
+}
+
+const isMismatchDetails = (value: unknown): value is MismatchDetail[] => {
+  if (value === undefined) {
+    return true
+  }
+
+  if (!Array.isArray(value)) {
+    return false
+  }
+
+  return value.every((detail) => {
+    if (!isRecord(detail)) {
+      return false
+    }
+
+    return (
+      typeof detail.playerId === 'string' &&
+      typeof detail.playerName === 'string' &&
+      isLaneRole(detail.assignedRole) &&
+      Array.isArray(detail.desiredRoles) &&
+      detail.desiredRoles.every((role) => isLaneRole(role)) &&
+      typeof detail.isRoleFixed === 'boolean'
+    )
+  })
+}
+
+const isMatchHistory = (value: unknown): value is MatchHistory => {
+  if (!isRecord(value)) {
+    return false
+  }
+
+  return (
+    typeof value.id === 'string' &&
+    typeof value.playedAt === 'string' &&
+    (value.winnerTeam === 'blue' || value.winnerTeam === 'red') &&
+    typeof value.mismatchCount === 'number' &&
+    Array.isArray(value.teamsSnapshot) &&
+    Array.isArray(value.playerResults) &&
+    isMismatchDetails(value.mismatchDetails)
+  )
+}
+
+export const normalizeMatchHistories = (
+  matchHistories: MatchHistory[] | undefined
+): MatchHistory[] => {
+  return (
+    matchHistories
+      ?.filter((history) => isMatchHistory(history))
+      .map((history) => ({
+        ...history,
+        mismatchDetails: history.mismatchDetails ?? [],
+      }))
+      .sort(
+        (left, right) =>
+          new Date(right.playedAt).getTime() - new Date(left.playedAt).getTime()
+      )
+      .slice(0, MAX_MATCH_HISTORIES) || []
+  )
+}
+
 export class TeamBalancer {
   private static readonly TEAM_SIZE = 5
   private static readonly TOTAL_PLAYERS = 50
+  private static readonly MAX_MATCH_HISTORIES = MAX_MATCH_HISTORIES
   private static readonly MAX_TEAM_EVALUATIONS = 200000
   private static readonly TEAM_DIVIDE_TIME_LIMIT_MS = 1500
   private static readonly PLAYERS_VERSION = '0.0.1'
@@ -118,63 +194,10 @@ export class TeamBalancer {
     teamBalancer.players = playersJson.players.map((player) =>
       Player.fromJson(player)
     )
-    teamBalancer.matchHistories =
+    teamBalancer.matchHistories = normalizeMatchHistories(
       playersJson.matchHistories
-        ?.filter((history) => TeamBalancer.isMatchHistory(history))
-        .map((history) => ({
-          ...history,
-          mismatchDetails: history.mismatchDetails ?? [],
-        })) || []
-    return teamBalancer
-  }
-
-  private static isMatchHistory(value: unknown): value is MatchHistory {
-    if (typeof value !== 'object' || value === null) {
-      return false
-    }
-
-    const record = value as Record<string, unknown>
-    return (
-      typeof record.id === 'string' &&
-      typeof record.playedAt === 'string' &&
-      (record.winnerTeam === 'blue' || record.winnerTeam === 'red') &&
-      typeof record.mismatchCount === 'number' &&
-      Array.isArray(record.teamsSnapshot) &&
-      Array.isArray(record.playerResults) &&
-      TeamBalancer.isMismatchDetails(record.mismatchDetails)
     )
-  }
-
-  private static isMismatchDetails(value: unknown): value is MismatchDetail[] {
-    if (value === undefined) {
-      return true
-    }
-
-    if (!Array.isArray(value)) {
-      return false
-    }
-
-    return value.every((detail) => {
-      if (typeof detail !== 'object' || detail === null) {
-        return false
-      }
-
-      const record = detail as Record<string, unknown>
-      return (
-        typeof record.playerId === 'string' &&
-        typeof record.playerName === 'string' &&
-        Object.values(roleEnum)
-          .filter((role) => role !== roleEnum.all)
-          .includes(record.assignedRole as LaneRole) &&
-        Array.isArray(record.desiredRoles) &&
-        record.desiredRoles.every((role) =>
-          Object.values(roleEnum)
-            .filter((value) => value !== roleEnum.all)
-            .includes(role as LaneRole)
-        ) &&
-        typeof record.isRoleFixed === 'boolean'
-      )
-    })
+    return teamBalancer
   }
 
   get playersInfo(): PlayersJson {
@@ -229,7 +252,10 @@ export class TeamBalancer {
 
     const appliedHistory = this.applyMatchHistory(history)
 
-    this.matchHistories = [appliedHistory, ...this.matchHistories]
+    this.matchHistories = normalizeMatchHistories([
+      appliedHistory,
+      ...this.matchHistories,
+    ]).slice(0, TeamBalancer.MAX_MATCH_HISTORIES)
     return appliedHistory
   }
 
@@ -257,10 +283,7 @@ export class TeamBalancer {
       this.applyMatchHistory(history)
     )
 
-    this.matchHistories = recalculatedHistories.sort(
-      (left, right) =>
-        new Date(right.playedAt).getTime() - new Date(left.playedAt).getTime()
-    )
+    this.matchHistories = normalizeMatchHistories(recalculatedHistories)
 
     return this.matchHistories
   }
