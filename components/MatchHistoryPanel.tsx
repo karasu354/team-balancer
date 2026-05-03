@@ -6,6 +6,7 @@ import MatchHistoryAccordion from './MatchHistoryAccordion'
 interface MatchHistoryPanelProps {
   histories: MatchHistory[]
   selectedHistoryId: string | null
+  isLoading?: boolean
   onDeleteHistory: (historyId: string) => void
   onToggleHistory: (historyId: string) => void
 }
@@ -29,6 +30,7 @@ const formatPlayedAt = (playedAt: string): string => {
 const MatchHistoryPanel: React.FC<MatchHistoryPanelProps> = ({
   histories,
   selectedHistoryId,
+  isLoading = false,
   onDeleteHistory,
   onToggleHistory,
 }) => {
@@ -82,6 +84,7 @@ const MatchHistoryPanel: React.FC<MatchHistoryPanelProps> = ({
               {selectedHistoryId === history.id && (
                 <MatchHistoryAccordion
                   history={history}
+                  isLoading={isLoading}
                   onDeleteHistory={onDeleteHistory}
                 />
               )}

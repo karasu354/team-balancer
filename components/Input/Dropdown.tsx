@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 
 interface Option {
   label: string
@@ -10,21 +10,40 @@ interface Props {
   setValue: (value: string) => void
   label: string
   options: Option[]
+  description?: string
+  required?: boolean
 }
 
-const Dropdown: React.FC<Props> = ({ value, setValue, label, options }) => {
-  const [isFocused, setIsFocused] = useState(false)
-
+const Dropdown: React.FC<Props> = ({
+  value,
+  setValue,
+  label,
+  options,
+  description,
+  required = true,
+}) => {
   return (
-    <div className="relative w-full">
+    <div className="w-full">
+      <div className="mb-1 flex items-center justify-between">
+        <label
+          htmlFor="dropdown-field"
+          className="text-sm font-medium text-slate-700"
+        >
+          {label}
+        </label>
+        {required && <span className="text-xs text-red-500">※必須</span>}
+      </div>
+
+      {description && (
+        <p className="mb-2 text-xs text-slate-500">{description}</p>
+      )}
+
       <select
         id="dropdown-field"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        className="h-10 w-80 rounded-md border-2 border-gray-400 bg-white px-2 pt-3 text-gray-900 outline-none focus:border-blue-500"
-        required
+        className="h-10 w-80 rounded-md border-2 border-gray-400 bg-white px-2 py-2 text-gray-900 outline-none focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-300"
+        required={required}
       >
         <option value="" disabled hidden />
         {options.map((option) => (
@@ -33,17 +52,6 @@ const Dropdown: React.FC<Props> = ({ value, setValue, label, options }) => {
           </option>
         ))}
       </select>
-
-      <label
-        htmlFor="dropdown-field"
-        className={`pointer-events-none absolute left-2 transition-all duration-300 ${
-          isFocused || value
-            ? 'top-0 px-1 text-xs text-gray-400'
-            : 'top-1/2 -translate-y-1/2'
-        }`}
-      >
-        {label}
-      </label>
     </div>
   )
 }

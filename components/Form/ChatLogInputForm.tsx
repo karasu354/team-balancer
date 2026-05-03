@@ -27,6 +27,8 @@ const ChatLogInputForm: React.FC<ChatLogInputFormProps> = ({
       <Textarea
         value={logInput}
         setValue={setLogInput}
+        label="チャットログ"
+        description="ロビーのチャットログをコピー&ペーストします。プレイヤー名とID（#以降）が自動で抽出されます"
         placeholder={`Player1 #JP1がロビーに参加しました。
 Player2 #meowがロビーに参加しました。
 Player1 #JP1がロビーから退出しました。
@@ -37,7 +39,7 @@ Player2 #meowがロビーから退出しました。`}
       <button
         onClick={handleLogSubmit}
         data-testid="import-chat-log"
-        className="rounded bg-blue-500 px-4 py-2 whitespace-nowrap text-white transition hover:bg-blue-600"
+        className="rounded bg-blue-600 px-4 py-2 whitespace-nowrap text-white transition hover:bg-blue-700"
       >
         取り込む
       </button>
