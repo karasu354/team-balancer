@@ -45,7 +45,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
         <div
           className="flex w-10 cursor-pointer items-center justify-center border-r border-gray-300 bg-gray-200 hover:brightness-80"
           onClick={handleParticipationToggle}
-          title="Toggle Participation"
+          title="参加切替"
         >
           <IconContext.Provider
             value={{ size: '1.5rem', className: 'text-gray-600' }}

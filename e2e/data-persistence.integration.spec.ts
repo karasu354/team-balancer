@@ -27,13 +27,13 @@ test('@integration ID保存→読み込みでプレイヤー一覧が復元さ�
   await page.goto('/')
   await addTenPlayers(page)
 
-  const idInput = page.getByPlaceholder('Input ID')
+  const idInput = page.getByPlaceholder('IDを入力')
   await idInput.fill(testId)
-  await page.getByRole('button', { name: 'Save' }).click()
+  await page.getByRole('button', { name: '保存する' }).click()
 
   await page.goto('/')
   await idInput.fill(testId)
-  await page.getByRole('button', { name: 'Import' }).first().click()
+  await page.getByRole('button', { name: '読み込む' }).first().click()
 
   await expect(page.getByText('Player01')).toBeVisible({ timeout: 5000 })
 })
@@ -46,12 +46,11 @@ test('@integration 存在しない ID で読み込むとエラーが表示され
 
   await page.goto('/')
 
-  const idInput = page.getByPlaceholder('Input ID')
+  const idInput = page.getByPlaceholder('IDを入力')
   await idInput.fill('nonexistent-id-xyz-12345')
 
-  const alertPromise = page.waitForEvent('dialog')
-  await page.getByRole('button', { name: 'Import' }).first().click()
-  const dialog = await alertPromise
-  expect(dialog.message()).toContain('見つかりません')
-  await dialog.dismiss()
+  await page.getByRole('button', { name: '読み込む' }).first().click()
+  await expect(
+    page.getByText('チームデータが見つかりませんでした。')
+  ).toBeVisible()
 })

@@ -45,7 +45,7 @@ const BulkEditRow: React.FC<BulkEditRowProps> = ({
         value={player.name}
         onChange={(e) => update('name', e.target.value)}
         className="min-w-24 flex-1 rounded border border-slate-300 px-2 py-1 text-sm"
-        placeholder="Player Name"
+        placeholder="プレイヤー名"
       />
 
       <select
@@ -109,11 +109,11 @@ const BulkEditRow: React.FC<BulkEditRowProps> = ({
           onChange={(e) => update('isRoleFixed', e.target.checked)}
           className="h-3 w-3"
         />
-        Fixed
+        固定
       </label>
 
       <div className="flex flex-wrap items-center gap-1">
-        <span className="text-xs text-slate-500">Desired:</span>
+        <span className="text-xs text-slate-500">希望:</span>
         {Object.values(roleEnum)
           .filter((r) => r !== roleEnum.all)
           .map((r) => (
@@ -141,7 +141,7 @@ const BulkEditRow: React.FC<BulkEditRowProps> = ({
         onClick={onRemove}
         className="rounded bg-red-100 px-2 py-1 text-xs text-red-700 hover:bg-red-200"
       >
-        Delete
+        削除
       </button>
     </div>
   )

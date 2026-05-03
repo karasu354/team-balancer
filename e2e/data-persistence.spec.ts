@@ -15,16 +15,16 @@ test('ID保存→読み込みでプレイヤー一覧が復元される', async 
 
   const idForm = page
     .locator('div')
-    .filter({ has: page.getByPlaceholder('Input ID') })
+    .filter({ has: page.getByPlaceholder('IDを入力') })
     .first()
-  const idInput = page.getByPlaceholder('Input ID')
+  const idInput = page.getByPlaceholder('IDを入力')
   await idInput.fill(testId)
-  await idForm.getByRole('button', { name: 'Save' }).click()
+  await idForm.getByRole('button', { name: '保存する' }).click()
 
   // ページをリロードして読み込み
   await page.goto('/')
   await idInput.fill(testId)
-  await idForm.getByRole('button', { name: 'Import' }).click()
+  await idForm.getByRole('button', { name: '読み込む' }).click()
 
   await expect(
     page.locator('p.font-bold', { hasText: 'Player01' }).first()
@@ -37,11 +37,11 @@ test('存在しない ID で読み込むとエラーが表示される', async (
 
   await page.goto('/')
 
-  const idInput = page.getByPlaceholder('Input ID')
+  const idInput = page.getByPlaceholder('IDを入力')
   const idForm = page.locator('div').filter({ has: idInput }).first()
   await idInput.fill('nonexistent-id-xyz-12345')
 
-  await idForm.getByRole('button', { name: 'Import' }).click()
+  await idForm.getByRole('button', { name: '読み込む' }).click()
 
   await expect(
     page.getByText('チームデータが見つかりませんでした。')

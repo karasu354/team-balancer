@@ -113,11 +113,11 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
     <div className="w-full">
       <div className="mb-3 flex items-center justify-between rounded-lg bg-slate-100 px-3 py-2">
         <p className="text-sm text-slate-600">
-          Total:{' '}
+          合計:{' '}
           <span className="font-semibold text-slate-900">{players.length}</span>
         </p>
         <p className="text-sm text-slate-600">
-          Participating:{' '}
+          参加中:{' '}
           <span className="font-semibold text-slate-900">
             {participatingPlayersCount}/10
           </span>
@@ -126,7 +126,7 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
 
       <div className="mb-3">
         <Tabs
-          labels={['Cards', 'Bulk Edit']}
+          labels={['カード表示', '一括編集']}
           activeTab={activeTab}
           onActiveTab={setActiveTab}
         />
@@ -166,8 +166,7 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
           ) : (
             <div className="space-y-2">
               <p className="text-xs text-slate-500">
-                Bulk Edit では全プレイヤーをまとめて編集できます。編集後に「Save
-                All」で確定してください。
+                一括編集では全プレイヤーをまとめて編集できます。編集後に「一括保存」で確定してください。
               </p>
               {draftPlayers.map((player, index) => (
                 <BulkEditRow
@@ -193,7 +192,7 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
                         : 'cursor-not-allowed bg-gray-300 text-gray-500'
                     }`}
                   >
-                    Save All
+                    一括保存
                   </button>
                 </div>
               )}

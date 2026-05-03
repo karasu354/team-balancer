@@ -5,12 +5,12 @@ import { Page } from '@playwright/test'
  * Single タブが選択済みの状態で呼び出すこと。
  */
 export const addPlayer = async (page: Page, name: string): Promise<void> => {
-  await page.getByLabel('Player Name').fill(name)
-  await page.getByRole('button', { name: 'Add Player' }).click()
+  await page.getByLabel('プレイヤー名').fill(name)
+  await page.getByRole('button', { name: 'プレイヤーを追加' }).click()
 
   // Divide Teams は「参加中プレイヤーが10人」で有効になるため、
   // E2E では追加直後に参加トグルを ON に統一する。
-  await page.getByTitle('Toggle Participation').last().click()
+  await page.getByTitle('参加切替').last().click()
 }
 
 /**

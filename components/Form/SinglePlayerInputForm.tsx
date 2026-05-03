@@ -57,14 +57,14 @@ const SinglePlayerInputForm: React.FC<SinglePlayerInputFormProps> = ({
       <InputText
         value={player.name}
         setValue={(value) => updatePlayerProperty('name', value)}
-        label="Player Name"
+        label="プレイヤー名"
       />
 
       <div className="flex space-x-4">
         <Dropdown
           value={player.tier}
           setValue={(value) => updatePlayerProperty('tier', value as tierEnum)}
-          label="Tier"
+          label="ティア"
           options={Object.values(tierEnum).map((tierValue) => ({
             label: tierValue,
             value: tierValue,
@@ -76,7 +76,7 @@ const SinglePlayerInputForm: React.FC<SinglePlayerInputFormProps> = ({
             setValue={(value) =>
               updatePlayerProperty('rank', value as rankEnum)
             }
-            label="Rank"
+            label="ランク"
             options={Object.values(rankEnum).map((rankValue) => ({
               label: rankValue,
               value: rankValue,
@@ -91,7 +91,7 @@ const SinglePlayerInputForm: React.FC<SinglePlayerInputFormProps> = ({
           setValue={(value) =>
             updatePlayerProperty('mainRole', value as roleEnum)
           }
-          label="Main Role"
+          label="メインロール"
           options={Object.values(roleEnum).map((roleValue) => ({
             label: roleValue,
             value: roleValue,
@@ -103,7 +103,7 @@ const SinglePlayerInputForm: React.FC<SinglePlayerInputFormProps> = ({
             setValue={(value) =>
               updatePlayerProperty('subRole', value as roleEnum)
             }
-            label="Sub Role"
+            label="サブロール"
             options={Object.values(roleEnum)
               .filter((role) => role !== roleEnum.all)
               .map((roleValue) => ({
@@ -118,7 +118,7 @@ const SinglePlayerInputForm: React.FC<SinglePlayerInputFormProps> = ({
         <CheckBox
           values={player.desiredRoles}
           setValues={(roles) => handleSetDesiredRoles(roles as roleEnum[])}
-          label="Select Desired Roles"
+          label="希望ロール"
           options={Object.values(roleEnum).map((roleValue) => ({
             label: roleValue,
             value: roleValue,
@@ -130,7 +130,7 @@ const SinglePlayerInputForm: React.FC<SinglePlayerInputFormProps> = ({
         onClick={handleAddPlayer}
         className="cursor-pointer rounded bg-green-500 px-4 py-2 text-white transition hover:bg-green-600"
       >
-        Add Player
+        プレイヤーを追加
       </button>
     </div>
   )

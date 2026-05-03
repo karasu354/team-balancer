@@ -1,23 +1,31 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { getTeamData, setTeamData } from '../composable/api'
 import { TeamBalancer } from '../utils/teamBalancer'
 
 interface IdFormProps {
+  activeTeamId: string
   teamBalancer: TeamBalancer
   onUpdateTeamBalancer: (teamBalancer: TeamBalancer) => void
+  onActiveTeamIdChange: (teamId: string) => void
   onAppUpdate: () => void
 }
 
 const IdForm: React.FC<IdFormProps> = ({
+  activeTeamId,
   teamBalancer,
   onUpdateTeamBalancer,
+  onActiveTeamIdChange,
   onAppUpdate,
 }) => {
   const [id, setId] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [statusMessage, setStatusMessage] = useState<string>('')
   const [isErrorStatus, setIsErrorStatus] = useState<boolean>(false)
+
+  useEffect(() => {
+    setId(activeTeamId)
+  }, [activeTeamId])
 
   const handleFetchTeamData = async () => {
     if (!id.trim()) return
@@ -29,6 +37,7 @@ const IdForm: React.FC<IdFormProps> = ({
       const teamData = await getTeamData(id)
       if (teamData) {
         onUpdateTeamBalancer(TeamBalancer.fromJson(teamData))
+        onActiveTeamIdChange(id)
         setStatusMessage('チームデータを読み込みました。')
       } else {
         setIsErrorStatus(true)
@@ -51,6 +60,7 @@ const IdForm: React.FC<IdFormProps> = ({
     try {
       const playersInfo = teamBalancer.playersInfo
       await setTeamData(id, playersInfo)
+      onActiveTeamIdChange(id)
       setStatusMessage('チームデータを保存しました。')
     } catch (error) {
       setIsErrorStatus(true)
@@ -68,12 +78,12 @@ const IdForm: React.FC<IdFormProps> = ({
             className="mb-1 block text-sm font-medium text-slate-700"
             htmlFor="team-id-input"
           >
-            Team ID
+            チームID
           </label>
           <input
             id="team-id-input"
             type="text"
-            placeholder="Input ID"
+            placeholder="IDを入力"
             value={id}
             onChange={(e) => setId(e.target.value)}
             className="w-full rounded border border-slate-300 bg-white p-2"
@@ -90,7 +100,7 @@ const IdForm: React.FC<IdFormProps> = ({
                 : 'bg-blue-500 text-white transition hover:bg-blue-600'
             }`}
           >
-            {isLoading ? 'Loading...' : 'Import'}
+            {isLoading ? '読込中...' : '読み込む'}
           </button>
 
           <button
@@ -102,7 +112,7 @@ const IdForm: React.FC<IdFormProps> = ({
                 : 'bg-green-500 text-white transition hover:bg-green-600'
             }`}
           >
-            {isLoading ? 'Saving...' : 'Save'}
+            {isLoading ? '保存中...' : '保存する'}
           </button>
         </div>
       </div>
