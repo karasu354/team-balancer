@@ -11,7 +11,7 @@ test('チャットログ取り込みで複数プレイヤーが追加される',
   await page.goto('/')
 
   // 複数入力タブへ切り替え
-  await page.getByRole('button', { name: '複数入力' }).click()
+  await page.getByRole('tab', { name: '複数入力' }).click()
 
   await page.locator('#textarea-field').fill(CHAT_LOG)
   await page.getByTestId('import-chat-log').click()

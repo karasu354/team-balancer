@@ -152,6 +152,9 @@ export class TeamBalancer {
   private static readonly ELO_LANE_WEIGHT = 0.7
   private static readonly ELO_TEAM_WEIGHT = 0.3
   private static readonly ELO_PAIR_BLEND_WEIGHT = 0.2
+  private static readonly TEAM_EVAL_TOTAL_RATING_WEIGHT = 0.2
+  private static readonly TEAM_EVAL_LANE_RATING_WEIGHT = 0.6
+  private static readonly TEAM_EVAL_ADC_SUP_PAIR_WEIGHT = 0.2
 
   // エラーメッセージの定数化
   private static readonly ERROR_MESSAGES = {
@@ -650,15 +653,10 @@ export class TeamBalancer {
     const laneRatingDifference = this._calculateLaneRatingDifference(players)
     const adcSupPairDifference = this._calculateAdcSupPairDifference(players)
 
-    const weights = {
-      totalRatingDifference: 0.3,
-      laneRatingDifference: 0.5,
-      adcSupPairDifference: 0.2,
-    }
     const evaluationScore =
-      weights.totalRatingDifference * totalRatingDifference +
-      weights.laneRatingDifference * laneRatingDifference +
-      weights.adcSupPairDifference * adcSupPairDifference
+      TeamBalancer.TEAM_EVAL_TOTAL_RATING_WEIGHT * totalRatingDifference +
+      TeamBalancer.TEAM_EVAL_LANE_RATING_WEIGHT * laneRatingDifference +
+      TeamBalancer.TEAM_EVAL_ADC_SUP_PAIR_WEIGHT * adcSupPairDifference
 
     return { players, mismatchCount, evaluationScore, mismatchDetails }
   }

@@ -19,7 +19,7 @@ const InputText = forwardRef<HTMLInputElement, Props>(
         <div className="mb-1 flex items-center justify-between">
           <label
             htmlFor="input-field"
-            className="text-sm font-medium text-slate-700"
+            className="text-sm font-medium text-[var(--tb-text-primary)]"
           >
             {label}
           </label>
@@ -27,7 +27,9 @@ const InputText = forwardRef<HTMLInputElement, Props>(
         </div>
 
         {description && (
-          <p className="mb-2 text-xs text-slate-500">{description}</p>
+          <p className="mb-2 text-xs text-[var(--tb-text-secondary)]">
+            {description}
+          </p>
         )}
 
         <input
@@ -37,7 +39,7 @@ const InputText = forwardRef<HTMLInputElement, Props>(
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder=""
-          className={`h-10 w-80 rounded-md border-2 bg-white px-2 py-2 outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${
+          className={`h-10 w-80 rounded-md border-2 bg-white px-2 py-2 text-gray-900 outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${
             errorMessage
               ? 'border-red-500 focus-visible:border-red-600'
               : 'border-gray-400 focus-visible:border-blue-500'

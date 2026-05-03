@@ -27,7 +27,7 @@ const Dropdown: React.FC<Props> = ({
       <div className="mb-1 flex items-center justify-between">
         <label
           htmlFor="dropdown-field"
-          className="text-sm font-medium text-slate-700"
+          className="text-sm font-medium text-[var(--tb-text-primary)]"
         >
           {label}
         </label>
@@ -35,7 +35,9 @@ const Dropdown: React.FC<Props> = ({
       </div>
 
       {description && (
-        <p className="mb-2 text-xs text-slate-500">{description}</p>
+        <p className="mb-2 text-xs text-[var(--tb-text-secondary)]">
+          {description}
+        </p>
       )}
 
       <select

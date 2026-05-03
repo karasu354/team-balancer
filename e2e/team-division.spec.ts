@@ -14,6 +14,10 @@ test('10人いるときチーム分割が実行できる', async ({ page }) => {
 
   await page.getByRole('button', { name: 'チーム分け' }).click()
 
+  await expect(page.getByText('チーム分けが完了しました。')).toBeVisible({
+    timeout: 10000,
+  })
+
   // 分割完了まで待機（最大10秒）
   await expect(page.getByText('青チーム', { exact: true })).toBeVisible({
     timeout: 10000,
@@ -29,6 +33,11 @@ test('10人未満のときチーム分けボタンが非活性', async ({ page }
 
   await expect(
     page.getByText('分割条件: 参加中プレイヤー 10人', { exact: false })
+  ).toBeVisible()
+  await expect(
+    page.getByText(
+      'キーボード操作: 分割エリアにフォーカスして Enter を押すとチーム分けを実行します。'
+    )
   ).toBeVisible()
 
   await addPlayer(page, 'OnlyOnePlayer')
@@ -48,11 +57,15 @@ test('勝敗確定後に履歴が表示される', async ({ page }) => {
   })
 
   await page.getByRole('button', { name: '青チーム勝利' }).click()
+  page.once('dialog', async (dialog) => {
+    await dialog.accept()
+  })
   await page.getByRole('button', { name: '結果を確定' }).click()
 
   await expect(
     page.getByText('試合結果を確定し、履歴に保存しました。')
   ).toBeVisible()
+  await page.getByRole('tab', { name: '履歴' }).click()
   await expect(page.getByText('試合履歴')).toBeVisible()
   const firstHistoryRow = page.getByTestId('match-history-row').first()
   await expect(firstHistoryRow).toContainText('青チーム勝利')
@@ -62,11 +75,16 @@ test('勝敗確定後に履歴が表示される', async ({ page }) => {
   await expect(firstHistoryRow).not.toContainText('敗 5')
 
   await page.getByRole('button', { name: 'チーム分け' }).click()
+  await page.getByRole('tab', { name: '分割結果' }).click()
   await expect(page.getByText('青チーム', { exact: true })).toBeVisible({
     timeout: 10000,
   })
   await page.getByRole('button', { name: '赤チーム勝利' }).click()
+  page.once('dialog', async (dialog) => {
+    await dialog.accept()
+  })
   await page.getByRole('button', { name: '結果を確定' }).click()
+  await page.getByRole('tab', { name: '履歴' }).click()
 
   const historyList = page.getByTestId('match-history-list')
   await expect(historyList).toHaveClass(/max-h-80/)
@@ -101,6 +119,7 @@ test('履歴削除でアコーディオンが閉じて件数が減る', async ({
 
   await page.getByRole('button', { name: '青チーム勝利' }).click()
   await page.getByRole('button', { name: '結果を確定' }).click()
+  await page.getByRole('tab', { name: '履歴' }).click()
 
   const historyRows = page.getByTestId('match-history-row')
   await expect(historyRows).toHaveCount(1)

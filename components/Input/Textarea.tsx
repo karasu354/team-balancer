@@ -23,7 +23,7 @@ const Textarea: React.FC<Props> = ({
         <div className="mb-1 flex items-center justify-between">
           <label
             htmlFor="textarea-field"
-            className="text-sm font-medium text-slate-700"
+            className="text-sm font-medium text-[var(--tb-text-primary)]"
           >
             {label}
           </label>

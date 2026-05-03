@@ -27,10 +27,10 @@ const BulkEditRow: React.FC<BulkEditRowProps> = ({
   }
 
   const selectClass =
-    'rounded border border-slate-300 bg-white px-1 py-1 text-xs'
+    'rounded border border-[var(--tb-border)] bg-[var(--tb-surface-muted)] px-1 py-1 text-xs text-[var(--tb-text-primary)]'
 
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded border border-slate-200 bg-white px-3 py-2">
+    <div className="flex flex-wrap items-center gap-2 rounded border border-[var(--tb-border)] bg-[var(--tb-surface)] px-3 py-2">
       <label className="flex cursor-pointer items-center gap-1" title="参加">
         <input
           type="checkbox"
@@ -44,7 +44,7 @@ const BulkEditRow: React.FC<BulkEditRowProps> = ({
         type="text"
         value={player.name}
         onChange={(e) => update('name', e.target.value)}
-        className="min-w-24 flex-1 rounded border border-slate-300 px-2 py-1 text-sm"
+        className="min-w-24 flex-1 rounded border border-[var(--tb-border)] bg-[var(--tb-surface-muted)] px-2 py-1 text-sm text-[var(--tb-text-primary)]"
         placeholder="プレイヤー名"
       />
 
@@ -102,7 +102,7 @@ const BulkEditRow: React.FC<BulkEditRowProps> = ({
         </select>
       )}
 
-      <label className="flex items-center gap-1 text-xs text-slate-600">
+      <label className="flex items-center gap-1 text-xs text-[var(--tb-text-secondary)]">
         <input
           type="checkbox"
           checked={player.isRoleFixed}
@@ -113,13 +113,13 @@ const BulkEditRow: React.FC<BulkEditRowProps> = ({
       </label>
 
       <div className="flex flex-wrap items-center gap-1">
-        <span className="text-xs text-slate-500">希望:</span>
+        <span className="text-xs text-[var(--tb-text-secondary)]">希望:</span>
         {Object.values(roleEnum)
           .filter((r) => r !== roleEnum.all)
           .map((r) => (
             <label
               key={r}
-              className="flex cursor-pointer items-center gap-0.5 text-xs text-slate-600"
+              className="flex cursor-pointer items-center gap-0.5 text-xs text-[var(--tb-text-secondary)]"
             >
               <input
                 type="checkbox"
@@ -139,7 +139,7 @@ const BulkEditRow: React.FC<BulkEditRowProps> = ({
 
       <button
         onClick={onRemove}
-        className="rounded bg-red-100 px-2 py-1 text-xs text-red-700 hover:bg-red-200"
+        className="rounded bg-red-900/40 px-2 py-1 text-xs text-red-300 hover:bg-red-900/60"
       >
         削除
       </button>

@@ -33,7 +33,9 @@ const CheckBox = <T,>({
   return (
     <div className="w-full">
       <div className="mb-1 flex items-center justify-between">
-        <label className="text-sm font-medium text-slate-700">{label}</label>
+        <label className="text-sm font-medium text-[var(--tb-text-primary)]">
+          {label}
+        </label>
         {required && <span className="text-xs text-red-500">※必須</span>}
       </div>
 

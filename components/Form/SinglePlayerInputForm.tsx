@@ -12,11 +12,18 @@ import InputText from '../Input/InputText'
 interface SinglePlayerInputFormProps {
   teamBalancer: TeamBalancer
   onAppUpdate: () => void
+  onPreviewChange?: (preview: {
+    tier: tierEnum
+    displayRank: string
+    rating: number
+    desiredRoles: roleEnum[]
+  }) => void
 }
 
 const SinglePlayerInputForm: React.FC<SinglePlayerInputFormProps> = ({
   teamBalancer,
   onAppUpdate,
+  onPreviewChange,
 }) => {
   const [player, setPlayer] = React.useState(new Player())
   const [errorMessage, setErrorMessage] = React.useState<string>('')
@@ -61,10 +68,24 @@ const SinglePlayerInputForm: React.FC<SinglePlayerInputFormProps> = ({
     }
   }
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    handleAddPlayer()
+  }
+
+  React.useEffect(() => {
+    onPreviewChange?.({
+      tier: player.tier,
+      displayRank: player.displayRank,
+      rating: player.rating,
+      desiredRoles: player.desiredRoles,
+    })
+  }, [onPreviewChange, player])
+
   return (
-    <div className="flex flex-col space-y-4">
+    <form className="flex flex-col space-y-4" onSubmit={handleSubmit}>
       {errorMessage && (
-        <div className="rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-700">
+        <div className="rounded-md border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">
           {errorMessage}
         </div>
       )}
@@ -150,12 +171,15 @@ const SinglePlayerInputForm: React.FC<SinglePlayerInputFormProps> = ({
       </div>
 
       <button
-        onClick={handleAddPlayer}
-        className="rounded bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700"
+        type="submit"
+        className="rounded bg-[var(--tb-accent)] px-4 py-2 font-semibold text-white transition hover:bg-[var(--tb-accent-strong)]"
       >
         プレイヤーを追加
       </button>
-    </div>
+      <p className="text-xs text-[var(--tb-text-secondary)]">
+        Enterキーでプレイヤーを追加できます。
+      </p>
+    </form>
   )
 }
 
