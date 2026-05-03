@@ -67,6 +67,7 @@ export interface MatchHistory {
 export class TeamBalancer {
   private static readonly TEAM_SIZE = 5
   private static readonly TOTAL_PLAYERS = 50
+  private static readonly MAX_MATCH_HISTORIES = 50
   private static readonly MAX_TEAM_EVALUATIONS = 200000
   private static readonly TEAM_DIVIDE_TIME_LIMIT_MS = 1500
   private static readonly PLAYERS_VERSION = '0.0.1'
@@ -118,14 +119,29 @@ export class TeamBalancer {
     teamBalancer.players = playersJson.players.map((player) =>
       Player.fromJson(player)
     )
-    teamBalancer.matchHistories =
+    teamBalancer.matchHistories = TeamBalancer.normalizeMatchHistories(
       playersJson.matchHistories
+    )
+    return teamBalancer
+  }
+
+  private static normalizeMatchHistories(
+    matchHistories: MatchHistory[] | undefined
+  ): MatchHistory[] {
+    return (
+      matchHistories
         ?.filter((history) => TeamBalancer.isMatchHistory(history))
         .map((history) => ({
           ...history,
           mismatchDetails: history.mismatchDetails ?? [],
-        })) || []
-    return teamBalancer
+        }))
+        .sort(
+          (left, right) =>
+            new Date(right.playedAt).getTime() -
+            new Date(left.playedAt).getTime()
+        )
+        .slice(0, TeamBalancer.MAX_MATCH_HISTORIES) || []
+    )
   }
 
   private static isMatchHistory(value: unknown): value is MatchHistory {
@@ -229,7 +245,10 @@ export class TeamBalancer {
 
     const appliedHistory = this.applyMatchHistory(history)
 
-    this.matchHistories = [appliedHistory, ...this.matchHistories]
+    this.matchHistories = [appliedHistory, ...this.matchHistories].slice(
+      0,
+      TeamBalancer.MAX_MATCH_HISTORIES
+    )
     return appliedHistory
   }
 

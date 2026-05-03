@@ -177,6 +177,8 @@ components:
             $ref: '#/components/schemas/PlayerJson'
         matchHistories:
           type: array
+          description: Match histories retained in descending playedAt order (latest first), up to 50 entries.
+          maxItems: 50
           items:
             $ref: '#/components/schemas/MatchHistory'
     PlayerJson:

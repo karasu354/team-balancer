@@ -26,6 +26,20 @@ type MinimalRequest = {
   body?: unknown
 }
 
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === 'object' && value !== null
+}
+
+const hasMatchHistories = (
+  value: unknown
+): value is { matchHistories: unknown[] } => {
+  return (
+    isRecord(value) &&
+    'matchHistories' in value &&
+    Array.isArray(value.matchHistories)
+  )
+}
+
 const toNextApiRequest = (request: MinimalRequest): NextApiRequest => {
   // テスト用の最小構造体を NextApiRequest として扱うため、unknown ブリッジで明示的に変換する
   return request as unknown as NextApiRequest
@@ -201,6 +215,85 @@ describe('pages/api/teams/[id]', () => {
         matchHistories: [],
       })
     )
+  })
+
+  test('保存と復元で履歴件数が最大50件に正規化されること', async () => {
+    const matchHistories = Array.from({ length: 51 }, (_, index) => ({
+      id: `history-${index}`,
+      playedAt: `2026-05-03T12:30:${index}Z`,
+      winnerTeam: 'blue',
+      mismatchCount: 0,
+      teamsSnapshot: [],
+      playerResults: [],
+    }))
+
+    const putReq = {
+      method: 'PUT',
+      query: { id: 'team-1' },
+      body: {
+        id: 'team-1',
+        version: '0.0.1',
+        playersTotalCount: 1,
+        players: [
+          {
+            id: 'player-1',
+            name: 'Alice',
+            tier: 'GOLD',
+            rank: 'II',
+            displayRank: 'GOLD II',
+            rating: 1400,
+            mainRole: 'TOP',
+            subRole: 'JG',
+            desiredRoles: ['TOP'],
+            isRoleFixed: false,
+          },
+        ],
+        matchHistories,
+      },
+    }
+    const putRes = createMockResponse()
+
+    await handler(toNextApiRequest(putReq), putRes)
+
+    expect(putRes.statusCode).toBe(200)
+    expect(mockRedis.setTeamPlayers).toHaveBeenCalled()
+
+    const savedPayload = mockRedis.setTeamPlayers.mock.calls[0]?.[1]
+    expect(savedPayload).toEqual(
+      expect.objectContaining({
+        id: 'team-1',
+      })
+    )
+
+    if (!hasMatchHistories(savedPayload)) {
+      throw new Error('保存された payload の形式が不正です。')
+    }
+
+    expect(savedPayload.matchHistories.length).toBe(50)
+
+    mockRedis.getTeamPlayers.mockResolvedValueOnce(savedPayload)
+
+    const getReq = {
+      method: 'GET',
+      query: { id: 'team-1' },
+    }
+    const getRes = createMockResponse()
+
+    await handler(toNextApiRequest(getReq), getRes)
+
+    expect(getRes.statusCode).toBe(200)
+    expect(getRes.body).toEqual(
+      expect.objectContaining({
+        id: 'team-1',
+        matchHistories: expect.any(Array),
+      })
+    )
+
+    if (!hasMatchHistories(getRes.body)) {
+      throw new Error('復元レスポンスの形式が不正です。')
+    }
+
+    expect(getRes.body.matchHistories.length).toBe(50)
   })
 
   test('履歴IDなしの DELETE で 400 を返すこと', async () => {

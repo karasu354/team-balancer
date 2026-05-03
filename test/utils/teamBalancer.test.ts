@@ -382,6 +382,29 @@ describe('TeamBalancer クラス', () => {
   })
 
   describe('finalizeMatchResult', () => {
+    const setupTenPlayers = (): Player[] => {
+      const players: Player[] = []
+
+      for (let i = 0; i < 10; i++) {
+        const player = new Player(`Player${i}`)
+        player.isParticipatingInGame = true
+        teamBalancer.addPlayer(player)
+        players.push(player)
+      }
+
+      return players
+    }
+
+    const createHistory = (id: string, playedAt: string) => ({
+      id,
+      playedAt,
+      winnerTeam: 'blue' as const,
+      mismatchCount: 0,
+      teamsSnapshot: [],
+      playerResults: [],
+      mismatchDetails: [],
+    })
+
     test('結果確定で履歴が追加され、プレイヤー結果が保存されること', () => {
       for (let i = 0; i < 10; i++) {
         const player = new Player(`Player${i}`)
@@ -416,6 +439,35 @@ describe('TeamBalancer クラス', () => {
           .length
       ).toBe(5)
       expect(history.playerResults[0].ratingDelta).toBeGreaterThan(0)
+    })
+
+    test('履歴が50件未満ならそのまま追加されること', () => {
+      const arrangedPlayers = setupTenPlayers()
+
+      teamBalancer.matchHistories = Array.from({ length: 49 }, (_, index) =>
+        createHistory(`history-${index}`, `2026-01-01T00:00:${index}Z`)
+      )
+
+      teamBalancer.finalizeMatchResult(arrangedPlayers, 'blue', 0)
+
+      expect(teamBalancer.matchHistories).toHaveLength(50)
+    })
+
+    test('51件目追加時に最古履歴が削除されること', () => {
+      const arrangedPlayers = setupTenPlayers()
+
+      teamBalancer.matchHistories = Array.from({ length: 50 }, (_, index) =>
+        createHistory(`history-${index}`, `2026-01-01T00:00:${index}Z`)
+      )
+
+      teamBalancer.finalizeMatchResult(arrangedPlayers, 'blue', 0)
+
+      expect(teamBalancer.matchHistories).toHaveLength(50)
+      expect(
+        teamBalancer.matchHistories.some(
+          (history) => history.id === 'history-49'
+        )
+      ).toBe(false)
     })
 
     test('10人未満の結果確定はエラーになること', () => {
@@ -483,6 +535,27 @@ describe('TeamBalancer クラス', () => {
           (expectedDeltaByPlayerId.get(player.id) ?? 0)
         expect(player.rating).toBe(expectedRating)
       })
+    })
+
+    test('履歴削除後の再計算後も件数上限を満たすこと', () => {
+      const arrangedPlayers = setupTenPlayers()
+
+      for (let i = 0; i < 50; i++) {
+        teamBalancer.finalizeMatchResult(
+          arrangedPlayers,
+          i % 2 === 0 ? 'blue' : 'red',
+          0
+        )
+      }
+
+      const deleteTargetHistoryId = teamBalancer.matchHistories[10]?.id
+      if (!deleteTargetHistoryId) {
+        throw new Error('削除対象の履歴が見つかりません。')
+      }
+
+      teamBalancer.deleteMatchHistory(deleteTargetHistoryId)
+
+      expect(teamBalancer.matchHistories.length).toBeLessThanOrEqual(50)
     })
 
     test('存在しない履歴削除はエラーになること', () => {

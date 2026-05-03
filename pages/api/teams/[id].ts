@@ -131,7 +131,9 @@ export default async function handler(
         return res.status(400).json({ error: 'Invalid request body' })
       }
 
-      await redis.setTeamPlayers(id, body)
+      const normalizedTeamData = TeamBalancer.fromJson(body).playersInfo
+
+      await redis.setTeamPlayers(id, normalizedTeamData)
 
       return res.status(200).json({ message: 'Team data saved successfully' })
     } else if (req.method === 'DELETE') {
