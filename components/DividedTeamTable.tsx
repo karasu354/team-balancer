@@ -192,7 +192,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
               : 'bg-blue-500 text-white transition hover:bg-blue-600'
           }`}
         >
-          結果をコピー
+          Copy to Clipboard
         </button>
       </div>
 
