@@ -196,7 +196,7 @@ $$
   - `npm run format:test`
   - `npm run typecheck`
   - `npm run test:unit`
-  - `npm run test:e2e:fast`
+  - `npm run test:e2e`
   - `npm run build`
 - `develop` / `main` への push 時はビルド成果物をアーティファクトとして保存する
 - Redis 実接続の E2E は手動 workflow で実行する
@@ -244,12 +244,11 @@ $$
 - ツール: **Playwright**
 - 配置: `e2e/*.spec.ts`
 - 実行:
-  - `npm run test:e2e`（基本実行）
-  - `npm run test:e2e:fast`（Redis 非依存）
-  - `npm run test:e2e:integration`（Redis 実接続）
+  - `npm run test:e2e`（ヘッドレス・通常実行）
+  - `npm run test:e2e:headed`（ブラウザ表示あり・目視確認用）
 - 立ち位置:
-  - `test:e2e` / `test:e2e:fast` はアプリケーションスコープの E2E とし、外部依存はモックする。
-  - 実 Redis を使う結合寄り検証は `test:e2e:integration` のみで扱う。
+  - `test:e2e` はアプリケーションスコープの E2E とし、外部依存はモックする。
+  - `E2E_USE_REAL_REDIS=true` のときのみ `@integration` テストを実行し、実Redisを使う結合寄り検証は `E2E_USE_REAL_REDIS=true` 環境のみで扱う。
 - 検証対象:
   - プレイヤー追加〜分割〜保存/復元の主要シナリオ
   - 10人条件とエラーハンドリング
@@ -271,13 +270,13 @@ $$
 
 CI とローカル実行の対応:
 
-| 観点             | ローカル標準手順        | CI (`ci.yaml`) |
-| ---------------- | ----------------------- | -------------- |
-| フォーマット検証 | `npm run format:test`   | 実行する       |
-| 型検証           | `npm run typecheck`     | 実行する       |
-| Unit検証         | `npm run test`          | 実行する       |
-| Fast E2E         | `npm run test:e2e:fast` | 実行する       |
-| Build            | 必要時のみ              | 実行する       |
+| 観点             | ローカル標準手順      | CI (`ci.yaml`) |
+| ---------------- | --------------------- | -------------- |
+| フォーマット検証 | `npm run format:test` | 実行する       |
+| 型検証           | `npm run typecheck`   | 実行する       |
+| Unit検証         | `npm run test`        | 実行する       |
+| E2E              | `npm run test:e2e`    | 実行する       |
+| Build            | 必要時のみ            | 実行する       |
 
 - 共通テストセットは `npm run test:ci` とし、ローカル実行と CI 実行の差分を最小化する
 
@@ -287,7 +286,7 @@ CI とローカル実行の対応:
 - `npm run format:test`
 - `npm run typecheck`
 - `npm run test`
-- `npm run test:e2e:fast`
+- `npm run test:e2e`
 
 ---
 

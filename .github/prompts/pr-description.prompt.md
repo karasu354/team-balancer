@@ -1,6 +1,6 @@
 ---
 agent: 'ask'
-description: '対象 .steering 1件の変更内容から、PR本文を .github/PULL_REQUEST_TEMPLATE.md 形式で1件生成する'
+description: '対象 .steering 1件の変更内容から、PR本文を1件生成する'
 ---
 
 # PR本文生成
@@ -10,18 +10,18 @@ description: '対象 .steering 1件の変更内容から、PR本文を .github/P
 - `.steering/[YYYYMMDD]-[連番]-[機能名]/requirements.md`
 - `.steering/[YYYYMMDD]-[連番]-[機能名]/design.md`
 - `.steering/[YYYYMMDD]-[連番]-[機能名]/tasks.md`
-- `.github/PULL_REQUEST_TEMPLATE.md`
 - `.github/copilot-instructions.md`
 
 ## 生成ルール
 
 - 対象 `.steering` は1件だけ選ぶ
-- 本文は `.github/PULL_REQUEST_TEMPLATE.md` の見出し構成を維持する
+- 本文は以下の見出し構成で生成する（順序を維持する）:
+  `背景 / 変更内容 / テスト結果 / 影響範囲 / レビューポイント / チェックリスト / 不足情報`
 - 必須項目 `背景 / 変更内容 / テスト結果 / 影響範囲 / レビューポイント` を必ず埋める
 - 推測で埋めず、情報不足がある場合は「不足情報」セクションに明示する
 - テスト結果には実行コマンドと pass/fail を書く
 - 箇条書きは短く、レビュー観点が分かる粒度にする
-- Description が自動で埋まらないケースを想定し、テンプレート必須項目を空欄で出力しない
+- 必須項目を空欄で出力しない
 
 ## 出力形式
 

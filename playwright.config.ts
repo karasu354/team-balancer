@@ -8,6 +8,13 @@ export default defineConfig({
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
   },
+  // E2E_USE_REAL_REDIS=true のとき @integration テストのみ実行し、
+  // false（デフォルト）のとき @integration タグを除外して実行する。
+  // これにより --grep フラグをスクリプトに書かずに制御できる。
+  grep:
+    process.env.E2E_USE_REAL_REDIS === 'true'
+      ? /@integration/
+      : /^(?!.*@integration)/,
   projects: [
     {
       name: 'chromium',
