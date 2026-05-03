@@ -97,7 +97,7 @@ const Home = () => {
               サンプルデータを投入
               {totalPlayersCount > 0 && (
                 <span className="ml-1 font-semibold text-amber-600">
-                  ※ 追加됨
+                  ※ 追加済み
                 </span>
               )}
             </p>

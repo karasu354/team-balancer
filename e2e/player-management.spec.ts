@@ -17,9 +17,7 @@ test('プレイヤーを1人追加すると一覧に表示される', async ({ p
 test('サンプルデータを投入すると10人が一覧に追加される', async ({ page }) => {
   await page.goto('/')
 
-  await page
-    .getByRole('button', { name: 'サンプル投入（10人）' })
-    .click()
+  await page.getByRole('button', { name: 'サンプル投入（10人）' }).click()
 
   await expect(
     page.locator('p.font-bold', { hasText: 'Sample_Top1' }).first()
