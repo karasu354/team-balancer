@@ -18,7 +18,7 @@ test('サンプルデータを投入すると10人が一覧に追加される', 
   await page.goto('/')
 
   await page
-    .getByRole('button', { name: 'サンプルデータを投入（10人）' })
+    .getByRole('button', { name: 'サンプル投入（10人）' })
     .click()
 
   await expect(

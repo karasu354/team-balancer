@@ -8,6 +8,7 @@ import {
 
 interface MatchHistoryAccordionProps {
   history: MatchHistory
+  isLoading?: boolean
   onDeleteHistory: (historyId: string) => void
 }
 
@@ -49,6 +50,7 @@ const formatDelta = (delta: number): string => {
 
 const MatchHistoryAccordion: React.FC<MatchHistoryAccordionProps> = ({
   history,
+  isLoading = false,
   onDeleteHistory,
 }) => {
   const blueTeam = buildTeamEntries(
@@ -76,7 +78,12 @@ const MatchHistoryAccordion: React.FC<MatchHistoryAccordionProps> = ({
         </div>
         <button
           onClick={() => onDeleteHistory(history.id)}
-          className="rounded bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-200"
+          disabled={isLoading}
+          className={`rounded px-3 py-1 text-xs font-semibold transition ${
+            isLoading
+              ? 'cursor-not-allowed bg-slate-200 text-slate-500'
+              : 'bg-red-100 text-red-700 hover:bg-red-200'
+          }`}
         >
           履歴を削除
         </button>

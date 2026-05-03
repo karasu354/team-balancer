@@ -133,6 +133,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
       return
     }
 
+    setIsLoading(true)
     try {
       if (currentTeamId) {
         const updatedData = await deleteTeamHistory(currentTeamId, historyId)
@@ -146,6 +147,8 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
       setResultStatusMessage('履歴を削除し、レートを再計算しました。')
     } catch (error) {
       setResultStatusMessage('履歴の削除に失敗しました。')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -175,10 +178,10 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
         <button
           onClick={handleDivideTeams}
           disabled={isLoading || isDivideButtonDisabled}
-          className={`rounded px-4 py-2 ${
+          className={`rounded px-4 py-2 transition ${
             isLoading || isDivideButtonDisabled
-              ? 'cursor-not-allowed bg-gray-400 text-gray-700'
-              : 'bg-green-500 text-white transition hover:bg-green-600'
+              ? 'cursor-not-allowed bg-slate-300 text-slate-500'
+              : 'bg-blue-600 text-white hover:bg-blue-700'
           }`}
         >
           {isLoading ? 'チーム分け中...' : 'チーム分け'}
@@ -186,10 +189,10 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
         <button
           onClick={handleCopyToClipboard}
           disabled={activeBalancedTeam.players.length === 0}
-          className={`rounded px-4 py-2 ${
+          className={`rounded px-4 py-2 transition ${
             activeBalancedTeam.players.length === 0
-              ? 'cursor-not-allowed bg-gray-400 text-gray-700'
-              : 'bg-blue-500 text-white transition hover:bg-blue-600'
+              ? 'cursor-not-allowed bg-slate-300 text-slate-500'
+              : 'bg-slate-200 text-slate-900 hover:bg-slate-300'
           }`}
         >
           Copy to Clipboard
@@ -360,6 +363,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
         <MatchHistoryPanel
           histories={teamBalancer.matchHistories}
           selectedHistoryId={selectedHistoryId}
+          isLoading={isLoading}
           onDeleteHistory={handleDeleteHistory}
           onToggleHistory={handleToggleHistory}
         />

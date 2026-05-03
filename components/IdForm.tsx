@@ -80,6 +80,9 @@ const IdForm: React.FC<IdFormProps> = ({
           >
             チームID
           </label>
+          <p className="mb-2 text-xs text-slate-500">
+            チームの状態を保存・復元するためのID
+          </p>
           <input
             id="team-id-input"
             type="text"
@@ -94,10 +97,10 @@ const IdForm: React.FC<IdFormProps> = ({
           <button
             onClick={handleFetchTeamData}
             disabled={!id.trim() || isLoading}
-            className={`rounded px-4 py-2 ${
+            className={`rounded px-4 py-2 transition ${
               !id.trim() || isLoading
-                ? 'cursor-not-allowed bg-gray-400 text-gray-700'
-                : 'bg-blue-500 text-white transition hover:bg-blue-600'
+                ? 'cursor-not-allowed bg-slate-300 text-slate-500'
+                : 'bg-slate-200 text-slate-900 hover:bg-slate-300'
             }`}
           >
             {isLoading ? '読込中...' : '読み込む'}
@@ -106,10 +109,10 @@ const IdForm: React.FC<IdFormProps> = ({
           <button
             onClick={handleSaveTeamData}
             disabled={!id.trim() || isLoading}
-            className={`rounded px-4 py-2 ${
+            className={`rounded px-4 py-2 transition ${
               !id.trim() || isLoading
-                ? 'cursor-not-allowed bg-gray-400 text-gray-700'
-                : 'bg-green-500 text-white transition hover:bg-green-600'
+                ? 'cursor-not-allowed bg-slate-300 text-slate-500'
+                : 'bg-slate-200 text-slate-900 hover:bg-slate-300'
             }`}
           >
             {isLoading ? '保存中...' : '保存する'}
