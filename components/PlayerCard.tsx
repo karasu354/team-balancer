@@ -40,15 +40,18 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
   }
 
   return (
-    <div className="h-min w-full overflow-hidden rounded border border-gray-300 bg-white shadow-sm">
+    <div className="h-min w-full overflow-hidden rounded border border-[var(--tb-border)] bg-[var(--tb-surface)] shadow-sm">
       <div className="flex">
         <div
-          className="flex w-10 cursor-pointer items-center justify-center border-r border-gray-300 bg-gray-200 hover:brightness-80"
+          className="flex w-10 cursor-pointer items-center justify-center border-r border-[var(--tb-border)] bg-[var(--tb-surface-muted)] hover:brightness-125"
           onClick={handleParticipationToggle}
           title="参加切替"
         >
           <IconContext.Provider
-            value={{ size: '1.5rem', className: 'text-gray-600' }}
+            value={{
+              size: '1.5rem',
+              className: 'text-[var(--tb-text-secondary)]',
+            }}
           >
             {player.isParticipatingInGame ? <FaCheckSquare /> : <FaRegSquare />}
           </IconContext.Provider>
@@ -60,12 +63,12 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
         </div>
 
         <div
-          className="flex min-w-5 flex-shrink-0 cursor-pointer items-center justify-center bg-gray-400 hover:brightness-80"
+          className="flex min-w-5 flex-shrink-0 cursor-pointer items-center justify-center bg-[var(--tb-surface-muted)] hover:brightness-125"
           onClick={onToggleExpand}
         >
           <IconContext.Provider value={{ size: '1rem' }}>
             <button
-              className={`text-gray-300 transition-transform duration-200 ${
+              className={`text-[var(--tb-text-secondary)] transition-transform duration-200 ${
                 isExpanded ? 'rotate-180' : 'rotate-0'
               }`}
             >

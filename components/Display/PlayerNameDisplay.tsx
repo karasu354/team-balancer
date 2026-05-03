@@ -11,7 +11,7 @@ const PlayerNameDisplay: React.FC<PlayerNameDisplayProps> = ({ player }) => {
     <div className="mb-2">
       <p className="overflow-hidden font-bold text-ellipsis">{player.name}</p>
       <p className="text-xs">({player.displayRank})</p>
-      <p className="text-[11px] text-slate-500">
+      <p className="text-[11px] text-[var(--tb-text-secondary)]">
         レート: {Math.round(player.rating)}
       </p>
     </div>

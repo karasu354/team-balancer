@@ -67,12 +67,14 @@ const MatchHistoryAccordion: React.FC<MatchHistoryAccordionProps> = ({
   return (
     <div
       data-testid="match-history-accordion"
-      className="border-t border-slate-200 bg-white px-4 py-4"
+      className="border-t border-[var(--tb-border)] bg-[var(--tb-surface)] px-4 py-4"
     >
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
-          <h4 className="text-sm font-bold text-slate-900">履歴詳細</h4>
-          <p className="text-xs text-slate-500">
+          <h4 className="text-sm font-bold text-[var(--tb-text-primary)]">
+            履歴詳細
+          </h4>
+          <p className="text-xs text-[var(--tb-text-secondary)]">
             この履歴を削除すると、残存履歴をもとにレートを再計算します。
           </p>
         </div>
@@ -81,8 +83,8 @@ const MatchHistoryAccordion: React.FC<MatchHistoryAccordionProps> = ({
           disabled={isLoading}
           className={`rounded px-3 py-1 text-xs font-semibold transition ${
             isLoading
-              ? 'cursor-not-allowed bg-slate-200 text-slate-500'
-              : 'bg-red-100 text-red-700 hover:bg-red-200'
+              ? 'cursor-not-allowed bg-[var(--tb-surface-muted)] text-[var(--tb-text-secondary)]'
+              : 'bg-red-900/40 text-red-300 hover:bg-red-900/60'
           }`}
         >
           履歴を削除

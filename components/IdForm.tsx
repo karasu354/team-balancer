@@ -75,12 +75,12 @@ const IdForm: React.FC<IdFormProps> = ({
       <div className="flex w-full flex-col gap-3 md:flex-row md:items-end">
         <div className="flex-1">
           <label
-            className="mb-1 block text-sm font-medium text-slate-700"
+            className="mb-1 block text-sm font-medium text-[var(--tb-text-primary)]"
             htmlFor="team-id-input"
           >
             チームID
           </label>
-          <p className="mb-2 text-xs text-slate-500">
+          <p className="mb-2 text-xs text-[var(--tb-text-secondary)]">
             チームの状態を保存・復元するためのID
           </p>
           <input
@@ -89,7 +89,7 @@ const IdForm: React.FC<IdFormProps> = ({
             placeholder="IDを入力"
             value={id}
             onChange={(e) => setId(e.target.value)}
-            className="w-full rounded border border-slate-300 bg-white p-2"
+            className="w-full rounded border border-[var(--tb-border)] bg-[#0b1730] p-2 text-[var(--tb-text-primary)]"
           />
         </div>
 
@@ -99,8 +99,8 @@ const IdForm: React.FC<IdFormProps> = ({
             disabled={!id.trim() || isLoading}
             className={`rounded px-4 py-2 transition ${
               !id.trim() || isLoading
-                ? 'cursor-not-allowed bg-slate-300 text-slate-500'
-                : 'bg-slate-200 text-slate-900 hover:bg-slate-300'
+                ? 'cursor-not-allowed bg-slate-500 text-slate-300'
+                : 'bg-[var(--tb-surface-muted)] text-[var(--tb-text-primary)] hover:brightness-110'
             }`}
           >
             {isLoading ? '読込中...' : '読み込む'}
@@ -111,8 +111,8 @@ const IdForm: React.FC<IdFormProps> = ({
             disabled={!id.trim() || isLoading}
             className={`rounded px-4 py-2 transition ${
               !id.trim() || isLoading
-                ? 'cursor-not-allowed bg-slate-300 text-slate-500'
-                : 'bg-slate-200 text-slate-900 hover:bg-slate-300'
+                ? 'cursor-not-allowed bg-slate-500 text-slate-300'
+                : 'bg-[var(--tb-accent)] text-white hover:bg-[var(--tb-accent-strong)]'
             }`}
           >
             {isLoading ? '保存中...' : '保存する'}
@@ -123,8 +123,9 @@ const IdForm: React.FC<IdFormProps> = ({
       {statusMessage && (
         <p
           className={`mt-2 text-sm ${
-            isErrorStatus ? 'text-red-600' : 'text-emerald-600'
+            isErrorStatus ? 'text-red-300' : 'text-emerald-300'
           }`}
+          aria-live="polite"
         >
           {statusMessage}
         </p>

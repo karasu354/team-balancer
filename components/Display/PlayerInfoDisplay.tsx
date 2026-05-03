@@ -34,10 +34,12 @@ const getRoleIconComponent = (role: roleEnum) => {
 }
 
 const PlayerInfoDisplay: React.FC<PlayerInfoDisplayProps> = ({ player }) => {
-  const lockIconColor = player.isRoleFixed ? 'text-yellow-400' : 'text-gray-200'
+  const lockIconColor = player.isRoleFixed
+    ? 'text-yellow-400'
+    : 'text-[var(--tb-text-secondary)]'
 
   return (
-    <div className="flex w-full divide-x divide-gray-400">
+    <div className="flex w-full divide-x divide-[var(--tb-border)]">
       <div className="w-min-full flex-shrink-0 p-2 text-center">
         <p className="font-bold">メインロール</p>
         <p>{player.mainRole}</p>
@@ -64,7 +66,7 @@ const PlayerInfoDisplay: React.FC<PlayerInfoDisplayProps> = ({ player }) => {
                   className={`size-6 ${
                     player.desiredRoles.includes(role)
                       ? 'text-yellow-400 opacity-100'
-                      : 'text-gray-600 opacity-10'
+                      : 'text-[var(--tb-text-secondary)] opacity-20'
                   }`}
                 />
               )

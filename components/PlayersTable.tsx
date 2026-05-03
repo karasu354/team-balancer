@@ -111,14 +111,16 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
 
   return (
     <div className="w-full">
-      <div className="mb-3 flex items-center justify-between rounded-lg bg-slate-100 px-3 py-2">
-        <p className="text-sm text-slate-600">
+      <div className="mb-3 flex items-center justify-between rounded-lg border border-[var(--tb-border)] bg-[#0f1a34] px-3 py-2">
+        <p className="text-sm text-[var(--tb-text-secondary)]">
           合計:{' '}
-          <span className="font-semibold text-slate-900">{players.length}</span>
+          <span className="font-semibold text-[var(--tb-text-primary)]">
+            {players.length}
+          </span>
         </p>
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-[var(--tb-text-secondary)]">
           参加中:{' '}
-          <span className="font-semibold text-slate-900">
+          <span className="font-semibold text-[var(--tb-text-primary)]">
             {participatingPlayersCount}/10
           </span>
         </p>
@@ -133,7 +135,7 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
       </div>
 
       {players.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center text-sm text-slate-600">
+        <div className="rounded-lg border border-dashed border-[var(--tb-border)] bg-[#0f1a34] px-4 py-8 text-center text-sm text-[var(--tb-text-secondary)]">
           プレイヤーがまだ登録されていません。入力フォームから追加するか、サンプルデータを投入してください。
         </div>
       ) : (
@@ -165,7 +167,7 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
             </div>
           ) : (
             <div className="space-y-2">
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-[var(--tb-text-secondary)]">
                 一括編集では全プレイヤーをまとめて編集できます。編集後に「一括保存」で確定してください。
               </p>
               {draftPlayers.map((player, index) => (
@@ -179,7 +181,10 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
               {draftPlayers.length > 0 && (
                 <div className="flex items-center justify-end gap-3 pt-2">
                   {savedMessage && (
-                    <span className="text-sm text-emerald-600">
+                    <span
+                      className="text-sm text-emerald-300"
+                      aria-live="polite"
+                    >
                       {savedMessage}
                     </span>
                   )}
@@ -188,8 +193,8 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
                     disabled={!isDirty}
                     className={`rounded px-5 py-2 font-semibold text-white transition ${
                       isDirty
-                        ? 'bg-green-500 hover:bg-green-600'
-                        : 'cursor-not-allowed bg-gray-300 text-gray-500'
+                        ? 'bg-emerald-600 hover:bg-emerald-700'
+                        : 'cursor-not-allowed bg-gray-400 text-gray-700'
                     }`}
                   >
                     一括保存

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 
 interface TabsProps {
   labels: string[]
@@ -8,39 +8,25 @@ interface TabsProps {
 
 const Tabs: React.FC<TabsProps> = ({ labels, activeTab, onActiveTab }) => {
   return (
-    <div className="w-full">
-      <div className="relative">
-        <ul
-          className="relative flex list-none flex-wrap rounded-md bg-gray-200"
-          role="list"
-        >
-          <div
-            className={`absolute top-0 left-0 h-full rounded-md bg-blue-500 transition-transform duration-300`}
-            style={{
-              width: `${100 / labels.length}%`,
-              transform: `translateX(${activeTab * 100}%)`,
-            }}
-          ></div>
-
-          {labels.map((label, index) => (
-            <li
-              key={index}
-              className="z-30 flex-1 text-center"
+    <div className="w-full rounded-md border border-[var(--tb-border)] bg-[#0b1730] p-1">
+      <ul className="flex list-none flex-wrap gap-1" role="tablist">
+        {labels.map((label, index) => (
+          <li key={label} className="flex-1 text-center" role="presentation">
+            <button
+              onClick={() => onActiveTab(index)}
               role="tab"
               aria-selected={activeTab === index}
+              className={`w-full rounded px-3 py-2 text-sm font-semibold transition ${
+                activeTab === index
+                  ? 'bg-[var(--tb-accent)] text-white'
+                  : 'text-[var(--tb-text-secondary)] hover:bg-[var(--tb-surface-muted)] hover:text-[var(--tb-text-primary)]'
+              }`}
             >
-              <button
-                onClick={() => onActiveTab(index)}
-                className={`z-30 flex w-full cursor-pointer items-center justify-center rounded-md border-0 p-3 text-sm transition-all duration-300 ease-in-out ${
-                  activeTab === index && 'text-white'
-                }`}
-              >
-                {label}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
+              {label}
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }
