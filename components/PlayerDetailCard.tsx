@@ -22,13 +22,13 @@ const PlayerDetailCard: React.FC<PlayerDetailCardProps> = ({
   return (
     <div className="p-2">
       <div className="">
-        <p className="font-bold">Player Info</p>
+        <p className="font-bold">プレイヤー情報</p>
         <div className="grid grid-cols-2 gap-2">
-          <p className="">Player Name:</p>
+          <p className="">プレイヤー名:</p>
           <p className="overflow-hidden text-ellipsis">{currentPlayer.name}</p>
-          <p className="">Rank:</p>
+          <p className="">ランク:</p>
           <p className="">{currentPlayer.displayRank}</p>
-          <p className="">Main Role:</p>
+          <p className="">メインロール:</p>
           <p className="">
             {currentPlayer.mainRole === roleEnum.all ? (
               <>
@@ -40,7 +40,7 @@ const PlayerDetailCard: React.FC<PlayerDetailCardProps> = ({
           </p>
           {currentPlayer.mainRole !== roleEnum.all && (
             <>
-              <p className="">Sub Role:</p>
+              <p className="">サブロール:</p>
               <p className="">
                 {currentPlayer.subRole === roleEnum.all ? (
                   <>
@@ -52,13 +52,13 @@ const PlayerDetailCard: React.FC<PlayerDetailCardProps> = ({
               </p>
             </>
           )}
-          <p className="">Desired Role:</p>
+          <p className="">希望ロール:</p>
           <p className="">
             {roleList
               .filter((_, index) => currentPlayer.desiredRoles[index])
               .join(', ')}
           </p>
-          <p className="">Role Fixed:</p>
+          <p className="">ロール固定:</p>
           <p>
             <FaLock className={lockIconColor} />
           </p>
@@ -68,13 +68,13 @@ const PlayerDetailCard: React.FC<PlayerDetailCardProps> = ({
             onClick={onEditModeToggle}
             className="rounded bg-blue-500 px-4 py-2 text-white transition hover:bg-blue-600"
           >
-            Edit
+            編集
           </button>
           <button
             onClick={onDeleteModeToggle}
             className="rounded bg-red-500 px-4 py-2 text-white transition hover:bg-red-600"
           >
-            Delete
+            削除
           </button>
         </div>
       </div>

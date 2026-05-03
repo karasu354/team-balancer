@@ -11,11 +11,49 @@ const isPlayersJson = (value: unknown): value is PlayersJson => {
     return false
   }
 
+  const isOptionalNumber = (input: unknown): boolean =>
+    input === undefined || typeof input === 'number'
+
+  const maybeMatchHistories = value.matchHistories
+  const isMatchHistoriesValid =
+    maybeMatchHistories === undefined ||
+    (Array.isArray(maybeMatchHistories) &&
+      maybeMatchHistories.every((history) => {
+        if (!isRecord(history)) {
+          return false
+        }
+
+        return (
+          typeof history.id === 'string' &&
+          typeof history.playedAt === 'string' &&
+          (history.winnerTeam === 'blue' || history.winnerTeam === 'red') &&
+          typeof history.mismatchCount === 'number' &&
+          Array.isArray(history.teamsSnapshot) &&
+          Array.isArray(history.playerResults) &&
+          history.playerResults.every((result) => {
+            if (!isRecord(result)) {
+              return false
+            }
+
+            return (
+              typeof result.playerId === 'string' &&
+              typeof result.playerName === 'string' &&
+              (result.team === 'blue' || result.team === 'red') &&
+              (result.result === 'win' || result.result === 'lose') &&
+              isOptionalNumber(result.ratingDelta) &&
+              isOptionalNumber(result.ratingBefore) &&
+              isOptionalNumber(result.ratingAfter)
+            )
+          })
+        )
+      }))
+
   return (
     typeof value.id === 'string' &&
     typeof value.version === 'string' &&
     typeof value.playersTotalCount === 'number' &&
-    Array.isArray(value.players)
+    Array.isArray(value.players) &&
+    isMatchHistoriesValid
   )
 }
 
@@ -64,4 +102,27 @@ export async function setTeamData(
   }
 
   return message
+}
+
+export async function deleteTeamHistory(
+  teamId: string,
+  historyId: string
+): Promise<PlayersJson> {
+  const response = await fetch(
+    `${API_BASE_URL}/${teamId}?historyId=${encodeURIComponent(historyId)}`,
+    {
+      method: 'DELETE',
+    }
+  )
+
+  if (!response.ok) {
+    throw new Error(`Failed to delete team history: ${response.statusText}`)
+  }
+
+  const data: unknown = await response.json()
+  if (!isPlayersJson(data)) {
+    throw new Error('Failed to delete team history: invalid response body')
+  }
+
+  return data
 }

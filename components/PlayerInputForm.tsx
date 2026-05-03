@@ -19,12 +19,12 @@ const PlayerInputForm: React.FC<PlayerInputFormProps> = ({
   return (
     <div className="w-full">
       <div className="mb-2 text-xs text-slate-500">
-        入力方式を選択してください（Single: 1人ずつ / Multi:
+        入力方式を選択してください（個別入力: 1人ずつ / 複数入力:
         チャットログから一括追加）
       </div>
       <div className="pb-4">
         <Tabs
-          labels={['Single', 'Multi']}
+          labels={['個別入力', '複数入力']}
           activeTab={activeTab}
           onActiveTab={setActiveTab}
         />

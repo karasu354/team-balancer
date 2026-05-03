@@ -4,12 +4,13 @@ import { expect, test } from '@playwright/test'
 test('プレイヤーを1人追加すると一覧に表示される', async ({ page }) => {
   await page.goto('/')
 
-  await page.getByLabel('Player Name').fill('TestPlayer')
-  await page.getByRole('button', { name: 'Add Player' }).click()
+  await page.getByLabel('プレイヤー名').fill('TestPlayer')
+  await page.getByRole('button', { name: 'プレイヤーを追加' }).click()
 
   await expect(
     page.locator('p.font-bold', { hasText: 'TestPlayer' }).first()
   ).toBeVisible()
+  await expect(page.getByText(/レート:\s*\d+/).first()).toBeVisible()
 })
 
 // E-6: サンプルデータ投入で10人が一覧に追加される
@@ -23,6 +24,6 @@ test('サンプルデータを投入すると10人が一覧に追加される', 
   await expect(
     page.locator('p.font-bold', { hasText: 'Sample_Top1' }).first()
   ).toBeVisible()
-  await expect(page.getByText('Total:').first()).toBeVisible()
+  await expect(page.getByText('合計:').first()).toBeVisible()
   await expect(page.getByText('10').first()).toBeVisible()
 })

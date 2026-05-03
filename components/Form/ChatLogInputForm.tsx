@@ -39,7 +39,7 @@ Player2 #meowがロビーから退出しました。`}
         data-testid="import-chat-log"
         className="rounded bg-blue-500 px-4 py-2 whitespace-nowrap text-white transition hover:bg-blue-600"
       >
-        Import
+        取り込む
       </button>
     </div>
   )

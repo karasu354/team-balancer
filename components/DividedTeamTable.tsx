@@ -1,11 +1,15 @@
 import React, { useState } from 'react'
 
+import { deleteTeamHistory } from '../composable/api'
 import { Player } from '../utils/player'
 import { roleList } from '../utils/role'
 import { TeamBalancer } from '../utils/teamBalancer'
+import MatchHistoryPanel from './MatchHistoryPanel'
 
 interface DividedTeamTableProps {
+  currentTeamId: string
   teamBalancer: TeamBalancer
+  onUpdateTeamBalancer: (teamBalancer: TeamBalancer) => void
   onAppUpdate: () => void
 }
 
@@ -24,7 +28,9 @@ const generateTeamText = (team: Player[], lanes: string[]): string =>
     .join('\n')
 
 const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
+  currentTeamId,
   teamBalancer,
+  onUpdateTeamBalancer,
   onAppUpdate,
 }) => {
   const balancedTeamsByMissMatch = teamBalancer.balancedTeamsByMissMatch
@@ -33,9 +39,18 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
   ).length
   const [activeTab, setActiveTab] = useState<number>(0)
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [selectedWinner, setSelectedWinner] = useState<'blue' | 'red' | null>(
+    null
+  )
+  const [resultStatusMessage, setResultStatusMessage] = useState<string>('')
+  const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(
+    null
+  )
 
   const handleTabChange = (tabIndex: number) => {
     setActiveTab(tabIndex)
+    setSelectedWinner(null)
+    setResultStatusMessage('')
   }
 
   const handleDivideTeams = async () => {
@@ -63,9 +78,58 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
       activeBalancedTeam.players.slice(5, 10),
       lanes
     )
-    const result = `Blue Team\n${blueTeamText}\n\nRed Team\n${redTeamText}`
+    const result = `青チーム\n${blueTeamText}\n\n赤チーム\n${redTeamText}`
     navigator.clipboard.writeText(result)
     alert('チーム結果をクリップボードにコピーしました！')
+  }
+
+  const handleConfirmResult = () => {
+    if (!selectedWinner) {
+      setResultStatusMessage('勝利チームを選択してください。')
+      return
+    }
+
+    if (activeBalancedTeam.players.length !== 10) {
+      setResultStatusMessage('確定対象の分割結果がありません。')
+      return
+    }
+
+    try {
+      teamBalancer.finalizeMatchResult(
+        activeBalancedTeam.players,
+        selectedWinner,
+        activeTab
+      )
+      setResultStatusMessage('試合結果を確定し、履歴に保存しました。')
+      onAppUpdate()
+    } catch (error) {
+      setResultStatusMessage('試合結果の確定に失敗しました。')
+    }
+  }
+
+  const handleToggleHistory = (historyId: string) => {
+    setSelectedHistoryId((prev) => (prev === historyId ? null : historyId))
+  }
+
+  const handleDeleteHistory = async (historyId: string) => {
+    if (!window.confirm('この履歴を削除し、以降のレートを再計算します。')) {
+      return
+    }
+
+    try {
+      if (currentTeamId) {
+        const updatedData = await deleteTeamHistory(currentTeamId, historyId)
+        onUpdateTeamBalancer(TeamBalancer.fromJson(updatedData))
+      } else {
+        teamBalancer.deleteMatchHistory(historyId)
+        onAppUpdate()
+      }
+
+      setSelectedHistoryId((prev) => (prev === historyId ? null : prev))
+      setResultStatusMessage('履歴を削除し、レートを再計算しました。')
+    } catch (error) {
+      setResultStatusMessage('履歴の削除に失敗しました。')
+    }
   }
 
   const activeBalancedTeam = balancedTeamsByMissMatch[activeTab]
@@ -87,7 +151,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
               : 'bg-green-500 text-white transition hover:bg-green-600'
           }`}
         >
-          {isLoading ? 'Running...' : 'Divide Teams'}
+          {isLoading ? 'チーム分け中...' : 'チーム分け'}
         </button>
         <button
           onClick={handleCopyToClipboard}
@@ -98,7 +162,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
               : 'bg-blue-500 text-white transition hover:bg-blue-600'
           }`}
         >
-          Copy to Clipboard
+          結果をコピー
         </button>
       </div>
 
@@ -116,7 +180,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
                 Number(key) === activeTab
               )}
             >
-              {key}-person mismatch
+              {key}人ミスマッチ
             </button>
           ))}
         </div>
@@ -125,7 +189,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
           {activeBalancedTeam.players.length === 10 && (
             <div>
               <p className="mb-3 text-sm text-slate-600">
-                Rating Difference:{' '}
+                評価スコア:{' '}
                 <span className="font-semibold text-slate-900">
                   {activeBalancedTeam.evaluationScore.toFixed(2)}
                 </span>
@@ -133,7 +197,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div>
                   <div className="mb-3 border-b border-slate-200 pb-1 font-bold">
-                    Lane
+                    レーン
                   </div>
                   {roleList.map((lane) => (
                     <div key={lane} className="mb-2 font-medium text-slate-700">
@@ -143,7 +207,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
                 </div>
                 <div>
                   <div className="mb-3 border-b border-blue-100 pb-1 text-xl font-bold text-blue-500">
-                    Blue Team
+                    青チーム
                   </div>
                   {roleList.map((lane, index) => (
                     <div key={lane} className="mb-2">
@@ -154,7 +218,7 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
                 </div>
                 <div>
                   <div className="mb-3 border-b border-red-100 pb-1 text-xl font-bold text-red-500">
-                    Red Team
+                    赤チーム
                   </div>
                   {roleList.map((lane, index) => (
                     <div key={lane} className="mb-2">
@@ -169,11 +233,64 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
 
           {activeBalancedTeam.players.length !== 10 && (
             <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center text-sm text-slate-600">
-              まだ分割結果がありません。10人揃えたうえで「Divide
-              Teams」を実行してください。
+              まだ分割結果がありません。10人揃えたうえで「チーム分け」を実行してください。
+            </div>
+          )}
+
+          {activeBalancedTeam.players.length === 10 && (
+            <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <p className="mb-2 text-sm font-semibold text-slate-700">
+                試合結果の確定
+              </p>
+              <div className="mb-2 flex flex-wrap gap-2">
+                <button
+                  className={`rounded px-3 py-1 text-sm ${
+                    selectedWinner === 'blue'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-blue-100 text-blue-700'
+                  }`}
+                  onClick={() => setSelectedWinner('blue')}
+                >
+                  青チーム勝利
+                </button>
+                <button
+                  className={`rounded px-3 py-1 text-sm ${
+                    selectedWinner === 'red'
+                      ? 'bg-red-600 text-white'
+                      : 'bg-red-100 text-red-700'
+                  }`}
+                  onClick={() => setSelectedWinner('red')}
+                >
+                  赤チーム勝利
+                </button>
+                <button
+                  className={`rounded px-3 py-1 text-sm ${
+                    selectedWinner
+                      ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                      : 'cursor-not-allowed bg-gray-300 text-gray-500'
+                  }`}
+                  onClick={handleConfirmResult}
+                  disabled={!selectedWinner}
+                >
+                  結果を確定
+                </button>
+              </div>
+              {resultStatusMessage && (
+                <p className="text-sm text-slate-700">{resultStatusMessage}</p>
+              )}
             </div>
           )}
         </div>
+      </div>
+
+      <div className="mt-4 rounded-lg border border-slate-300 bg-white p-4">
+        <h3 className="mb-2 text-base font-bold">試合履歴</h3>
+        <MatchHistoryPanel
+          histories={teamBalancer.matchHistories}
+          selectedHistoryId={selectedHistoryId}
+          onDeleteHistory={handleDeleteHistory}
+          onToggleHistory={handleToggleHistory}
+        />
       </div>
     </div>
   )

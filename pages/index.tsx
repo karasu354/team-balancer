@@ -11,6 +11,7 @@ const Home = () => {
   const [teamBalancer, setTeamBalancer] = useState<TeamBalancer>(
     new TeamBalancer()
   )
+  const [currentTeamId, setCurrentTeamId] = useState<string>('')
   const [_, setUpdate] = useState<number>(0)
   const totalPlayersCount = teamBalancer.players.length
   const participatingPlayersCount = teamBalancer.players.filter(
@@ -55,11 +56,11 @@ const Home = () => {
             </div>
             <div className="grid grid-cols-2 gap-2 md:grid-cols-1">
               <div className="rounded-lg bg-slate-100 px-3 py-2 text-right">
-                <p className="text-xs text-slate-500">Total Players</p>
+                <p className="text-xs text-slate-500">登録人数</p>
                 <p className="text-lg font-bold">{totalPlayersCount}</p>
               </div>
               <div className="rounded-lg bg-slate-100 px-3 py-2 text-right">
-                <p className="text-xs text-slate-500">Participating</p>
+                <p className="text-xs text-slate-500">参加中</p>
                 <p className="text-lg font-bold">
                   {participatingPlayersCount}/10
                 </p>
@@ -75,8 +76,10 @@ const Home = () => {
             を指定してチーム状態を保存・読み込みできます。アプリ開始時・終了前に使用してください。
           </p>
           <IdForm
+            activeTeamId={currentTeamId}
             teamBalancer={teamBalancer}
             onUpdateTeamBalancer={handleUpdateTeamBalancer}
+            onActiveTeamIdChange={setCurrentTeamId}
             onAppUpdate={handleAppUpdate}
           />
         </section>
@@ -84,7 +87,7 @@ const Home = () => {
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
           <h2 className="text-lg font-bold">1. プレイヤー入力</h2>
           <p className="mb-4 text-sm text-slate-600">
-            Single または Multi でプレイヤーを追加します。
+            個別入力または複数入力でプレイヤーを追加します。
           </p>
           <PlayerInputForm
             teamBalancer={teamBalancer}
@@ -126,7 +129,9 @@ const Home = () => {
             参加者が10人のときに実行できます。結果はコピー可能です。
           </p>
           <DividedTeamTable
+            currentTeamId={currentTeamId}
             teamBalancer={teamBalancer}
+            onUpdateTeamBalancer={handleUpdateTeamBalancer}
             onAppUpdate={handleAppUpdate}
           />
         </section>
