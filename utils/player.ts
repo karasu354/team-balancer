@@ -133,14 +133,39 @@ export class Player {
   }
 }
 
+type SelectableRole = Exclude<roleEnum, roleEnum.all>
+
+const selectRandomDesiredRoles = (
+  mainRole: SelectableRole,
+  subRole: SelectableRole
+): SelectableRole[] => {
+  const selectedRoles: SelectableRole[] = [mainRole]
+  const selectableRoles = Object.values(roleEnum).filter(
+    (role): role is SelectableRole => role !== roleEnum.all
+  )
+
+  if (Math.random() < 0.55) {
+    const subOrAnotherRole =
+      Math.random() < 0.7
+        ? subRole
+        : selectableRoles[Math.floor(Math.random() * selectableRoles.length)]
+
+    if (!selectedRoles.includes(subOrAnotherRole)) {
+      selectedRoles.push(subOrAnotherRole)
+    }
+  }
+
+  return selectedRoles
+}
+
 // アプリの操作に慣れるためのサンプルデータ（10人分）を生成する
 export const generateSamplePlayers = (): Player[] => {
   const configs: {
     name: string
     tier: tierEnum
     rank: rankEnum
-    mainRole: roleEnum
-    subRole: roleEnum
+    mainRole: SelectableRole
+    subRole: SelectableRole
   }[] = [
     {
       name: 'Sample_Top1',
@@ -214,9 +239,22 @@ export const generateSamplePlayers = (): Player[] => {
     },
   ]
 
-  return configs.map(({ name, tier, rank, mainRole, subRole }) => {
+  const shuffledIndexes = Array.from({ length: configs.length }, (_, i) => i)
+  for (let i = shuffledIndexes.length - 1; i > 0; i--) {
+    const randomIndex = Math.floor(Math.random() * (i + 1))
+    const temp = shuffledIndexes[i]
+    shuffledIndexes[i] = shuffledIndexes[randomIndex]
+    shuffledIndexes[randomIndex] = temp
+  }
+
+  const targetFixedCount = 2 + Math.floor(Math.random() * 3)
+  const fixedPlayerIndexes = new Set(shuffledIndexes.slice(0, targetFixedCount))
+
+  return configs.map(({ name, tier, rank, mainRole, subRole }, index) => {
     const player = new Player(name, tier, rank, mainRole, subRole)
     player.isParticipatingInGame = true
+    player.desiredRoles = selectRandomDesiredRoles(mainRole, subRole)
+    player.isRoleFixed = fixedPlayerIndexes.has(index)
     return player
   })
 }

@@ -63,5 +63,84 @@
 - [x] `npm run test` を実行して成功を確認する（S）
 - [x] `npm run test:e2e` を実行して成功を確認する（M）
 
+## Phase 9: 設計更新（チーム分割探索見直し）
+
+- [x] `.steering/20260503-10-prompt-and-ci-test-review/design.md` に、
+      `MAX_TEAM_ATTEMPTS = 5000000` 再検討の方針と採用アルゴリズム（決定的探索または再現可能探索）を追記する（S）
+- [x] `.steering/20260503-10-prompt-and-ci-test-review/design.md` に、
+      CI 環境での処理時間上限と計測方法（ローカル/CI比較観点）を追記する（S）
+
+## Phase 10: ロジック実装（teamBalancer）
+
+- [x] `utils/teamBalancer.ts` の探索ロジックを、10人固定時に実行時間上限が予測可能な方式へ置き換える（L）
+- [x] `utils/teamBalancer.ts` の `MAX_TEAM_ATTEMPTS` を削減・撤廃・または用途限定し、
+      5000000 回ランダム探索依存を解消する（M）
+- [x] 分割候補が成立しない場合でも規定時間内に終了し、分割不可を判定できる分岐を追加する（S）
+- [x] 既存の評価式重み（0.3 / 0.5 / 0.2）と「参加者10人のみ分割可」の条件を維持する（S）
+
+## Phase 11: ユニットテスト更新
+
+- [x] `test/utils/teamBalancer.test.ts` に、見直し後の探索ロジックで分割結果が安定して取得できるテストを追加する（M）
+- [x] `test/utils/teamBalancer.test.ts` に、分割候補なしケースで規定どおり終了・判定されるテストを追加する（M）
+- [x] `test/utils/teamBalancer.test.ts` に、評価式重みと10人制約の互換性維持を確認するテストを追加する（S）
+
+## Phase 12: 検証
+
+- [x] `npm run test:unit -- teamBalancer` を実行し、追加・更新したユニットテストの成功を確認する（S）
+- [x] `npm run test:e2e` を少なくとも3回連続で実行し、`e2e/team-division.spec.ts` が失敗しないことを確認する（M）
+- [x] 最終確認として `npm run format` → `npm run format:test` → `npm run typecheck` → `npm run test` → `npm run test:e2e` を再実行する（M）
+
+## Phase 13: レート変動ロジックのドキュメント明確化
+
+- [x] `docs/team-balancer-spec.md` にレート変動の数式
+      （期待値、重み、K係数、最終更新式）を追記する（S）
+- [x] `docs/team-balancer-spec.md` に数式と実装箇所
+      （ファイルパス・関数名）の対応表を追記する（S）
+
+## Phase 14: ミスマッチ内訳の可視化
+
+- [x] `utils/teamBalancer.ts` でミスマッチ対象者（名前・割当前ロール・希望ロール）を
+      算出・保持できるようにする（M）
+- [x] `components/DividedTeamTable.tsx` に「◯人ミスマッチ」の内訳一覧を表示する（M）
+- [x] `test/utils/teamBalancer.test.ts` にミスマッチ内訳生成のユニットテストを追加する（M）
+- [x] 旧データ互換（追加フィールド欠損時のフォールバック）を確認するテストを追加する（S）
+
+## Phase 15: 最終検証（Phase 13-14 完了後）
+
+- [x] `npm run format` を実行して差分を整える（S）
+- [x] `npm run format:test` を実行して成功を確認する（S）
+- [x] `npm run typecheck` を実行して成功を確認する（S）
+- [x] `npm run test` を実行して成功を確認する（S）
+- [x] `npm run test:e2e` を実行して成功を確認する（M）
+
+## Phase 16: ミスマッチ別スコア比較の可視化
+
+- [x] `components/DividedTeamTable.tsx` に、各「◯人ミスマッチ」タブの最良評価スコア表示を追加する（M）
+- [x] 最小評価スコアの候補を視覚的に強調表示する（S）
+- [x] 候補なしタブは比較対象から除外し、表示が破綻しないことを確認する（S）
+
+## Phase 17: サンプルデータの希望ロール・固定希望ランダム化
+
+- [x] `utils/player.ts` のサンプル投入ロジックで、
+      `desiredRoles` を1〜2ロールのランダム割当に変更する（M）
+- [x] `utils/player.ts` で `isRoleFixed` を確率付与し、
+      全員固定/全員非固定になりにくい分布へ調整する（M）
+- [x] サンプル投入後も10人表示・重複なし・分割操作可能を維持する確認を追加する（S）
+
+## Phase 18: テスト・ドキュメント更新
+
+- [x] `test/utils/teamBalancer.test.ts` にミスマッチ比較表示で利用する評価スコア保持の
+      回帰テストを追加する（S）
+- [x] `docs/team-balancer-spec.md` に、ミスマッチ別最良スコア比較表示と
+      サンプルデータ多様化方針を追記する（S）
+
+## Phase 19: 最終検証（Phase 16-18 完了後）
+
+- [x] `npm run format` を実行して差分を整える（S）
+- [x] `npm run format:test` を実行して成功を確認する（S）
+- [x] `npm run typecheck` を実行して成功を確認する（S）
+- [x] `npm run test` を実行して成功を確認する（S）
+- [x] `npm run test:e2e` を実行して成功を確認する（M）
+
 ブランチ名: `feature/prompt-and-ci-test-review`
 初回コミット: `chore(copilot): simplify e2e scripts, add requirements-update prompt, fix typecheck gap`

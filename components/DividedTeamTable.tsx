@@ -6,6 +6,23 @@ import { roleList } from '../utils/role'
 import { TeamBalancer } from '../utils/teamBalancer'
 import MatchHistoryPanel from './MatchHistoryPanel'
 
+const getRoleLabel = (role: string): string => {
+  switch (role) {
+    case 'top':
+      return 'Top'
+    case 'jg':
+      return 'Jg'
+    case 'mid':
+      return 'Mid'
+    case 'bot':
+      return 'Bot'
+    case 'sup':
+      return 'Sup'
+    default:
+      return role
+  }
+}
+
 interface DividedTeamTableProps {
   currentTeamId: string
   teamBalancer: TeamBalancer
@@ -134,6 +151,19 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
 
   const activeBalancedTeam = balancedTeamsByMissMatch[activeTab]
   const isDivideButtonDisabled = teamBalancer.isDividable() === false
+  const scoreSummaries = Object.entries(balancedTeamsByMissMatch)
+    .map(([key, value]) => ({
+      mismatchCount: Number(key),
+      hasCandidate: value.players.length === 10,
+      evaluationScore: value.evaluationScore,
+    }))
+    .filter((summary) => summary.hasCandidate)
+  const bestSummary =
+    scoreSummaries.length > 0
+      ? scoreSummaries.reduce((best, current) =>
+          current.evaluationScore < best.evaluationScore ? current : best
+        )
+      : null
 
   return (
     <div className="w-full">
@@ -168,6 +198,21 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
 
       <div className="flex flex-col gap-3 md:flex-row">
         <div className="flex gap-2 overflow-x-auto pb-1 md:mr-2 md:flex-col md:gap-2 md:overflow-visible md:pb-0">
+          {scoreSummaries.length > 0 && (
+            <div className="mb-2 rounded border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
+              <p className="font-semibold">ミスマッチ別最良スコア比較</p>
+              <ul className="mt-1 list-disc pl-4">
+                {scoreSummaries.map((summary) => (
+                  <li key={summary.mismatchCount}>
+                    {summary.mismatchCount}人:{' '}
+                    {summary.evaluationScore.toFixed(2)}
+                    {bestSummary?.mismatchCount === summary.mismatchCount &&
+                      ' ← 最小スコア'}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           {Object.keys(balancedTeamsByMissMatch).map((key) => (
             <button
               key={key}
@@ -175,12 +220,18 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
               disabled={
                 balancedTeamsByMissMatch[Number(key)].players.length === 0
               }
-              className={getButtonClass(
+              className={`${getButtonClass(
                 balancedTeamsByMissMatch[Number(key)].players.length === 0,
                 Number(key) === activeTab
-              )}
+              )} ${
+                bestSummary?.mismatchCount === Number(key)
+                  ? 'ring-2 ring-emerald-500'
+                  : ''
+              }`}
             >
               {key}人ミスマッチ
+              {balancedTeamsByMissMatch[Number(key)].players.length === 10 &&
+                ` (${balancedTeamsByMissMatch[Number(key)].evaluationScore.toFixed(2)})`}
             </button>
           ))}
         </div>
@@ -194,6 +245,27 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
                   {activeBalancedTeam.evaluationScore.toFixed(2)}
                 </span>
               </p>
+              <div className="mb-3 rounded border border-amber-200 bg-amber-50 p-3 text-sm">
+                <p className="font-semibold text-amber-900">
+                  ミスマッチ内訳（{activeBalancedTeam.mismatchDetails.length}
+                  件）
+                </p>
+                {activeBalancedTeam.mismatchDetails.length === 0 ? (
+                  <p className="mt-1 text-amber-800">
+                    ミスマッチはありません（全員が希望ロールに配置されています）。
+                  </p>
+                ) : (
+                  <ul className="mt-2 list-disc space-y-1 pl-5 text-amber-900">
+                    {activeBalancedTeam.mismatchDetails.map((detail) => (
+                      <li key={`${detail.playerId}-${detail.assignedRole}`}>
+                        {detail.playerName}: 割当{' '}
+                        {getRoleLabel(detail.assignedRole)} / 希望{' '}
+                        {detail.desiredRoles.map(getRoleLabel).join(', ')}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div>
                   <div className="mb-3 border-b border-slate-200 pb-1 font-bold">

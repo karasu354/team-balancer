@@ -120,6 +120,8 @@ Team Balancer の仕様を定義する。
 | 5-8  | 履歴詳細アコーディオン | 履歴一覧から詳細アコーディオンで勝敗と「変動後のレート（変動値）」を確認できる。各プレイヤーのレート数値も表示する | ✅ 実装済み（案B）    |
 | 5-9  | 表示文言の日本語化     | 主要ラベルを日本語または統一表記へ置換する                                                                         | ✅ 実装済み           |
 | 5-10 | 履歴削除UI             | 履歴一覧から誤登録履歴を削除できる                                                                                 | ✅ 実装済み           |
+| 5-11 | ミスマッチ比較表示     | 各「◯人ミスマッチ」候補の最良評価スコアを一覧表示し、最小スコア候補を強調表示する                                  | ✅ 実装済み           |
+| 5-12 | サンプルデータ多様化   | サンプル投入時に希望ロール（1〜2件）と固定希望をランダム化し、検証データの偏りを減らす                             | ✅ 実装済み           |
 
 ### 表示方針（採用決定: 2026-05-03）
 
@@ -160,6 +162,101 @@ $$
 補足:
 
 - 実装は固定差分方式ではなく、ELO ベース計算で運用する。
+
+### レート変動の数式
+
+期待値関数:
+
+$$
+E(r, r_{opp}, s) = \frac{1}{1 + 10^{\frac{r_{opp} - r}{s}}}
+$$
+
+レーン期待値:
+
+$$
+E_{lane} = E(r_i, r_{laneOpp}, 400)
+$$
+
+チーム期待値:
+
+$$
+E_{team} = E(\bar{r}_{ownTeam}, \bar{r}_{oppTeam}, 400)
+$$
+
+基本期待値（全ロール共通）:
+
+$$
+E_{base} = 0.7 \times E_{lane} + 0.3 \times E_{team}
+$$
+
+Bot/Sup のみペア補正を適用:
+
+$$
+E_{pair} = E(r_{ownPair}, r_{oppPair}, 800)
+$$
+
+$$
+E_{final} =
+\begin{cases}
+E_{base} & \text{(Top/Jg/Mid)} \\
+0.8 \times E_{base} + 0.2 \times E_{pair} & \text{(Bot/Sup)}
+\end{cases}
+$$
+
+実スコア:
+
+$$
+S =
+\begin{cases}
+1 & \text{(win)} \\
+0 & \text{(lose)}
+\end{cases}
+$$
+
+レート変動量と更新後レート:
+
+$$
+\Delta r = \mathrm{round}(30 \times (S - E_{final}))
+$$
+
+$$
+r_{after} = r_{before} + \Delta r
+$$
+
+### 数式とコード対応表
+
+| 仕様項目                      | 実装箇所                                                                |
+| ----------------------------- | ----------------------------------------------------------------------- |
+| 期待値関数 $E(r, r_{opp}, s)$ | `utils/teamBalancer.ts` `calculateExpectedScore`                        |
+| $E_{lane}$ 計算               | `utils/teamBalancer.ts` `applyMatchHistory` 内 `laneExpected`           |
+| $E_{team}$ 計算               | `utils/teamBalancer.ts` `applyMatchHistory` 内 `teamExpected`           |
+| $E_{base}$ 合成（0.7 / 0.3）  | `utils/teamBalancer.ts` `applyMatchHistory` 内 `expectedScore` 初期計算 |
+| Bot/Sup ペア補正（0.2）       | `utils/teamBalancer.ts` `applyMatchHistory` 内 `pairExpected` 合成      |
+| $\Delta r$ 計算（K=30, 丸め） | `utils/teamBalancer.ts` `applyMatchHistory` 内 `ratingDelta`            |
+| $r_{after}$ 計算              | `utils/teamBalancer.ts` `applyMatchHistory` 内 `ratingAfter`            |
+
+### ミスマッチ内訳の表示仕様
+
+- 分割結果は「◯人ミスマッチ」に加えて、対象プレイヤーの内訳を表示する
+  - プレイヤー名
+  - 割当前ロール
+  - 希望ロール一覧
+- 内訳データは分割候補ごとに保持し、表示時に参照する
+- 旧データで内訳が欠損している場合は空配列として扱い、表示上は「ミスマッチなし」または
+  「内訳なし」としてフォールバックする
+
+### ミスマッチ別最良スコアの比較表示
+
+- 各「◯人ミスマッチ」タブには `evaluationScore` を併記する
+- 候補が存在するミスマッチ人数のみ比較対象とし、候補なしタブは無効化を維持する
+- 比較対象のうち最小スコア候補は強調表示し、採用判断をしやすくする
+
+### サンプルデータ多様化方針
+
+- サンプルプレイヤーは10人固定で投入する
+- 各プレイヤーの `desiredRoles` は1〜2ロールをランダム付与する（`ALL` は除外）
+- `isRoleFixed` は全員固定/全員非固定を避ける分布でランダム付与する
+- プレイヤー名重複なし・参加フラグON・分割可能な基本条件を維持する
 
 ---
 

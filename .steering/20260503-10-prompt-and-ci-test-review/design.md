@@ -236,3 +236,133 @@ export const addPlayer = async (page: Page, name: string): Promise<void> => {
 
 実装時は `addTenPlayers` 完了後に参加人数テキスト（例：`参加中プレイヤー 10人`）が
 表示されることを `expect` で確認するアプローチが最もシンプルで堅牢。
+
+---
+
+## 追加設計（2026-05-03）: teamBalancer 探索戦略の見直し
+
+`MAX_TEAM_ATTEMPTS = 5000000` のランダム試行は、環境差で完了時間が揺らぎやすく
+CI の E2E 失敗要因になりうるため、以下の決定的探索へ置き換える。
+
+### 採用アルゴリズム
+
+- 対象: `utils/teamBalancer.ts` の `divideTeams()`
+- 方式: 10スロット（Blue 5 + Red 5）に対する深さ優先探索（DFS）
+- 探索順序: プレイヤー ID 昇順で固定し、毎回同じ入力から同じ候補順で評価する
+- 制約適用: `isRoleFixed=true` かつ希望外ロールは探索途中で即座に枝刈りする
+- 対称性削減: チーム入れ替え対称を抑えるため、最小 ID プレイヤーが Blue 側に入る分岐のみ許可する
+
+### 処理時間上限と終了条件
+
+- 評価上限: `MAX_TEAM_EVALUATIONS = 200000`
+- 時間上限: `TEAM_DIVIDE_TIME_LIMIT_MS = 1500`
+- いずれかに到達したら探索を終了し、評価済み候補から最良結果を採用する
+- 候補が1件も成立しない場合は例外を投げ、分割不可を明示する
+
+### 互換性ポリシー
+
+- 維持する仕様:
+  - 参加者10人ちょうどでのみ分割可能
+  - 評価式重み `0.3 / 0.5 / 0.2`
+  - `balancedTeamsByMissMatch` にミスマッチ人数ごとの最良候補を保存
+- 変更する仕様:
+  - ランダム探索による非決定性（再現しづらい実行時間・結果）
+
+### 計測方法（ローカル / CI 比較）
+
+- 単体確認: `npm run test:unit -- teamBalancer`
+- E2E 安定性確認: `npm run test:e2e` を3回連続実行し、`e2e/team-division.spec.ts` の失敗有無を確認
+- 最終確認: `npm run format` → `npm run format:test` → `npm run typecheck` → `npm run test` → `npm run test:e2e`
+
+これにより「実行時間上限が明確で再現可能な分割処理」を実現し、
+CI 環境での `青チーム` 表示待機タイムアウトの再発を抑制する。
+
+---
+
+## 追加設計（2026-05-03）: レート変動の数式可視化とミスマッチ内訳表示
+
+### 目的
+
+- レート変動ロジックを数式として仕様書に明示し、実装との対応関係を追跡しやすくする
+- `mismatchCount` の件数だけでなく、どのプレイヤーがミスマッチだったかを表示できるようにする
+
+### 影響ファイル
+
+- `docs/team-balancer-spec.md`
+  - レート変動数式（期待値、重み、K係数、丸め、更新式）を追記
+  - 数式と実装関数の対応表を追記
+- `utils/teamBalancer.ts`
+  - チーム分割時にミスマッチ対象プレイヤー情報を計算して保持
+  - `playersInfo` / `fromJson` 互換を壊さない形で追加項目を optional で拡張
+- `components/DividedTeamTable.tsx`
+  - 現在選択中の分割結果に対し、ミスマッチ対象者一覧を表示
+- `test/utils/teamBalancer.test.ts`
+  - ミスマッチ対象者情報の生成・互換性維持を検証
+
+### データモデル拡張方針
+
+- 追加型（案）:
+  - `MismatchDetail` = `{ playerId, playerName, assignedRole, desiredRoles, isRoleFixed }`
+- 保持先（案）:
+  - `balancedTeamsByMissMatch[mismatchCount]` の値に `mismatchDetails` を追加
+  - 既存データとの互換のため、追加フィールドは optional とする
+
+### コード対応の明示方針（ドキュメント記載）
+
+- レート期待値: `utils/teamBalancer.ts` の `calculateExpectedScore`
+- レーン/チーム期待値の合成: `applyMatchHistory`
+- Bot/Sup ペア補正: `applyMatchHistory`
+- 最終変動量: `ratingDelta = round(K * (actual - expected))` 相当計算箇所
+
+### 互換性方針
+
+- 旧保存データ（`mismatchDetails` なし）読み込み時は空配列扱いにフォールバック
+- `matchHistories` の既存構造を必須破壊しない（必要なら optional 追加で段階移行）
+
+---
+
+## 追加設計（2026-05-03）: ミスマッチ別スコア比較とサンプルデータ多様化
+
+### 目的
+
+- `◯人ミスマッチ` タブごとの最良評価スコアを同時比較できるようにし、
+  採用すべき候補を判断しやすくする
+- サンプルデータ投入時に希望レーンと `isRoleFixed` を固定化せず、
+  検証データの偏りを減らす
+
+### 影響ファイル
+
+- `components/DividedTeamTable.tsx`
+  - タブラベルまたはサマリー領域に、各ミスマッチ人数の最良スコアを表示
+  - 最小スコアのタブを強調表示（色・バッジ等）
+- `utils/teamBalancer.ts`
+  - 既存の `balancedTeamsByMissMatch` を比較用データソースとして利用
+  - 追加の再計算は行わず、保持済み評価スコアを表示へ流用
+- `components/Form/ChatLogInputForm.tsx`
+  - サンプルデータ生成時に `desiredRoles` と `isRoleFixed` の付与をランダム化
+  - 無効データ（空希望ロールなど）を生成しないガードを維持
+- `docs/team-balancer-spec.md`
+  - UI 仕様に「ミスマッチ別最良スコア比較」と「サンプルデータ多様化方針」を追記
+
+### 実装方針
+
+- ミスマッチ比較表示
+
+  - `balancedTeamsByMissMatch` を走査し、`players.length === 10` の候補だけを対象に
+    `evaluationScore` を一覧表示する
+  - 候補なしタブは従来通り無効化する
+  - 候補ありタブのうち最小 `evaluationScore` を持つタブを強調する
+
+- サンプルデータランダム化
+  - 希望ロール: 1〜2ロールをランダム選択（重複なし）
+  - 固定希望: 一定確率で `isRoleFixed=true` を付与するが、全員固定にはしない
+  - 既存制約を維持:
+    - プレイヤー名重複を作らない
+    - 10人投入後に分割可能性が極端に下がりすぎない分布へ調整
+
+### 検証方針
+
+- `test/utils/teamBalancer.test.ts`
+  - ミスマッチ比較表示に必要な評価スコアデータが保持されることを確認
+- UI/E2E（既存範囲）
+  - サンプルデータ投入後に10人表示・チーム分割操作が可能であることを確認
