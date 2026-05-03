@@ -3,11 +3,25 @@ import { RedisClientType, createClient } from 'redis'
 
 import { PlayersJson } from '../utils/teamBalancer'
 
+export const createTeamPlayersKey = (teamId: string): string => {
+  return `teams:${teamId}:players`
+}
+
+const getRequiredRedisUrl = (redisUrl: string | undefined): string => {
+  if (!redisUrl || !redisUrl.trim()) {
+    throw new Error('REDIS_URL is not configured')
+  }
+
+  return redisUrl
+}
+
 export class VercelRedis {
   private client: RedisClientType
 
-  constructor() {
-    this.client = createClient({ url: process.env.REDIS_URL })
+  constructor(redisUrl?: string) {
+    this.client = createClient({
+      url: getRequiredRedisUrl(redisUrl ?? process.env.REDIS_URL),
+    })
   }
 
   public async connect() {
@@ -23,7 +37,7 @@ export class VercelRedis {
   }
 
   public async getTeamPlayers(teamId: string): Promise<PlayersJson | null> {
-    const data = await this.client.get(`teams:${teamId}:players`)
+    const data = await this.client.get(createTeamPlayersKey(teamId))
     if (data) {
       return JSON.parse(data) as PlayersJson
     }
@@ -34,7 +48,7 @@ export class VercelRedis {
     teamId: string,
     players: PlayersJson
   ): Promise<void> {
-    await this.client.set(`teams:${teamId}:players`, JSON.stringify(players))
+    await this.client.set(createTeamPlayersKey(teamId), JSON.stringify(players))
   }
 
   public async flushAll() {

@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 
 import handler from '../../pages/api/teams/[id]'
+import { VercelRedis } from '../../services/vercelRedis'
 
 const mockRedis = {
   connect: jest.fn(),
@@ -11,6 +12,9 @@ const mockRedis = {
 
 jest.mock('../../services/vercelRedis', () => {
   return {
+    createTeamPlayersKey: jest.fn(
+      (teamId: string) => `teams:${teamId}:players`
+    ),
     VercelRedis: jest.fn(() => mockRedis),
   }
 })
@@ -39,6 +43,38 @@ const hasMatchHistories = (
     Array.isArray(value.matchHistories)
   )
 }
+
+const createPlayerJson = () => ({
+  id: 'player-1',
+  name: 'Alice',
+  tier: 'GOLD',
+  rank: 'II',
+  displayRank: 'GOLD II',
+  rating: 1400,
+  mainRole: 'TOP',
+  subRole: 'JG',
+  desiredRoles: ['TOP'],
+  isRoleFixed: false,
+})
+
+const createMatchHistory = (index: number) => ({
+  id: `history-${index}`,
+  playedAt: `2026-05-03T12:30:${String(index).padStart(2, '0')}Z`,
+  winnerTeam: 'blue',
+  mismatchCount: 0,
+  teamsSnapshot: [],
+  playerResults: [],
+})
+
+const createPlayersPayload = (matchHistoryCount = 0) => ({
+  id: 'team-1',
+  version: '0.0.1',
+  playersTotalCount: 1,
+  players: [createPlayerJson()],
+  matchHistories: Array.from({ length: matchHistoryCount }, (_, index) =>
+    createMatchHistory(index)
+  ),
+})
 
 const toNextApiRequest = (request: MinimalRequest): NextApiRequest => {
   // テスト用の最小構造体を NextApiRequest として扱うため、unknown ブリッジで明示的に変換する
@@ -96,6 +132,7 @@ describe('pages/api/teams/[id]', () => {
 
     expect(res.statusCode).toBe(400)
     expect(res.body).toEqual({ error: 'Invalid request body' })
+    expect(mockRedis.connect).not.toHaveBeenCalled()
   })
 
   test('未対応メソッドで 405 を返すこと', async () => {
@@ -131,6 +168,29 @@ describe('pages/api/teams/[id]', () => {
     expect(res.body).toEqual({ error: 'Internal Server Error' })
   })
 
+  test('REDIS_URL 未設定時に 500 を返すこと', async () => {
+    const originalRedisUrl = process.env.REDIS_URL
+    delete process.env.REDIS_URL
+
+    const req = {
+      method: 'GET',
+      query: { id: 'team-1' },
+    }
+    const res = createMockResponse()
+
+    const redisMock = VercelRedis as unknown as jest.Mock
+    redisMock.mockImplementationOnce(() => {
+      throw new Error('REDIS_URL is not configured')
+    })
+
+    await handler(toNextApiRequest(req), res)
+
+    expect(res.statusCode).toBe(500)
+    expect(res.body).toEqual({ error: 'Internal Server Error' })
+
+    process.env.REDIS_URL = originalRedisUrl
+  })
+
   test('不正な matchHistories 形式で 400 を返すこと', async () => {
     const req = {
       method: 'PUT',
@@ -153,23 +213,7 @@ describe('pages/api/teams/[id]', () => {
 
   test('履歴削除で更新後データを返すこと', async () => {
     mockRedis.getTeamPlayers.mockResolvedValueOnce({
-      id: 'team-1',
-      version: '0.0.1',
-      playersTotalCount: 1,
-      players: [
-        {
-          id: 'player-1',
-          name: 'Alice',
-          tier: 'GOLD',
-          rank: 'II',
-          displayRank: 'GOLD II',
-          rating: 1400,
-          mainRole: 'TOP',
-          subRole: 'JG',
-          desiredRoles: ['TOP'],
-          isRoleFixed: false,
-        },
-      ],
+      ...createPlayersPayload(),
       matchHistories: [
         {
           id: 'history-1',
@@ -218,38 +262,10 @@ describe('pages/api/teams/[id]', () => {
   })
 
   test('保存と復元で履歴件数が最大50件に正規化されること', async () => {
-    const matchHistories = Array.from({ length: 51 }, (_, index) => ({
-      id: `history-${index}`,
-      playedAt: `2026-05-03T12:30:${index}Z`,
-      winnerTeam: 'blue',
-      mismatchCount: 0,
-      teamsSnapshot: [],
-      playerResults: [],
-    }))
-
     const putReq = {
       method: 'PUT',
       query: { id: 'team-1' },
-      body: {
-        id: 'team-1',
-        version: '0.0.1',
-        playersTotalCount: 1,
-        players: [
-          {
-            id: 'player-1',
-            name: 'Alice',
-            tier: 'GOLD',
-            rank: 'II',
-            displayRank: 'GOLD II',
-            rating: 1400,
-            mainRole: 'TOP',
-            subRole: 'JG',
-            desiredRoles: ['TOP'],
-            isRoleFixed: false,
-          },
-        ],
-        matchHistories,
-      },
+      body: createPlayersPayload(51),
     }
     const putRes = createMockResponse()
 
@@ -307,5 +323,23 @@ describe('pages/api/teams/[id]', () => {
 
     expect(res.statusCode).toBe(400)
     expect(res.body).toEqual({ error: 'Invalid or missing history ID' })
+  })
+
+  test('保存時に既存の Redis キー形式を維持すること', async () => {
+    mockRedis.setTeamPlayers.mockResolvedValueOnce(undefined)
+
+    const req = {
+      method: 'PUT',
+      query: { id: 'team-1' },
+      body: createPlayersPayload(),
+    }
+    const res = createMockResponse()
+
+    await handler(toNextApiRequest(req), res)
+
+    expect(mockRedis.setTeamPlayers).toHaveBeenCalledWith(
+      'team-1',
+      expect.any(Object)
+    )
   })
 })

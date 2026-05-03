@@ -26,3 +26,19 @@
 - [x] npm run typecheck を実行（S）
 - [x] npm run test を実行（S）
 - [x] npm run test:e2e を実行（M）
+
+## Phase 5: API 責務分離（未着手）
+
+- [x] pages/api/teams/[id].ts の入力検証・永続化変換・レスポンス組み立てを関数分離する（L）
+- [x] 正規化処理が `utils/` を唯一の正とすることを確認し、API 層の重複ロジックを解消する（M）
+
+## Phase 6: ドメイン/Redis 保守性改善（未着手）
+
+- [x] utils/teamBalancer.ts の履歴正規化・保持上限制御を純粋関数へ切り出す方針で整理する（M）
+- [x] services/vercelRedis.ts に `REDIS_URL` の fail-fast 検証を追加する（S）
+- [x] services/vercelRedis.ts の Redis キー生成を定数または関数に集約する（S）
+
+## Phase 7: テスト保守性改善（未着手）
+
+- [x] test/api/teams-id.test.ts の保存/復元系フィクスチャを共通化する（S）
+- [x] API 責務分離と Redis 設定検証に対応するテスト観点を tasks と同期して補強する（M）

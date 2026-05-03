@@ -1,7 +1,12 @@
 import { Player } from '../../utils/player'
 import { rankEnum, tierEnum } from '../../utils/rank'
 import { roleEnum } from '../../utils/role'
-import { PlayersJson, TeamBalancer } from '../../utils/teamBalancer'
+import {
+  MAX_MATCH_HISTORIES,
+  PlayersJson,
+  TeamBalancer,
+  normalizeMatchHistories,
+} from '../../utils/teamBalancer'
 import { generateInternalId } from '../../utils/utils'
 
 describe('TeamBalancer クラス', () => {
@@ -157,6 +162,59 @@ describe('TeamBalancer クラス', () => {
       const loaded = TeamBalancer.fromJson(legacyJson)
       expect(loaded.matchHistories).toHaveLength(1)
       expect(loaded.matchHistories[0].mismatchDetails).toEqual([])
+    })
+
+    test('51件以上の履歴を playedAt 降順で最大50件に正規化できること', () => {
+      const loaded = TeamBalancer.fromJson({
+        id: 'team-id-123',
+        version: '0.0.1',
+        playersTotalCount: 0,
+        players: [],
+        matchHistories: Array.from({ length: 51 }, (_, index) => ({
+          id: `history-${index}`,
+          playedAt: `2026-05-03T12:30:${String(index).padStart(2, '0')}Z`,
+          winnerTeam: 'blue',
+          mismatchCount: 0,
+          teamsSnapshot: [],
+          playerResults: [],
+        })),
+      })
+
+      expect(loaded.matchHistories).toHaveLength(MAX_MATCH_HISTORIES)
+      expect(loaded.matchHistories[0].id).toBe('history-50')
+      expect(
+        loaded.matchHistories.some((history) => history.id === 'history-0')
+      ).toBe(false)
+    })
+  })
+
+  describe('normalizeMatchHistories', () => {
+    test('undefined 入力なら空配列を返すこと', () => {
+      expect(normalizeMatchHistories(undefined)).toEqual([])
+    })
+
+    test('不正な履歴は除外し、有効な履歴のみを返すこと', () => {
+      const invalidHistoryInput: unknown[] = [
+        {
+          id: 'history-valid',
+          playedAt: '2026-05-03T12:30:00Z',
+          winnerTeam: 'blue',
+          mismatchCount: 0,
+          teamsSnapshot: [],
+          playerResults: [],
+        },
+        {
+          id: 'history-invalid',
+          winnerTeam: 'blue',
+        },
+      ]
+
+      const histories = normalizeMatchHistories(
+        invalidHistoryInput as unknown as PlayersJson['matchHistories']
+      )
+
+      expect(histories).toHaveLength(1)
+      expect(histories[0].id).toBe('history-valid')
     })
   })
 
@@ -465,7 +523,7 @@ describe('TeamBalancer クラス', () => {
       expect(teamBalancer.matchHistories).toHaveLength(50)
       expect(
         teamBalancer.matchHistories.some(
-          (history) => history.id === 'history-49'
+          (history) => history.id === 'history-00'
         )
       ).toBe(false)
     })

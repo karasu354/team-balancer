@@ -99,71 +99,133 @@ const isPlayersJsonBody = (value: unknown): value is PlayersJson => {
   )
 }
 
+const getTeamId = (id: string | string[] | undefined): string | null => {
+  return typeof id === 'string' && id ? id : null
+}
+
+const getHistoryId = (
+  historyId: string | string[] | undefined
+): string | null => {
+  return typeof historyId === 'string' && historyId ? historyId : null
+}
+
+const normalizePlayersJson = (playersJson: PlayersJson): PlayersJson => {
+  return TeamBalancer.fromJson(playersJson).playersInfo
+}
+
+const handleGetRequest = async (
+  teamId: string,
+  redis: VercelRedis,
+  res: NextApiResponse
+): Promise<void> => {
+  const teamData = await redis.getTeamPlayers(teamId)
+
+  if (!teamData) {
+    res.status(404).json({ error: 'Team not found' })
+    return
+  }
+
+  res.status(200).json(teamData)
+}
+
+const handlePutRequest = async (
+  teamId: string,
+  body: unknown,
+  redis: VercelRedis,
+  res: NextApiResponse
+): Promise<void> => {
+  if (!isPlayersJsonBody(body)) {
+    res.status(400).json({ error: 'Invalid request body' })
+    return
+  }
+
+  await redis.setTeamPlayers(teamId, normalizePlayersJson(body))
+
+  res.status(200).json({ message: 'Team data saved successfully' })
+}
+
+const handleDeleteRequest = async (
+  teamId: string,
+  historyId: string | null,
+  redis: VercelRedis,
+  res: NextApiResponse
+): Promise<void> => {
+  if (!historyId) {
+    res.status(400).json({ error: 'Invalid or missing history ID' })
+    return
+  }
+
+  const teamData = await redis.getTeamPlayers(teamId)
+  if (!teamData) {
+    res.status(404).json({ error: 'Team not found' })
+    return
+  }
+
+  const teamBalancer = TeamBalancer.fromJson(teamData)
+  teamBalancer.deleteMatchHistory(historyId)
+  const updatedTeamData = teamBalancer.playersInfo
+
+  await redis.setTeamPlayers(teamId, updatedTeamData)
+
+  res.status(200).json(updatedTeamData)
+}
+
+const handleMethodNotAllowed = (
+  req: NextApiRequest,
+  res: NextApiResponse
+): void => {
+  res.setHeader('Allow', ['GET', 'PUT', 'DELETE'])
+  res.status(405).json({ error: `Method ${req.method} Not Allowed` })
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { id } = req.query
+  const teamId = getTeamId(req.query.id)
 
-  if (!id || typeof id !== 'string') {
+  if (!teamId) {
     return res.status(400).json({ error: 'Invalid or missing team ID' })
   }
 
-  const redis = new VercelRedis()
+  if (req.method === 'PUT' && !isPlayersJsonBody(req.body)) {
+    return res.status(400).json({ error: 'Invalid request body' })
+  }
+
+  if (req.method !== 'GET' && req.method !== 'PUT' && req.method !== 'DELETE') {
+    handleMethodNotAllowed(req, res)
+    return
+  }
+
   let isConnected = false
+  let redis: VercelRedis | null = null
 
   try {
+    redis = new VercelRedis()
     await redis.connect()
     isConnected = true
 
     if (req.method === 'GET') {
-      const teamData = await redis.getTeamPlayers(id)
-
-      if (!teamData) {
-        return res.status(404).json({ error: 'Team not found' })
-      }
-
-      return res.status(200).json(teamData)
-    } else if (req.method === 'PUT') {
-      const body: unknown = req.body
-
-      if (!isPlayersJsonBody(body)) {
-        return res.status(400).json({ error: 'Invalid request body' })
-      }
-
-      const normalizedTeamData = TeamBalancer.fromJson(body).playersInfo
-
-      await redis.setTeamPlayers(id, normalizedTeamData)
-
-      return res.status(200).json({ message: 'Team data saved successfully' })
-    } else if (req.method === 'DELETE') {
-      const historyId =
-        typeof req.query.historyId === 'string' ? req.query.historyId : null
-
-      if (!historyId) {
-        return res.status(400).json({ error: 'Invalid or missing history ID' })
-      }
-
-      const teamData = await redis.getTeamPlayers(id)
-      if (!teamData) {
-        return res.status(404).json({ error: 'Team not found' })
-      }
-
-      const teamBalancer = TeamBalancer.fromJson(teamData)
-      teamBalancer.deleteMatchHistory(historyId)
-      const updatedTeamData = teamBalancer.playersInfo
-
-      await redis.setTeamPlayers(id, updatedTeamData)
-
-      return res.status(200).json(updatedTeamData)
+      await handleGetRequest(teamId, redis, res)
+      return
     }
 
-    res.setHeader('Allow', ['GET', 'PUT', 'DELETE'])
-    return res.status(405).json({ error: `Method ${req.method} Not Allowed` })
-  } catch (error) {
+    if (req.method === 'PUT') {
+      await handlePutRequest(teamId, req.body, redis, res)
+      return
+    }
+
+    await handleDeleteRequest(
+      teamId,
+      getHistoryId(req.query.historyId),
+      redis,
+      res
+    )
+    return
+  } catch {
     return res.status(500).json({ error: 'Internal Server Error' })
   } finally {
-    if (isConnected) {
+    if (isConnected && redis) {
       await redis.disconnect()
     }
   }
