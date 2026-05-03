@@ -213,7 +213,8 @@ npm run test:unit
 # テストを実行しないままコミット
 ```
 
-- 実装後の標準検証順は `npm run format` → `npm run format:test` → `npm run test` → `npm run test:e2e:fast` とする
+- 実装後の標準検証順は `npm run format` → `npm run format:test` → `npm run typecheck` → `npm run test` → `npm run test:e2e:fast` とする
+- CI と同一セットの簡易実行として `npm run test:ci` を利用してよい
 
 ### ユニットテスト（Jest）
 
@@ -243,13 +244,14 @@ npm run test:unit
 
 ### CI/CD（GitHub Actions）
 
-- CI workflow は `.github/workflows/test.yaml` を利用する
+- CI workflow は `.github/workflows/ci.yaml` を利用する
 - PR / push（`develop`, `main`）で以下を実行する
   - `npm run format:test`
   - `npm run typecheck`
-  - `npm run test:unit`
+  - `npm run test`
   - `npm run test:e2e:fast`
   - `npm run build`
+- `.github/workflows/*.yaml` の `uses` はタグではなくコミットハッシュへ固定する
 - Integration E2E は `.github/workflows/e2e-integration.yaml` で手動実行する
 - Integration E2E 実行時は `REDIS_URL` secret を必須とする
 - 同一ブランチで重複実行が発生した場合は `concurrency` で最新実行を優先する
@@ -269,6 +271,7 @@ npm run test:unit
 - 仕様変更が `docs/` に反映されている
 - `npm run format` を実行している
 - `npm run format:test` が成功している
+- `npm run typecheck` が成功している
 - `npm run test` が成功している
 - `npm run test:unit` が成功している
 - `npm run test:e2e:fast` が成功している

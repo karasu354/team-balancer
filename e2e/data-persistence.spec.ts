@@ -8,23 +8,31 @@ test('ID保存→読み込みでプレイヤー一覧が復元される', async 
   await setupTeamApiMock(page)
 
   const testId = `e2e-test-${Date.now()}`
+  const getIdSection = () =>
+    page
+      .locator('div')
+      .filter({ has: page.getByRole('button', { name: '保存する' }) })
+      .filter({ has: page.getByRole('button', { name: '読み込む' }) })
+      .first()
 
   // プレイヤーを追加して保存
   await page.goto('/')
   await addTenPlayers(page)
 
-  const idForm = page
-    .locator('div')
-    .filter({ has: page.getByPlaceholder('IDを入力') })
-    .first()
-  const idInput = page.getByPlaceholder('IDを入力')
+  const idForm = getIdSection()
+  const idInput = idForm.getByPlaceholder('IDを入力')
   await idInput.fill(testId)
   await idForm.getByRole('button', { name: '保存する' }).click()
 
   // ページをリロードして読み込み
   await page.goto('/')
-  await idInput.fill(testId)
-  await idForm.getByRole('button', { name: '読み込む' }).click()
+  const reloadedForm = getIdSection()
+  const reloadedInput = reloadedForm.getByPlaceholder('IDを入力')
+  await reloadedInput.fill(testId)
+
+  const loadButton = reloadedForm.getByRole('button', { name: '読み込む' })
+  await expect(loadButton).toBeEnabled()
+  await loadButton.click()
 
   await expect(
     page.locator('p.font-bold', { hasText: 'Player01' }).first()

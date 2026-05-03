@@ -220,6 +220,25 @@ $$
   - `utils/role.ts`
   - `utils/utils.ts`
 
+### テスト境界線（追加先判断基準）
+
+| 区分            | 主配置                                       | 目的                                              | 外部依存                  | 代表ケース                                       |
+| --------------- | -------------------------------------------- | ------------------------------------------------- | ------------------------- | ------------------------------------------------ |
+| Unit            | `test/utils/*.test.ts`, `test/api/*.test.ts` | ドメインロジック・API入力検証の正しさを高速に検証 | モック必須                | 10人条件、11人時の分割不可、不正Bodyで400        |
+| Fast E2E        | `e2e/*.spec.ts`（`@integration` なし）       | 画面操作の主経路回帰を検証                        | Redis 非依存（APIモック） | 追加/分割/保存読み込みUI、存在しないIDエラー表示 |
+| Integration E2E | `e2e/*.spec.ts`（`@integration` あり）       | 実Redis経路の保存/復元を検証                      | Redis 実接続              | `REDIS_URL` 前提の保存/復元往復                  |
+
+テスト追加時の判断基準:
+
+- 表示や操作フローの回帰は Fast E2E に追加する
+- HTTP ステータスや入力検証は Unit（`test/api`）へ追加する
+- Redis 実接続が必要な検証のみ Integration E2E へ追加する
+
+重複/不足の整理（2026-05-03 時点）:
+
+- 重複候補: 保存/読み込み成功・未存在IDの確認は Fast E2E と Integration E2E の両方で持つため、回帰目的は Fast E2E を優先し、Integration 側は実接続保証ケースに絞る
+- 追加候補: API の未対応メソッド、不正ID形式、履歴削除エラー分岐のような境界条件は `test/api` 側で補強する
+
 ### E2Eテスト
 
 - ツール: **Playwright**
@@ -241,17 +260,32 @@ $$
 
 ### CI/CD 運用
 
-- CI workflow: `.github/workflows/test.yaml`
+- CI workflow: `.github/workflows/ci.yaml`
   - `pull_request` / `push`（`develop`, `main`）で実行
   - 同一ブランチの重複実行は `concurrency` で自動キャンセル
+  - Fast E2E は Redis 非依存（`E2E_USE_REAL_REDIS=false`）で実行する
+  - `uses` はタグではなくコミットハッシュへ固定する
 - Integration workflow: `.github/workflows/e2e-integration.yaml`
   - `workflow_dispatch`（手動起動）のみ
   - `REDIS_URL` secret が未設定の場合は明示的に失敗させる
+
+CI とローカル実行の対応:
+
+| 観点             | ローカル標準手順        | CI (`ci.yaml`) |
+| ---------------- | ----------------------- | -------------- |
+| フォーマット検証 | `npm run format:test`   | 実行する       |
+| 型検証           | `npm run typecheck`     | 実行する       |
+| Unit検証         | `npm run test`          | 実行する       |
+| Fast E2E         | `npm run test:e2e:fast` | 実行する       |
+| Build            | 必要時のみ              | 実行する       |
+
+- 共通テストセットは `npm run test:ci` とし、ローカル実行と CI 実行の差分を最小化する
 
 ### ローカル最終検証手順
 
 - `npm run format`
 - `npm run format:test`
+- `npm run typecheck`
 - `npm run test`
 - `npm run test:e2e:fast`
 

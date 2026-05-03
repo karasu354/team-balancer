@@ -269,7 +269,8 @@ export class TeamBalancer {
 
       const opponentTeam: TeamSide =
         snapshotPlayer.team === 'blue' ? 'red' : 'blue'
-      const result = snapshotPlayer.team === history.winnerTeam ? 'win' : 'lose'
+      const result: PlayerResult['result'] =
+        snapshotPlayer.team === history.winnerTeam ? 'win' : 'lose'
       const ratingBefore = ratingsBeforeById.get(snapshotPlayer.playerId) ?? 0
 
       const laneOpponent = history.teamsSnapshot.find(
