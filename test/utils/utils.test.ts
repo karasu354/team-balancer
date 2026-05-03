@@ -52,6 +52,26 @@ describe('parseChatLogs', () => {
     const result = parseChatLogs(logs)
     expect(result).toEqual([])
   })
+
+  test('同一プレイヤーの再参加と退出を時系列どおり反映できること', () => {
+    const logs = `
+      Alice #1234がロビーに参加しました。
+      Alice #1234がロビーから退出しました。
+      Alice #1234がロビーに参加しました。
+    `
+    const result = parseChatLogs(logs)
+    expect(result).toEqual(['Alice'])
+  })
+
+  test('形式が崩れたログは無視されること', () => {
+    const logs = `
+      Alice #1234がロビーに参加しました。
+      Alice #1234 がロビーに参加しました。
+      Bob#5678がロビーに参加しました。
+    `
+    const result = parseChatLogs(logs)
+    expect(result).toEqual(['Alice'])
+  })
 })
 
 describe('generateRandomPermutations', () => {

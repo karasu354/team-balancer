@@ -10,7 +10,7 @@ import InputText from './Input/InputText'
 interface PlayerEditCardProps {
   currentPlayer: Player
   setEditablePlayer: (player: Player) => void
-  onEditModeToggle: (e: React.MouseEvent) => void
+  onEditModeToggle?: (e: React.MouseEvent) => void
 }
 
 const PlayerEditCard: React.FC<PlayerEditCardProps> = ({
@@ -48,25 +48,27 @@ const PlayerEditCard: React.FC<PlayerEditCardProps> = ({
     }
   }
 
+  const roleFixedId = `role-fixed-${currentPlayer.id}`
+
   const handleSave = (e: React.MouseEvent) => {
     e.stopPropagation()
     setEditablePlayer(player)
-    onEditModeToggle(e)
+    onEditModeToggle?.(e)
   }
 
   return (
     <div className="p-2">
       <div className="space-y-2">
-        <p className="font-bold">Player Edit</p>
+        <p className="font-bold">プレイヤー編集</p>
         <InputText
           value={player.name}
           setValue={(value) => updatePlayerProperty('name', value)}
-          label="Player Name"
+          label="プレイヤー名"
         />
         <Dropdown
           value={player.tier}
           setValue={(value) => updatePlayerProperty('tier', value as tierEnum)}
-          label="Tier"
+          label="ティア"
           options={Object.values(tierEnum).map((tierValue) => ({
             label: tierValue,
             value: tierValue,
@@ -80,7 +82,7 @@ const PlayerEditCard: React.FC<PlayerEditCardProps> = ({
               setValue={(value) =>
                 updatePlayerProperty('rank', value as rankEnum)
               }
-              label="Rank"
+              label="ランク"
               options={Object.values(rankEnum).map((rankValue) => ({
                 label: rankValue,
                 value: rankValue,
@@ -88,13 +90,16 @@ const PlayerEditCard: React.FC<PlayerEditCardProps> = ({
             />
           </div>
         )}
+        <p className="text-xs text-slate-500">
+          ティア/ランクを変更すると、レートは自動で再計算されます。
+        </p>
 
         <Dropdown
           value={player.mainRole}
           setValue={(value) =>
             updatePlayerProperty('mainRole', value as roleEnum)
           }
-          label="Main Role"
+          label="メインロール"
           options={Object.values(roleEnum).map((roleValue) => ({
             label: roleValue,
             value: roleValue,
@@ -106,7 +111,7 @@ const PlayerEditCard: React.FC<PlayerEditCardProps> = ({
             setValue={(value) =>
               updatePlayerProperty('subRole', value as roleEnum)
             }
-            label="Sub Role"
+            label="サブロール"
             options={Object.values(roleEnum)
               .filter(
                 (role) => role !== roleEnum.all && role !== player.mainRole
@@ -121,7 +126,7 @@ const PlayerEditCard: React.FC<PlayerEditCardProps> = ({
         <CheckBox
           values={player.desiredRoles}
           setValues={(roles) => handleSetDesiredRoles(roles as roleEnum[])}
-          label="Desired Roles"
+          label="希望ロール"
           options={Object.values(roleEnum).map((roleValue) => ({
             label: roleValue,
             value: roleValue,
@@ -135,10 +140,10 @@ const PlayerEditCard: React.FC<PlayerEditCardProps> = ({
             onChange={(e) =>
               updatePlayerProperty('isRoleFixed', e.target.checked)
             }
-            id="role-fixed-toggle"
+            id={roleFixedId}
           />
-          <label htmlFor="role-fixed-toggle" className="text-sm">
-            Role Fixed
+          <label htmlFor={roleFixedId} className="text-sm">
+            ロール固定
           </label>
         </div>
 
@@ -147,14 +152,16 @@ const PlayerEditCard: React.FC<PlayerEditCardProps> = ({
             onClick={handleSave}
             className="rounded bg-green-500 px-4 py-2 text-white transition hover:bg-green-600"
           >
-            Save
+            保存
           </button>
-          <button
-            onClick={onEditModeToggle}
-            className="rounded bg-red-500 px-4 py-2 text-white transition hover:bg-gray-600"
-          >
-            Cancel
-          </button>
+          {onEditModeToggle && (
+            <button
+              onClick={onEditModeToggle}
+              className="rounded bg-red-500 px-4 py-2 text-white transition hover:bg-gray-600"
+            >
+              キャンセル
+            </button>
+          )}
         </div>
       </div>
     </div>

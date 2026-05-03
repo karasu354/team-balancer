@@ -1,30 +1,99 @@
 import { Player, PlayerJson } from './player'
 import { roleEnum } from './role'
-import {
-  generateInternalId,
-  generateRandomPermutations,
-  parseChatLogs,
-} from './utils'
+import { generateInternalId, parseChatLogs } from './utils'
 
 export interface PlayersJson {
   id: string
   version: string
   playersTotalCount: number
   players: PlayerJson[]
+  matchHistories?: MatchHistory[]
+}
+
+type TeamSide = 'blue' | 'red'
+
+type LaneRole =
+  | roleEnum.top
+  | roleEnum.jg
+  | roleEnum.mid
+  | roleEnum.bot
+  | roleEnum.sup
+
+const TEAM_ROLES: LaneRole[] = [
+  roleEnum.top,
+  roleEnum.jg,
+  roleEnum.mid,
+  roleEnum.bot,
+  roleEnum.sup,
+]
+
+const MATCH_SLOT_ROLES: LaneRole[] = [...TEAM_ROLES, ...TEAM_ROLES]
+
+export interface TeamsSnapshotPlayer {
+  playerId: string
+  playerName: string
+  team: TeamSide
+  role: LaneRole
+}
+
+export interface MismatchDetail {
+  playerId: string
+  playerName: string
+  assignedRole: LaneRole
+  desiredRoles: LaneRole[]
+  isRoleFixed: boolean
+}
+
+export interface PlayerResult {
+  playerId: string
+  playerName: string
+  team: TeamSide
+  result: 'win' | 'lose'
+  ratingDelta: number
+  ratingBefore: number
+  ratingAfter: number
+}
+
+export interface MatchHistory {
+  id: string
+  playedAt: string
+  winnerTeam: TeamSide
+  mismatchCount: number
+  teamsSnapshot: TeamsSnapshotPlayer[]
+  playerResults: PlayerResult[]
+  mismatchDetails?: MismatchDetail[]
 }
 
 export class TeamBalancer {
   private static readonly TEAM_SIZE = 5
   private static readonly TOTAL_PLAYERS = 50
-  private static readonly MAX_TEAM_ATTEMPTS = 5000000
+  private static readonly MAX_TEAM_EVALUATIONS = 200000
+  private static readonly TEAM_DIVIDE_TIME_LIMIT_MS = 1500
   private static readonly PLAYERS_VERSION = '0.0.1'
+  private static readonly ELO_K_FACTOR = 30
+  private static readonly ELO_SCALE = 400
+  private static readonly ELO_PAIR_SCALE = 800
+  private static readonly ELO_LANE_WEIGHT = 0.7
+  private static readonly ELO_TEAM_WEIGHT = 0.3
+  private static readonly ELO_PAIR_BLEND_WEIGHT = 0.2
+
+  // エラーメッセージの定数化
+  private static readonly ERROR_MESSAGES = {
+    MAX_PLAYERS: 'これ以上プレイヤーを追加できません。最大人数に達しました。',
+    INVALID_INDEX: '無効なインデックスです。',
+  }
 
   id: string = ''
   playersTotalCount: number = 0
   players: Player[] = []
+  matchHistories: MatchHistory[] = []
   balancedTeamsByMissMatch: Record<
     number,
-    { players: Player[]; evaluationScore: number }
+    {
+      players: Player[]
+      evaluationScore: number
+      mismatchDetails: MismatchDetail[]
+    }
   > = {}
 
   constructor() {
@@ -37,6 +106,7 @@ export class TeamBalancer {
       this.balancedTeamsByMissMatch[i] = {
         players: [],
         evaluationScore: Infinity,
+        mismatchDetails: [],
       }
     }
   }
@@ -48,7 +118,63 @@ export class TeamBalancer {
     teamBalancer.players = playersJson.players.map((player) =>
       Player.fromJson(player)
     )
+    teamBalancer.matchHistories =
+      playersJson.matchHistories
+        ?.filter((history) => TeamBalancer.isMatchHistory(history))
+        .map((history) => ({
+          ...history,
+          mismatchDetails: history.mismatchDetails ?? [],
+        })) || []
     return teamBalancer
+  }
+
+  private static isMatchHistory(value: unknown): value is MatchHistory {
+    if (typeof value !== 'object' || value === null) {
+      return false
+    }
+
+    const record = value as Record<string, unknown>
+    return (
+      typeof record.id === 'string' &&
+      typeof record.playedAt === 'string' &&
+      (record.winnerTeam === 'blue' || record.winnerTeam === 'red') &&
+      typeof record.mismatchCount === 'number' &&
+      Array.isArray(record.teamsSnapshot) &&
+      Array.isArray(record.playerResults) &&
+      TeamBalancer.isMismatchDetails(record.mismatchDetails)
+    )
+  }
+
+  private static isMismatchDetails(value: unknown): value is MismatchDetail[] {
+    if (value === undefined) {
+      return true
+    }
+
+    if (!Array.isArray(value)) {
+      return false
+    }
+
+    return value.every((detail) => {
+      if (typeof detail !== 'object' || detail === null) {
+        return false
+      }
+
+      const record = detail as Record<string, unknown>
+      return (
+        typeof record.playerId === 'string' &&
+        typeof record.playerName === 'string' &&
+        Object.values(roleEnum)
+          .filter((role) => role !== roleEnum.all)
+          .includes(record.assignedRole as LaneRole) &&
+        Array.isArray(record.desiredRoles) &&
+        record.desiredRoles.every((role) =>
+          Object.values(roleEnum)
+            .filter((value) => value !== roleEnum.all)
+            .includes(role as LaneRole)
+        ) &&
+        typeof record.isRoleFixed === 'boolean'
+      )
+    })
   }
 
   get playersInfo(): PlayersJson {
@@ -57,14 +183,288 @@ export class TeamBalancer {
       version: TeamBalancer.PLAYERS_VERSION,
       playersTotalCount: this.players.length,
       players: this.players.map((p) => p.playerInfo) || [],
+      matchHistories: this.matchHistories,
     }
+  }
+
+  finalizeMatchResult(
+    arrangedPlayers: Player[],
+    winnerTeam: TeamSide,
+    mismatchCount: number
+  ): MatchHistory {
+    if (arrangedPlayers.length !== TeamBalancer.TEAM_SIZE * 2) {
+      throw new Error('試合結果の確定には10人の分割結果が必要です。')
+    }
+
+    const teamsSnapshot: TeamsSnapshotPlayer[] = []
+
+    arrangedPlayers.forEach((arrangedPlayer, index) => {
+      const role = TEAM_ROLES[index % TeamBalancer.TEAM_SIZE]
+      const team: TeamSide = index < TeamBalancer.TEAM_SIZE ? 'blue' : 'red'
+
+      const targetPlayer = this.players.find((p) => p.id === arrangedPlayer.id)
+      if (!targetPlayer) {
+        throw new Error(
+          '試合結果の確定に失敗しました。対象プレイヤーが見つかりません。'
+        )
+      }
+
+      teamsSnapshot.push({
+        playerId: targetPlayer.id,
+        playerName: targetPlayer.name,
+        team,
+        role,
+      })
+    })
+
+    const history: MatchHistory = {
+      id: generateInternalId(),
+      playedAt: new Date().toISOString(),
+      winnerTeam,
+      mismatchCount,
+      teamsSnapshot,
+      playerResults: [],
+      mismatchDetails: this._buildMismatchDetails(arrangedPlayers),
+    }
+
+    const appliedHistory = this.applyMatchHistory(history)
+
+    this.matchHistories = [appliedHistory, ...this.matchHistories]
+    return appliedHistory
+  }
+
+  deleteMatchHistory(historyId: string): MatchHistory[] {
+    const targetHistory = this.matchHistories.find(
+      (history) => history.id === historyId
+    )
+    if (!targetHistory) {
+      throw new Error('削除対象の履歴が見つかりません。')
+    }
+
+    const baselineRatings = this.createBaselineRatings()
+    const historiesToReplay = this.matchHistories
+      .filter((history) => history.id !== historyId)
+      .sort(
+        (left, right) =>
+          new Date(left.playedAt).getTime() - new Date(right.playedAt).getTime()
+      )
+
+    this.players.forEach((player) => {
+      player.rating = baselineRatings.get(player.id) ?? player.rating
+    })
+
+    const recalculatedHistories = historiesToReplay.map((history) =>
+      this.applyMatchHistory(history)
+    )
+
+    this.matchHistories = recalculatedHistories.sort(
+      (left, right) =>
+        new Date(right.playedAt).getTime() - new Date(left.playedAt).getTime()
+    )
+
+    return this.matchHistories
+  }
+
+  private applyMatchHistory(history: MatchHistory): MatchHistory {
+    const playersById = new Map(
+      this.players.map((player) => [player.id, player])
+    )
+    const ratingsBeforeById = new Map<string, number>()
+
+    history.teamsSnapshot.forEach((snapshotPlayer) => {
+      const targetPlayer = playersById.get(snapshotPlayer.playerId)
+      if (!targetPlayer) {
+        throw new Error(
+          '履歴の再計算に失敗しました。対象プレイヤーが見つかりません。'
+        )
+      }
+
+      ratingsBeforeById.set(snapshotPlayer.playerId, targetPlayer.rating)
+    })
+
+    const teamAverageRating = {
+      blue: this.calculateTeamAverageRating(
+        'blue',
+        history.teamsSnapshot,
+        ratingsBeforeById
+      ),
+      red: this.calculateTeamAverageRating(
+        'red',
+        history.teamsSnapshot,
+        ratingsBeforeById
+      ),
+    }
+
+    const botSupPairRating = {
+      blue: this.calculateBotSupPairRating(
+        'blue',
+        history.teamsSnapshot,
+        ratingsBeforeById
+      ),
+      red: this.calculateBotSupPairRating(
+        'red',
+        history.teamsSnapshot,
+        ratingsBeforeById
+      ),
+    }
+
+    const playerResults = history.teamsSnapshot.map((snapshotPlayer) => {
+      const targetPlayer = playersById.get(snapshotPlayer.playerId)
+
+      if (!targetPlayer) {
+        throw new Error(
+          '履歴の再計算に失敗しました。対象プレイヤーが見つかりません。'
+        )
+      }
+
+      const opponentTeam: TeamSide =
+        snapshotPlayer.team === 'blue' ? 'red' : 'blue'
+      const result: PlayerResult['result'] =
+        snapshotPlayer.team === history.winnerTeam ? 'win' : 'lose'
+      const ratingBefore = ratingsBeforeById.get(snapshotPlayer.playerId) ?? 0
+
+      const laneOpponent = history.teamsSnapshot.find(
+        (player) =>
+          player.team === opponentTeam && player.role === snapshotPlayer.role
+      )
+
+      const laneExpected = laneOpponent
+        ? TeamBalancer.calculateExpectedScore(
+            ratingBefore,
+            ratingsBeforeById.get(laneOpponent.playerId) ?? ratingBefore,
+            TeamBalancer.ELO_SCALE
+          )
+        : 0.5
+
+      const teamExpected = TeamBalancer.calculateExpectedScore(
+        teamAverageRating[snapshotPlayer.team],
+        teamAverageRating[opponentTeam],
+        TeamBalancer.ELO_SCALE
+      )
+
+      let expectedScore =
+        TeamBalancer.ELO_LANE_WEIGHT * laneExpected +
+        TeamBalancer.ELO_TEAM_WEIGHT * teamExpected
+
+      if (
+        snapshotPlayer.role === roleEnum.bot ||
+        snapshotPlayer.role === roleEnum.sup
+      ) {
+        const ownPairRating = botSupPairRating[snapshotPlayer.team]
+        const opponentPairRating = botSupPairRating[opponentTeam]
+
+        if (ownPairRating !== null && opponentPairRating !== null) {
+          const pairExpected = TeamBalancer.calculateExpectedScore(
+            ownPairRating,
+            opponentPairRating,
+            TeamBalancer.ELO_PAIR_SCALE
+          )
+          expectedScore =
+            expectedScore * (1 - TeamBalancer.ELO_PAIR_BLEND_WEIGHT) +
+            pairExpected * TeamBalancer.ELO_PAIR_BLEND_WEIGHT
+        }
+      }
+
+      const actualScore = result === 'win' ? 1 : 0
+      const ratingDelta = Math.round(
+        TeamBalancer.ELO_K_FACTOR * (actualScore - expectedScore)
+      )
+      const ratingAfter = ratingBefore + ratingDelta
+
+      return {
+        playerId: targetPlayer.id,
+        playerName: targetPlayer.name,
+        team: snapshotPlayer.team,
+        result,
+        ratingDelta,
+        ratingBefore,
+        ratingAfter,
+      }
+    })
+
+    playerResults.forEach((result) => {
+      const targetPlayer = playersById.get(result.playerId)
+      if (targetPlayer) {
+        targetPlayer.rating = result.ratingAfter
+      }
+    })
+
+    return {
+      ...history,
+      playerResults,
+    }
+  }
+
+  private static calculateExpectedScore(
+    rating: number,
+    opponentRating: number,
+    scale: number
+  ): number {
+    return 1 / (1 + 10 ** ((opponentRating - rating) / scale))
+  }
+
+  private calculateTeamAverageRating(
+    team: TeamSide,
+    teamsSnapshot: TeamsSnapshotPlayer[],
+    ratingsBeforeById: Map<string, number>
+  ): number {
+    const teamPlayers = teamsSnapshot.filter((player) => player.team === team)
+
+    if (teamPlayers.length === 0) {
+      return 0
+    }
+
+    const totalRating = teamPlayers.reduce(
+      (sum, player) => sum + (ratingsBeforeById.get(player.playerId) ?? 0),
+      0
+    )
+
+    return totalRating / teamPlayers.length
+  }
+
+  private calculateBotSupPairRating(
+    team: TeamSide,
+    teamsSnapshot: TeamsSnapshotPlayer[],
+    ratingsBeforeById: Map<string, number>
+  ): number | null {
+    const botPlayer = teamsSnapshot.find(
+      (player) => player.team === team && player.role === roleEnum.bot
+    )
+    const supPlayer = teamsSnapshot.find(
+      (player) => player.team === team && player.role === roleEnum.sup
+    )
+
+    if (!botPlayer || !supPlayer) {
+      return null
+    }
+
+    return (
+      (ratingsBeforeById.get(botPlayer.playerId) ?? 0) +
+      (ratingsBeforeById.get(supPlayer.playerId) ?? 0)
+    )
+  }
+
+  private createBaselineRatings(): Map<string, number> {
+    const deltaMap = new Map<string, number>()
+
+    this.matchHistories.forEach((history) => {
+      history.playerResults.forEach((result) => {
+        const currentDelta = deltaMap.get(result.playerId) ?? 0
+        deltaMap.set(result.playerId, currentDelta + (result.ratingDelta ?? 0))
+      })
+    })
+
+    return new Map(
+      this.players.map((player) => [
+        player.id,
+        player.rating - (deltaMap.get(player.id) ?? 0),
+      ])
+    )
   }
 
   addPlayer(player: Player): void {
     if (this.players.length >= TeamBalancer.TOTAL_PLAYERS) {
-      throw new Error(
-        'これ以上プレイヤーを追加できません。最大人数に達しました。'
-      )
+      throw new Error(TeamBalancer.ERROR_MESSAGES.MAX_PLAYERS)
     }
     if (this.players.some((p) => p.name === player.name)) {
       return
@@ -74,7 +474,7 @@ export class TeamBalancer {
 
   removePlayerByIndex(index: number): void {
     if (index < 0 || index >= this.players.length) {
-      throw new Error('無効なインデックスです。')
+      throw new Error(TeamBalancer.ERROR_MESSAGES.INVALID_INDEX)
     }
     this.players.splice(index, 1)
   }
@@ -106,51 +506,122 @@ export class TeamBalancer {
     const participatePlayers = this.players.filter(
       (p) => p.isParticipatingInGame
     )
-    this._resetBalancedTeamsByMissMatch()
-    const shufflePatterns = generateRandomPermutations(
-      Array.from({ length: TeamBalancer.TEAM_SIZE * 2 }, (_, i) => i),
-      TeamBalancer.MAX_TEAM_ATTEMPTS
-    )
-    for (let i = 0; i < shufflePatterns.length; i++) {
-      const pattern = shufflePatterns[i]
-      const shuffledPlayers = pattern.map((index) => participatePlayers[index])
-      const { players, mismatchCount, evaluationScore } =
-        this._createTeams(shuffledPlayers)
 
-      if (mismatchCount === -1) continue
-      if (
-        evaluationScore <
-        this.balancedTeamsByMissMatch[mismatchCount].evaluationScore
-      ) {
-        this.balancedTeamsByMissMatch[mismatchCount] = {
+    const sortedPlayers = [...participatePlayers].sort((left, right) =>
+      left.id.localeCompare(right.id)
+    )
+    const smallestPlayerId = sortedPlayers[0]?.id ?? ''
+
+    this._resetBalancedTeamsByMissMatch()
+
+    const used = Array.from({ length: TeamBalancer.TEAM_SIZE * 2 }, () => false)
+    const arrangedPlayers: Player[] = Array.from(
+      { length: TeamBalancer.TEAM_SIZE * 2 },
+      () => sortedPlayers[0]
+    )
+    const deadline = Date.now() + TeamBalancer.TEAM_DIVIDE_TIME_LIMIT_MS
+
+    let evaluatedCount = 0
+    let shouldStop = false
+
+    const explore = (
+      slotIndex: number,
+      mismatchCount: number,
+      isSmallestInBlueTeam: boolean
+    ): void => {
+      if (shouldStop) {
+        return
+      }
+
+      if (Date.now() >= deadline) {
+        shouldStop = true
+        return
+      }
+
+      if (slotIndex === TeamBalancer.TEAM_SIZE && !isSmallestInBlueTeam) {
+        return
+      }
+
+      if (slotIndex === TeamBalancer.TEAM_SIZE * 2) {
+        if (evaluatedCount >= TeamBalancer.MAX_TEAM_EVALUATIONS) {
+          shouldStop = true
+          return
+        }
+
+        evaluatedCount++
+
+        const {
           players,
+          mismatchCount: resolvedMismatchCount,
           evaluationScore,
+          mismatchDetails,
+        } = this._createTeams([...arrangedPlayers], mismatchCount)
+
+        if (
+          evaluationScore <
+          this.balancedTeamsByMissMatch[resolvedMismatchCount].evaluationScore
+        ) {
+          this.balancedTeamsByMissMatch[resolvedMismatchCount] = {
+            players,
+            evaluationScore,
+            mismatchDetails,
+          }
+        }
+        return
+      }
+
+      const role = MATCH_SLOT_ROLES[slotIndex]
+
+      for (let i = 0; i < sortedPlayers.length; i++) {
+        if (used[i]) {
+          continue
+        }
+
+        const player = sortedPlayers[i]
+        const isDesiredRole = player.desiredRoles.includes(role)
+        if (!isDesiredRole && player.isRoleFixed) {
+          continue
+        }
+
+        used[i] = true
+        arrangedPlayers[slotIndex] = player
+        explore(
+          slotIndex + 1,
+          mismatchCount + (isDesiredRole ? 0 : 1),
+          isSmallestInBlueTeam ||
+            (slotIndex < TeamBalancer.TEAM_SIZE &&
+              player.id === smallestPlayerId)
+        )
+        used[i] = false
+
+        if (shouldStop) {
+          return
         }
       }
+    }
+
+    explore(0, 0, false)
+
+    const hasBalancedTeam = Object.values(this.balancedTeamsByMissMatch).some(
+      (team) => team.players.length === TeamBalancer.TEAM_SIZE * 2
+    )
+
+    if (!hasBalancedTeam) {
+      throw new Error('条件を満たすチーム分割候補が見つかりません。')
     }
   }
 
-  private _createTeams(players: Player[]): {
+  private _createTeams(
+    players: Player[],
+    preCalculatedMismatchCount?: number
+  ): {
     players: Player[]
     mismatchCount: number
     evaluationScore: number
+    mismatchDetails: MismatchDetail[]
   } {
-    let mismatchCount = 0
-    const roles = Object.values(roleEnum).filter(
-      (role) => role !== roleEnum.all
-    )
-
-    for (let i = 0; i < players.length; i++) {
-      const player = players[i]
-      const role = roles[i % 5]
-
-      if (!player.desiredRoles.includes(role)) {
-        if (player.isRoleFixed) {
-          return { players: [], mismatchCount: -1, evaluationScore: Infinity }
-        }
-        mismatchCount++
-      }
-    }
+    const mismatchDetails = this._buildMismatchDetails(players)
+    const mismatchCount = preCalculatedMismatchCount ?? mismatchDetails.length
 
     const totalRatingDifference = this._calculateTotalRatingDifference(players)
     const laneRatingDifference = this._calculateLaneRatingDifference(players)
@@ -166,7 +637,32 @@ export class TeamBalancer {
       weights.laneRatingDifference * laneRatingDifference +
       weights.adcSupPairDifference * adcSupPairDifference
 
-    return { players, mismatchCount, evaluationScore }
+    return { players, mismatchCount, evaluationScore, mismatchDetails }
+  }
+
+  private _buildMismatchDetails(players: Player[]): MismatchDetail[] {
+    const mismatchDetails: MismatchDetail[] = []
+
+    for (let i = 0; i < players.length; i++) {
+      const player = players[i]
+      const assignedRole = MATCH_SLOT_ROLES[i]
+
+      if (player.desiredRoles.includes(assignedRole)) {
+        continue
+      }
+
+      mismatchDetails.push({
+        playerId: player.id,
+        playerName: player.name,
+        assignedRole,
+        desiredRoles: player.desiredRoles.filter(
+          (role): role is LaneRole => role !== roleEnum.all
+        ),
+        isRoleFixed: player.isRoleFixed,
+      })
+    }
+
+    return mismatchDetails
   }
 
   private _calculateTotalRatingDifference(players: Player[]): number {

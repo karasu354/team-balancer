@@ -39,18 +39,18 @@ const PlayerInfoDisplay: React.FC<PlayerInfoDisplayProps> = ({ player }) => {
   return (
     <div className="flex w-full divide-x divide-gray-400">
       <div className="w-min-full flex-shrink-0 p-2 text-center">
-        <p className="font-bold">Main Role</p>
+        <p className="font-bold">メインロール</p>
         <p>{player.mainRole}</p>
       </div>
 
       <div className="w-min-full flex-shrink-0 p-2 text-center">
-        <p className="font-bold">Sub Role</p>
+        <p className="font-bold">サブロール</p>
         <p>{player.mainRole === roleEnum.all ? '-' : player.subRole}</p>
       </div>
 
       <div className="flex-1 p-2 text-center">
         <div className="flex items-center justify-center gap-2">
-          <p className="font-bold">Desired Roles</p>
+          <p className="font-bold">希望ロール</p>
           <FaLock className={`h-5 w-5 ${lockIconColor}`} />
         </div>
         <div className="mt-2 flex flex-wrap justify-center gap-2">

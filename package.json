@@ -6,9 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:test": "prettier --check .",
-    "test:unit": "jest"
+    "test": "npm run test:unit",
+    "test:ci": "npm run format:test && npm run typecheck && npm run test && npm run test:e2e",
+    "test:unit": "jest",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed"
   },
   "dependencies": {
     "axios": "^1.8.4",
@@ -21,9 +26,10 @@
     "redis": "^5.0.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4.1.4",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
-    "@types/jest": "^29.5.12",
+    "@types/jest": "^29.5.14",
     "@types/node": "^22.15.9",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.3",

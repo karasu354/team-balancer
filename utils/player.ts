@@ -132,3 +132,129 @@ export class Player {
     }
   }
 }
+
+type SelectableRole = Exclude<roleEnum, roleEnum.all>
+
+const selectRandomDesiredRoles = (
+  mainRole: SelectableRole,
+  subRole: SelectableRole
+): SelectableRole[] => {
+  const selectedRoles: SelectableRole[] = [mainRole]
+  const selectableRoles = Object.values(roleEnum).filter(
+    (role): role is SelectableRole => role !== roleEnum.all
+  )
+
+  if (Math.random() < 0.55) {
+    const subOrAnotherRole =
+      Math.random() < 0.7
+        ? subRole
+        : selectableRoles[Math.floor(Math.random() * selectableRoles.length)]
+
+    if (!selectedRoles.includes(subOrAnotherRole)) {
+      selectedRoles.push(subOrAnotherRole)
+    }
+  }
+
+  return selectedRoles
+}
+
+// アプリの操作に慣れるためのサンプルデータ（10人分）を生成する
+export const generateSamplePlayers = (): Player[] => {
+  const configs: {
+    name: string
+    tier: tierEnum
+    rank: rankEnum
+    mainRole: SelectableRole
+    subRole: SelectableRole
+  }[] = [
+    {
+      name: 'Sample_Top1',
+      tier: tierEnum.diamond,
+      rank: rankEnum.two,
+      mainRole: roleEnum.top,
+      subRole: roleEnum.mid,
+    },
+    {
+      name: 'Sample_Jg1',
+      tier: tierEnum.emerald,
+      rank: rankEnum.one,
+      mainRole: roleEnum.jg,
+      subRole: roleEnum.top,
+    },
+    {
+      name: 'Sample_Mid1',
+      tier: tierEnum.emerald,
+      rank: rankEnum.three,
+      mainRole: roleEnum.mid,
+      subRole: roleEnum.bot,
+    },
+    {
+      name: 'Sample_Bot1',
+      tier: tierEnum.platinum,
+      rank: rankEnum.one,
+      mainRole: roleEnum.bot,
+      subRole: roleEnum.sup,
+    },
+    {
+      name: 'Sample_Sup1',
+      tier: tierEnum.gold,
+      rank: rankEnum.one,
+      mainRole: roleEnum.sup,
+      subRole: roleEnum.jg,
+    },
+    {
+      name: 'Sample_Top2',
+      tier: tierEnum.gold,
+      rank: rankEnum.two,
+      mainRole: roleEnum.top,
+      subRole: roleEnum.jg,
+    },
+    {
+      name: 'Sample_Jg2',
+      tier: tierEnum.silver,
+      rank: rankEnum.one,
+      mainRole: roleEnum.jg,
+      subRole: roleEnum.mid,
+    },
+    {
+      name: 'Sample_Mid2',
+      tier: tierEnum.gold,
+      rank: rankEnum.three,
+      mainRole: roleEnum.mid,
+      subRole: roleEnum.top,
+    },
+    {
+      name: 'Sample_Bot2',
+      tier: tierEnum.platinum,
+      rank: rankEnum.two,
+      mainRole: roleEnum.bot,
+      subRole: roleEnum.mid,
+    },
+    {
+      name: 'Sample_Sup2',
+      tier: tierEnum.silver,
+      rank: rankEnum.two,
+      mainRole: roleEnum.sup,
+      subRole: roleEnum.bot,
+    },
+  ]
+
+  const shuffledIndexes = Array.from({ length: configs.length }, (_, i) => i)
+  for (let i = shuffledIndexes.length - 1; i > 0; i--) {
+    const randomIndex = Math.floor(Math.random() * (i + 1))
+    const temp = shuffledIndexes[i]
+    shuffledIndexes[i] = shuffledIndexes[randomIndex]
+    shuffledIndexes[randomIndex] = temp
+  }
+
+  const targetFixedCount = 2 + Math.floor(Math.random() * 3)
+  const fixedPlayerIndexes = new Set(shuffledIndexes.slice(0, targetFixedCount))
+
+  return configs.map(({ name, tier, rank, mainRole, subRole }, index) => {
+    const player = new Player(name, tier, rank, mainRole, subRole)
+    player.isParticipatingInGame = true
+    player.desiredRoles = selectRandomDesiredRoles(mainRole, subRole)
+    player.isRoleFixed = fixedPlayerIndexes.has(index)
+    return player
+  })
+}

@@ -110,29 +110,89 @@ paths:
                 $ref: '#/components/schemas/Error'
               example:
                 error: 'Internal Server Error'
+    delete:
+      summary: Delete match history and recalculate ratings
+      description: Delete a specific match history and replay remaining histories to recalculate player ratings.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the team.
+          schema:
+            type: string
+        - name: historyId
+          in: query
+          required: true
+          description: The ID of the match history to delete.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully deleted match history and recalculated ratings.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayersJson'
+        '400':
+          description: Invalid or missing history ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Invalid or missing history ID'
+        '404':
+          description: Team not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Team not found'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Internal Server Error'
 components:
   schemas:
     PlayersJson:
       type: object
       properties:
+        id:
+          type: string
+          example: 'team-20260503-001'
         version:
           type: string
           example: '1.0'
+        playersTotalCount:
+          type: integer
+          example: 10
         players:
           type: array
           items:
             $ref: '#/components/schemas/PlayerJson'
+        matchHistories:
+          type: array
+          items:
+            $ref: '#/components/schemas/MatchHistory'
     PlayerJson:
       type: object
       properties:
+        id:
+          type: string
+          example: 'player-001'
         name:
           type: string
           example: 'Alice'
         desiredRoles:
           type: array
           items:
-            type: boolean
-          example: [true, false, true, false, true]
+            type: string
+          example: ['TOP', 'MID']
         isRoleFixed:
           type: boolean
           example: false
@@ -148,6 +208,72 @@ components:
         rating:
           type: number
           example: 1400
+        mainRole:
+          type: string
+          example: 'MID'
+        subRole:
+          type: string
+          example: 'JG'
+    MatchHistory:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 'history-001'
+        playedAt:
+          type: string
+          format: date-time
+          example: '2026-05-03T12:30:00.000Z'
+        winnerTeam:
+          type: string
+          enum: ['blue', 'red']
+        mismatchCount:
+          type: integer
+          example: 1
+        teamsSnapshot:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamsSnapshotPlayer'
+        playerResults:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlayerResult'
+    TeamsSnapshotPlayer:
+      type: object
+      properties:
+        playerId:
+          type: string
+        playerName:
+          type: string
+        team:
+          type: string
+          enum: ['blue', 'red']
+        role:
+          type: string
+          enum: ['TOP', 'JG', 'MID', 'BOT', 'SUP']
+    PlayerResult:
+      type: object
+      properties:
+        playerId:
+          type: string
+        playerName:
+          type: string
+        team:
+          type: string
+          enum: ['blue', 'red']
+        result:
+          type: string
+          enum: ['win', 'lose']
+        ratingDelta:
+          type: number
+          description: Eloベース計算によるレート変動値（勝敗と期待勝率で変動）
+          example: 14
+        ratingBefore:
+          type: number
+          example: 1370
+        ratingAfter:
+          type: number
+          example: 1384
     Error:
       type: object
       properties:

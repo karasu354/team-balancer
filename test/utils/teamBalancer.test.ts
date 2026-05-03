@@ -1,7 +1,7 @@
 import { Player } from '../../utils/player'
 import { rankEnum, tierEnum } from '../../utils/rank'
 import { roleEnum } from '../../utils/role'
-import { TeamBalancer } from '../../utils/teamBalancer'
+import { PlayersJson, TeamBalancer } from '../../utils/teamBalancer'
 import { generateInternalId } from '../../utils/utils'
 
 describe('TeamBalancer クラス', () => {
@@ -24,6 +24,9 @@ describe('TeamBalancer クラス', () => {
         expect(teamBalancer.balancedTeamsByMissMatch[key].evaluationScore).toBe(
           Infinity
         )
+        expect(
+          teamBalancer.balancedTeamsByMissMatch[key].mismatchDetails
+        ).toEqual([])
       }
     })
   })
@@ -93,6 +96,67 @@ describe('TeamBalancer クラス', () => {
       expect(player2.desiredRoles).toEqual([roleEnum.mid, roleEnum.bot])
       expect(player2.isRoleFixed).toBe(true)
       expect(player2.isParticipatingInGame).toBe(false)
+    })
+
+    test('旧形式JSONの matchHistories 欠損を補完できること', () => {
+      const legacyJson = {
+        id: 'legacy-team-id',
+        version: '0.0.1',
+        playersTotalCount: 1,
+        players: [
+          {
+            id: 'legacy-player-id-1',
+            name: 'LegacyAlice',
+            tier: tierEnum.gold,
+            rank: rankEnum.two,
+            displayRank: 'GOLD II',
+            rating: 1400,
+            mainRole: roleEnum.top,
+            subRole: roleEnum.jg,
+            desiredRoles: [roleEnum.top],
+            isRoleFixed: false,
+          },
+        ],
+      }
+
+      const loaded = TeamBalancer.fromJson(legacyJson)
+      expect(loaded.matchHistories).toEqual([])
+    })
+
+    test('旧履歴で mismatchDetails 欠損でも読み込みできること', () => {
+      const legacyJson: PlayersJson = {
+        id: 'legacy-team-id',
+        version: '0.0.1',
+        playersTotalCount: 1,
+        players: [
+          {
+            id: 'legacy-player-id-1',
+            name: 'LegacyAlice',
+            tier: tierEnum.gold,
+            rank: rankEnum.two,
+            displayRank: 'GOLD II',
+            rating: 1400,
+            mainRole: roleEnum.top,
+            subRole: roleEnum.jg,
+            desiredRoles: [roleEnum.top],
+            isRoleFixed: false,
+          },
+        ],
+        matchHistories: [
+          {
+            id: 'history-1',
+            playedAt: new Date().toISOString(),
+            winnerTeam: 'blue',
+            mismatchCount: 1,
+            teamsSnapshot: [],
+            playerResults: [],
+          },
+        ],
+      }
+
+      const loaded = TeamBalancer.fromJson(legacyJson)
+      expect(loaded.matchHistories).toHaveLength(1)
+      expect(loaded.matchHistories[0].mismatchDetails).toEqual([])
     })
   })
 
@@ -176,6 +240,99 @@ describe('TeamBalancer クラス', () => {
         '現在のプレイヤーではチーム分割ができません。'
       )
     })
+
+    test('同一入力で連続実行しても分割結果が安定すること', () => {
+      for (let i = 0; i < 10; i++) {
+        const player = new Player(`Player${i}`)
+        player.isParticipatingInGame = true
+        teamBalancer.addPlayer(player)
+      }
+
+      const getFirstBalancedPlayers = (): Player[] => {
+        for (let mismatch = 0; mismatch <= 10; mismatch++) {
+          const candidate = teamBalancer.balancedTeamsByMissMatch[mismatch]
+          if (candidate.players.length === 10) {
+            return candidate.players
+          }
+        }
+
+        throw new Error('有効な分割結果が見つかりません。')
+      }
+
+      teamBalancer.divideTeams()
+      const firstResult = getFirstBalancedPlayers().map((player) => player.id)
+
+      teamBalancer.divideTeams()
+      const secondResult = getFirstBalancedPlayers().map((player) => player.id)
+
+      expect(secondResult).toEqual(firstResult)
+    })
+
+    test('固定ロール制約で候補がない場合はエラーになること', () => {
+      for (let i = 0; i < 10; i++) {
+        const player = new Player(`Player${i}`)
+        player.isParticipatingInGame = true
+        player.desiredRoles = [roleEnum.top]
+        player.isRoleFixed = true
+        teamBalancer.addPlayer(player)
+      }
+
+      expect(() => teamBalancer.divideTeams()).toThrow(
+        '条件を満たすチーム分割候補が見つかりません。'
+      )
+    })
+
+    test('ミスマッチ対象者の内訳を保持できること', () => {
+      for (let i = 0; i < 10; i++) {
+        const player = new Player(`Player${i}`)
+        player.isParticipatingInGame = true
+        player.desiredRoles = [roleEnum.top]
+        player.isRoleFixed = false
+        teamBalancer.addPlayer(player)
+      }
+
+      teamBalancer.divideTeams()
+
+      const candidate = Object.values(
+        teamBalancer.balancedTeamsByMissMatch
+      ).find((team) => team.players.length === 10)
+      expect(candidate).toBeDefined()
+
+      if (!candidate) {
+        throw new Error('有効な分割結果が見つかりません。')
+      }
+
+      expect(candidate.players).toHaveLength(10)
+      expect(candidate.mismatchDetails.length).toBeGreaterThan(0)
+
+      candidate.mismatchDetails.forEach((detail) => {
+        expect(detail.playerId).toBeTruthy()
+        expect(detail.playerName).toBeTruthy()
+        expect(detail.desiredRoles.length).toBeGreaterThan(0)
+        expect(detail.desiredRoles.includes(detail.assignedRole)).toBe(false)
+      })
+    })
+
+    test('ミスマッチ比較表示で使う評価スコアが候補ごとに保持されること', () => {
+      for (let i = 0; i < 10; i++) {
+        const player = new Player(`Player${i}`)
+        player.isParticipatingInGame = true
+        teamBalancer.addPlayer(player)
+      }
+
+      teamBalancer.divideTeams()
+
+      const availableCandidates = Object.values(
+        teamBalancer.balancedTeamsByMissMatch
+      ).filter((candidate) => candidate.players.length === 10)
+
+      expect(availableCandidates.length).toBeGreaterThan(0)
+      expect(
+        availableCandidates.every((candidate) =>
+          Number.isFinite(candidate.evaluationScore)
+        )
+      ).toBe(true)
+    })
   })
 
   describe('isDividable', () => {
@@ -221,6 +378,158 @@ describe('TeamBalancer クラス', () => {
       expect(() => teamBalancer.removePlayerByIndex(10)).toThrow(
         '無効なインデックスです。'
       )
+    })
+  })
+
+  describe('finalizeMatchResult', () => {
+    test('結果確定で履歴が追加され、プレイヤー結果が保存されること', () => {
+      for (let i = 0; i < 10; i++) {
+        const player = new Player(`Player${i}`)
+        player.isParticipatingInGame = true
+        teamBalancer.addPlayer(player)
+      }
+
+      teamBalancer.divideTeams()
+      const balanced = Object.values(
+        teamBalancer.balancedTeamsByMissMatch
+      ).find((team) => team.players.length === 10)
+      expect(balanced).toBeDefined()
+      if (!balanced) {
+        throw new Error('有効な分割結果が見つかりません。')
+      }
+
+      const history = teamBalancer.finalizeMatchResult(
+        balanced.players,
+        'blue',
+        0
+      )
+
+      expect(teamBalancer.matchHistories.length).toBe(1)
+      expect(history.winnerTeam).toBe('blue')
+      expect(history.teamsSnapshot).toHaveLength(10)
+      expect(history.playerResults).toHaveLength(10)
+      expect(
+        history.playerResults.filter((result) => result.result === 'win').length
+      ).toBe(5)
+      expect(
+        history.playerResults.filter((result) => result.result === 'lose')
+          .length
+      ).toBe(5)
+      expect(history.playerResults[0].ratingDelta).toBeGreaterThan(0)
+    })
+
+    test('10人未満の結果確定はエラーになること', () => {
+      const player = new Player('OnlyOne')
+      player.isParticipatingInGame = true
+      teamBalancer.addPlayer(player)
+
+      expect(() =>
+        teamBalancer.finalizeMatchResult(teamBalancer.players, 'blue', 0)
+      ).toThrow('試合結果の確定には10人の分割結果が必要です。')
+    })
+
+    test('履歴削除時にレートを基準値へ戻して残存履歴を再計算できること', () => {
+      for (let i = 0; i < 10; i++) {
+        const player = new Player(`Player${i}`)
+        player.isParticipatingInGame = true
+        teamBalancer.addPlayer(player)
+      }
+
+      const baseRatings = new Map(
+        teamBalancer.players.map((player) => [player.id, player.rating])
+      )
+
+      teamBalancer.divideTeams()
+      const balanced = Object.values(
+        teamBalancer.balancedTeamsByMissMatch
+      ).find((team) => team.players.length === 10)
+
+      if (!balanced) {
+        throw new Error('有効な分割結果が見つかりません。')
+      }
+
+      const firstHistory = teamBalancer.finalizeMatchResult(
+        balanced.players,
+        'blue',
+        0
+      )
+      const secondHistory = teamBalancer.finalizeMatchResult(
+        balanced.players,
+        'red',
+        0
+      )
+
+      expect(teamBalancer.matchHistories).toHaveLength(2)
+      expect(teamBalancer.players[0].rating).not.toBe(
+        baseRatings.get(teamBalancer.players[0].id)
+      )
+
+      teamBalancer.deleteMatchHistory(firstHistory.id)
+
+      expect(teamBalancer.matchHistories).toHaveLength(1)
+      expect(teamBalancer.matchHistories[0].id).toBe(secondHistory.id)
+
+      const remainingHistory = teamBalancer.matchHistories[0]
+      const expectedDeltaByPlayerId = new Map(
+        remainingHistory.playerResults.map((result) => [
+          result.playerId,
+          result.ratingDelta,
+        ])
+      )
+
+      teamBalancer.players.forEach((player) => {
+        const expectedRating =
+          (baseRatings.get(player.id) ?? 0) +
+          (expectedDeltaByPlayerId.get(player.id) ?? 0)
+        expect(player.rating).toBe(expectedRating)
+      })
+    })
+
+    test('存在しない履歴削除はエラーになること', () => {
+      expect(() => teamBalancer.deleteMatchHistory('missing-history')).toThrow(
+        '削除対象の履歴が見つかりません。'
+      )
+    })
+
+    test('ELO計算ではレート差が大きい勝利ほど増分が小さくなること', () => {
+      const arrangedPlayers: Player[] = []
+
+      for (let i = 0; i < 10; i++) {
+        const player = new Player(`Player${i}`)
+        player.isParticipatingInGame = true
+        teamBalancer.addPlayer(player)
+        arrangedPlayers.push(player)
+      }
+
+      // [blue top, blue jg, blue mid, blue bot, blue sup, red top, red jg, red mid, red bot, red sup]
+      arrangedPlayers[0].rating = 2000
+      arrangedPlayers[5].rating = 1200
+      arrangedPlayers[2].rating = 1500
+      arrangedPlayers[7].rating = 1480
+
+      const history = teamBalancer.finalizeMatchResult(
+        arrangedPlayers,
+        'blue',
+        0
+      )
+
+      const topBlueResult = history.playerResults.find(
+        (result) => result.playerId === arrangedPlayers[0].id
+      )
+      const midBlueResult = history.playerResults.find(
+        (result) => result.playerId === arrangedPlayers[2].id
+      )
+
+      expect(topBlueResult).toBeDefined()
+      expect(midBlueResult).toBeDefined()
+
+      if (!topBlueResult || !midBlueResult) {
+        throw new Error('検証用のプレイヤー結果が見つかりません。')
+      }
+
+      expect(topBlueResult.ratingDelta).toBeGreaterThan(0)
+      expect(midBlueResult.ratingDelta).toBeGreaterThan(0)
+      expect(topBlueResult.ratingDelta).toBeLessThan(midBlueResult.ratingDelta)
     })
   })
 })
