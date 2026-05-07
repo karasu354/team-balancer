@@ -134,3 +134,49 @@ test('履歴削除でアコーディオンが閉じて件数が減る', async ({
     )
   ).toBeVisible()
 })
+
+test('手動分割モードでドラッグ&ドロップ割り当てして確定できる', async ({
+  page,
+}) => {
+  await page.goto('/')
+
+  await addTenPlayers(page)
+  await page.getByRole('button', { name: '手動分割モード' }).click()
+
+  const slotIds = [
+    'manual-slot-blue-top',
+    'manual-slot-blue-jg',
+    'manual-slot-blue-mid',
+    'manual-slot-blue-bot',
+    'manual-slot-blue-sup',
+    'manual-slot-red-top',
+    'manual-slot-red-jg',
+    'manual-slot-red-mid',
+    'manual-slot-red-bot',
+    'manual-slot-red-sup',
+  ]
+
+  for (const slotId of slotIds) {
+    const sourceCard = page
+      .getByTestId('manual-unassigned-dropzone')
+      .locator('[data-testid^="manual-card-"]')
+      .first()
+    await sourceCard.dragTo(page.getByTestId(slotId))
+  }
+
+  await expect(
+    page
+      .getByTestId('manual-unassigned-dropzone')
+      .getByText('未配置プレイヤーはいません。')
+  ).toBeVisible()
+
+  await page.getByRole('button', { name: '青チーム勝利' }).click()
+  page.once('dialog', async (dialog) => {
+    await dialog.accept()
+  })
+  await page.getByRole('button', { name: '結果を確定' }).click()
+
+  await expect(
+    page.getByText('試合結果を確定し、履歴に保存しました。')
+  ).toBeVisible()
+})

@@ -2,10 +2,13 @@ import { Player } from '../../utils/player'
 import { rankEnum, tierEnum } from '../../utils/rank'
 import { roleEnum } from '../../utils/role'
 import {
+  MANUAL_SLOT_ORDER,
   MAX_MATCH_HISTORIES,
   PlayersJson,
   TeamBalancer,
+  buildEmptyManualAssignment,
   normalizeMatchHistories,
+  validateManualAssignment,
 } from '../../utils/teamBalancer'
 import { generateInternalId } from '../../utils/utils'
 
@@ -215,6 +218,82 @@ describe('TeamBalancer クラス', () => {
 
       expect(histories).toHaveLength(1)
       expect(histories[0].id).toBe('history-valid')
+    })
+  })
+
+  describe('validateManualAssignment', () => {
+    const createParticipatingPlayers = (count: number): Player[] => {
+      return Array.from({ length: count }, (_, index) => {
+        const player = new Player(`ManualPlayer${index + 1}`)
+        player.isParticipatingInGame = true
+        return player
+      })
+    }
+
+    test('10人が重複なく全ロールに配置されていれば有効と判定されること', () => {
+      const participatingPlayers = createParticipatingPlayers(10)
+      const assignment = buildEmptyManualAssignment()
+
+      MANUAL_SLOT_ORDER.forEach((slot, index) => {
+        assignment[slot] = participatingPlayers[index].id
+      })
+
+      const result = validateManualAssignment(participatingPlayers, assignment)
+
+      expect(result.isValid).toBe(true)
+      expect(result.errors).toEqual([])
+      expect(result.missingSlots).toEqual([])
+      expect(result.duplicatedPlayerIds).toEqual([])
+    })
+
+    test('参加人数が10人でない場合は無効になること', () => {
+      const participatingPlayers = createParticipatingPlayers(9)
+      const assignment = buildEmptyManualAssignment()
+      MANUAL_SLOT_ORDER.forEach((slot, index) => {
+        assignment[slot] = participatingPlayers[index]?.id ?? null
+      })
+
+      const result = validateManualAssignment(participatingPlayers, assignment)
+
+      expect(result.isValid).toBe(false)
+      expect(result.errors).toContain(
+        '手動割り当ては参加プレイヤーが10人ちょうどの場合のみ確定できます。'
+      )
+    })
+
+    test('同一プレイヤー重複配置を検出できること', () => {
+      const participatingPlayers = createParticipatingPlayers(10)
+      const assignment = buildEmptyManualAssignment()
+
+      MANUAL_SLOT_ORDER.forEach((slot, index) => {
+        assignment[slot] = participatingPlayers[index].id
+      })
+      assignment['red-SUP'] = participatingPlayers[0].id
+
+      const result = validateManualAssignment(participatingPlayers, assignment)
+
+      expect(result.isValid).toBe(false)
+      expect(result.errors).toContain(
+        '同一プレイヤーが複数ロールに配置されています。'
+      )
+      expect(result.duplicatedPlayerIds).toContain(participatingPlayers[0].id)
+    })
+
+    test('未配置ロールがある場合は無効になること', () => {
+      const participatingPlayers = createParticipatingPlayers(10)
+      const assignment = buildEmptyManualAssignment()
+
+      MANUAL_SLOT_ORDER.slice(0, 9).forEach((slot, index) => {
+        assignment[slot] = participatingPlayers[index].id
+      })
+
+      const result = validateManualAssignment(participatingPlayers, assignment)
+
+      expect(result.isValid).toBe(false)
+      expect(result.errors).toContain(
+        '未配置のロールがあります。全ロールを埋めてください。'
+      )
+      expect(result.missingSlots.length).toBe(1)
     })
   })
 

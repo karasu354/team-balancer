@@ -12,7 +12,7 @@ export interface PlayersJson {
 
 type TeamSide = 'blue' | 'red'
 
-type LaneRole =
+export type LaneRole =
   | roleEnum.top
   | roleEnum.jg
   | roleEnum.mid
@@ -28,6 +28,117 @@ const TEAM_ROLES: LaneRole[] = [
 ]
 
 const MATCH_SLOT_ROLES: LaneRole[] = [...TEAM_ROLES, ...TEAM_ROLES]
+
+export type ManualTeamSlot = `${TeamSide}-${LaneRole}`
+
+export type ManualAssignmentMap = Record<ManualTeamSlot, string | null>
+
+export interface ManualAssignmentValidationResult {
+  isValid: boolean
+  errors: string[]
+  missingSlots: ManualTeamSlot[]
+  duplicatedPlayerIds: string[]
+}
+
+export const MANUAL_SLOT_ORDER: ManualTeamSlot[] = [
+  'blue-TOP',
+  'blue-JG',
+  'blue-MID',
+  'blue-BOT',
+  'blue-SUP',
+  'red-TOP',
+  'red-JG',
+  'red-MID',
+  'red-BOT',
+  'red-SUP',
+]
+
+export const buildEmptyManualAssignment = (): ManualAssignmentMap => {
+  return {
+    'blue-TOP': null,
+    'blue-JG': null,
+    'blue-MID': null,
+    'blue-BOT': null,
+    'blue-SUP': null,
+    'red-TOP': null,
+    'red-JG': null,
+    'red-MID': null,
+    'red-BOT': null,
+    'red-SUP': null,
+  }
+}
+
+export const createManualAssignmentFromArrangedPlayers = (
+  players: Player[]
+): ManualAssignmentMap => {
+  const assignment = buildEmptyManualAssignment()
+
+  for (let i = 0; i < Math.min(players.length, MANUAL_SLOT_ORDER.length); i++) {
+    assignment[MANUAL_SLOT_ORDER[i]] = players[i].id
+  }
+
+  return assignment
+}
+
+export const validateManualAssignment = (
+  participatingPlayers: Player[],
+  assignment: ManualAssignmentMap
+): ManualAssignmentValidationResult => {
+  const errors: string[] = []
+
+  if (participatingPlayers.length !== TEAM_ROLES.length * 2) {
+    errors.push(
+      '手動割り当ては参加プレイヤーが10人ちょうどの場合のみ確定できます。'
+    )
+  }
+
+  const missingSlots = MANUAL_SLOT_ORDER.filter((slot) => !assignment[slot])
+  if (missingSlots.length > 0) {
+    errors.push('未配置のロールがあります。全ロールを埋めてください。')
+  }
+
+  const assignedPlayerIds = MANUAL_SLOT_ORDER.map(
+    (slot) => assignment[slot]
+  ).filter((playerId): playerId is string => playerId !== null)
+  const duplicateSet = new Set<string>()
+  const seenSet = new Set<string>()
+  assignedPlayerIds.forEach((playerId) => {
+    if (seenSet.has(playerId)) {
+      duplicateSet.add(playerId)
+      return
+    }
+    seenSet.add(playerId)
+  })
+
+  const duplicatedPlayerIds = Array.from(duplicateSet)
+  if (duplicatedPlayerIds.length > 0) {
+    errors.push('同一プレイヤーが複数ロールに配置されています。')
+  }
+
+  const participatingIds = new Set(
+    participatingPlayers.map((player) => player.id)
+  )
+  const invalidAssignedIds = assignedPlayerIds.filter(
+    (playerId) => !participatingIds.has(playerId)
+  )
+  if (invalidAssignedIds.length > 0) {
+    errors.push('参加していないプレイヤーが割り当てられています。')
+  }
+
+  const unassignedParticipating = participatingPlayers.filter(
+    (player) => !seenSet.has(player.id)
+  )
+  if (unassignedParticipating.length > 0) {
+    errors.push('未配置プレイヤーが残っています。')
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    missingSlots,
+    duplicatedPlayerIds,
+  }
+}
 
 export interface TeamsSnapshotPlayer {
   playerId: string

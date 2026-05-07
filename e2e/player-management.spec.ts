@@ -8,7 +8,7 @@ test('プレイヤーを1人追加すると一覧に表示される', async ({ p
   await page.getByRole('button', { name: 'プレイヤーを追加' }).click()
 
   await expect(
-    page.locator('p.font-bold', { hasText: 'TestPlayer' }).first()
+    page.locator('p.font-semibold', { hasText: 'TestPlayer' }).first()
   ).toBeVisible()
   await expect(page.getByText(/レート:\s*\d+/).first()).toBeVisible()
 })
@@ -38,7 +38,7 @@ test('サンプルデータを投入すると10人が一覧に追加される', 
   await page.getByRole('button', { name: 'サンプル投入（10人）' }).click()
 
   await expect(
-    page.locator('p.font-bold', { hasText: 'Sample_Top1' }).first()
+    page.locator('p.font-semibold', { hasText: 'Sample_Top1' }).first()
   ).toBeVisible()
   await expect(page.getByText('合計:').first()).toBeVisible()
   await expect(page.getByText('10/10').first()).toBeVisible()

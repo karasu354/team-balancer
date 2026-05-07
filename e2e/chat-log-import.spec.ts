@@ -17,12 +17,12 @@ test('チャットログ取り込みで複数プレイヤーが追加される',
   await page.getByTestId('import-chat-log').click()
 
   await expect(
-    page.locator('p.font-bold', { hasText: 'Player01' }).first()
+    page.locator('p.font-semibold', { hasText: 'Player01' }).first()
   ).toBeVisible()
   await expect(
-    page.locator('p.font-bold', { hasText: 'Player02' }).first()
+    page.locator('p.font-semibold', { hasText: 'Player02' }).first()
   ).toBeVisible()
   await expect(
-    page.locator('p.font-bold', { hasText: 'Player05' }).first()
+    page.locator('p.font-semibold', { hasText: 'Player05' }).first()
   ).toBeVisible()
 })

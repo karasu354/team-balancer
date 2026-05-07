@@ -4,7 +4,9 @@ import { Player } from '../utils/player'
 import { TeamBalancer } from '../utils/teamBalancer'
 import BulkEditRow from './BulkEditRow'
 import Tabs from './Navigation/Tabs'
-import PlayerCard from './PlayerCard'
+import PlayerDeleteCard from './PlayerDeleteCard'
+import PlayerDetailCard from './PlayerDetailCard'
+import PlayerEditCard from './PlayerEditCard'
 
 interface PlayersTableProps {
   teamBalancer: TeamBalancer
@@ -128,7 +130,7 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
 
       <div className="mb-3">
         <Tabs
-          labels={['カード表示', '一括編集']}
+          labels={['リスト表示', '一括編集']}
           activeTab={activeTab}
           onActiveTab={setActiveTab}
         />
@@ -141,29 +143,94 @@ const PlayersTable: React.FC<PlayersTableProps> = ({
       ) : (
         <>
           {activeTab === 0 ? (
-            <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
-              {players.map((player, index) => (
-                <PlayerCard
-                  key={player.id}
-                  player={player}
-                  isExpanded={isExpandedList[index]}
-                  isEditMode={isEditModeList[index]}
-                  isDeleteMode={isDeleteModeList[index]}
-                  onToggleExpand={(e: React.MouseEvent) =>
-                    handleToggleExpand(e, index)
-                  }
-                  onEditModeToggle={(e: React.MouseEvent) =>
-                    handleToggleEditMode(e, index)
-                  }
-                  onDeleteModeToggle={(e: React.MouseEvent) =>
-                    handleToggleDeleteMode(e, index)
-                  }
-                  onCurrentPlayerUpdate={(updatedPlayer) =>
-                    handleUpdatePlayer(index, updatedPlayer)
-                  }
-                  onRemove={() => onRemovePlayerByIndex(index)}
-                />
-              ))}
+            <div className="overflow-hidden rounded-lg border border-[var(--tb-border)] bg-[#0f1a34]">
+              <div className="max-h-96 space-y-0 overflow-y-auto">
+                {players.map((player, index) => (
+                  <div key={player.id}>
+                    <div className="flex items-center border-b border-[var(--tb-border)]">
+                      <button
+                        onClick={() => {
+                          player.isParticipatingInGame =
+                            !player.isParticipatingInGame
+                          handleUpdatePlayer(index, player)
+                        }}
+                        title="参加切替"
+                        className="flex w-10 flex-shrink-0 items-center justify-center border-r border-[var(--tb-border)] bg-[var(--tb-surface-muted)] hover:brightness-125"
+                      >
+                        <span className="text-lg">
+                          {player.isParticipatingInGame ? '☑' : '☐'}
+                        </span>
+                      </button>
+
+                      <button
+                        onClick={(e) => handleToggleExpand(e, index)}
+                        className="flex flex-1 items-center justify-between gap-3 px-3 py-2 text-left transition hover:bg-[#1a2847]"
+                      >
+                        <div className="flex min-w-0 flex-1 items-center gap-3">
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate font-semibold text-[var(--tb-text-primary)]">
+                              {player.name}
+                            </p>
+                            <p className="text-xs text-[var(--tb-text-secondary)]">
+                              {player.displayRank}
+                            </p>
+                          </div>
+
+                          <div className="text-right">
+                            <p className="text-sm font-bold text-[var(--tb-accent)]">
+                              レート: {player.rating}
+                            </p>
+                          </div>
+
+                          <div className="hidden min-w-[80px] text-right sm:block">
+                            <p className="text-xs text-[var(--tb-text-secondary)]">
+                              {player.desiredRoles.slice(0, 2).join('/')}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="text-[var(--tb-text-secondary)]">
+                          {isExpandedList[index] ? '▼' : '▶'}
+                        </div>
+                      </button>
+                    </div>
+
+                    {isExpandedList[index] && (
+                      <div className="border-b border-[var(--tb-border)] bg-[#0c1a35] px-3 py-3">
+                        {isEditModeList[index] ? (
+                          <PlayerEditCard
+                            currentPlayer={player}
+                            setEditablePlayer={(updatedPlayer) =>
+                              handleUpdatePlayer(index, updatedPlayer)
+                            }
+                            onEditModeToggle={(e: React.MouseEvent) =>
+                              handleToggleEditMode(e, index)
+                            }
+                          />
+                        ) : isDeleteModeList[index] ? (
+                          <PlayerDeleteCard
+                            playerName={player.name}
+                            onDelete={() => onRemovePlayerByIndex(index)}
+                            onDeleteModeToggle={(e: React.MouseEvent) =>
+                              handleToggleDeleteMode(e, index)
+                            }
+                          />
+                        ) : (
+                          <PlayerDetailCard
+                            currentPlayer={player}
+                            onEditModeToggle={(e: React.MouseEvent) =>
+                              handleToggleEditMode(e, index)
+                            }
+                            onDeleteModeToggle={(e: React.MouseEvent) =>
+                              handleToggleDeleteMode(e, index)
+                            }
+                          />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           ) : (
             <div className="space-y-2">

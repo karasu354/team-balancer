@@ -3,20 +3,35 @@ import React, { useState } from 'react'
 import { deleteTeamHistory } from '../composable/api'
 import { Player } from '../utils/player'
 import { roleList } from '../utils/role'
-import { TeamBalancer } from '../utils/teamBalancer'
+import {
+  MANUAL_SLOT_ORDER,
+  ManualAssignmentMap,
+  ManualTeamSlot,
+  TeamBalancer,
+  buildEmptyManualAssignment,
+  createManualAssignmentFromArrangedPlayers,
+  validateManualAssignment,
+} from '../utils/teamBalancer'
 import MatchHistoryPanel from './MatchHistoryPanel'
 import Tabs from './Navigation/Tabs'
 
+type DivisionMode = 'auto' | 'manual'
+
 const getRoleLabel = (role: string): string => {
   switch (role) {
+    case 'TOP':
     case 'top':
       return 'Top'
+    case 'JG':
     case 'jg':
       return 'Jg'
+    case 'MID':
     case 'mid':
       return 'Mid'
+    case 'BOT':
     case 'bot':
       return 'Bot'
+    case 'SUP':
     case 'sup':
       return 'Sup'
     default:
@@ -44,6 +59,15 @@ const generateTeamText = (team: Player[], lanes: string[]): string =>
   lanes
     .map((lane, index) => `${lane}: ${team[index]?.name || 'N/A'}`)
     .join('\n')
+
+const slotToRoleLabel = (slot: ManualTeamSlot): string => {
+  const [, role] = slot.split('-')
+  return role
+}
+
+const slotToTestId = (slot: ManualTeamSlot): string => {
+  return `manual-slot-${slot.toLowerCase()}`
+}
 
 const getContributionWidthClass = (
   rating: number,
@@ -77,6 +101,11 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
   const [activeViewTab, setActiveViewTab] = useState<number>(0)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isDividing, setIsDividing] = useState<boolean>(false)
+  const [divisionMode, setDivisionMode] = useState<DivisionMode>('auto')
+  const [manualAssignments, setManualAssignments] =
+    useState<ManualAssignmentMap>(buildEmptyManualAssignment)
+  const [draggingPlayerId, setDraggingPlayerId] = useState<string | null>(null)
+  const [manualStatusMessage, setManualStatusMessage] = useState<string>('')
   const [selectedWinner, setSelectedWinner] = useState<'blue' | 'red' | null>(
     null
   )
@@ -89,6 +118,153 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
     setActiveTab(tabIndex)
     setSelectedWinner(null)
     setResultStatusMessage('')
+  }
+
+  const participatingPlayers = teamBalancer.players.filter(
+    (player) => player.isParticipatingInGame
+  )
+  const participatingPlayersById = new Map(
+    participatingPlayers.map((player) => [player.id, player])
+  )
+
+  const initializeManualAssignments = () => {
+    if (activeBalancedTeam.players.length === 10) {
+      setManualAssignments(
+        createManualAssignmentFromArrangedPlayers(activeBalancedTeam.players)
+      )
+      setManualStatusMessage('自動分割結果を手動分割モードに読み込みました。')
+      return
+    }
+
+    setManualAssignments(buildEmptyManualAssignment())
+    setManualStatusMessage(
+      '手動分割モードです。プレイヤーを各ロールに配置してください。'
+    )
+  }
+
+  const handleModeChange = (nextMode: DivisionMode) => {
+    setDivisionMode(nextMode)
+    setSelectedWinner(null)
+    setResultStatusMessage('')
+    if (nextMode === 'manual') {
+      initializeManualAssignments()
+    }
+  }
+
+  const countManualMismatch = (arrangedPlayers: Player[]): number => {
+    return arrangedPlayers.reduce((count, player, index) => {
+      const role = roleList[index % 5]
+      return player.desiredRoles.includes(role) ? count : count + 1
+    }, 0)
+  }
+
+  const getManualArrangedPlayers = (): Player[] | null => {
+    const validation = validateManualAssignment(
+      participatingPlayers,
+      manualAssignments
+    )
+
+    if (!validation.isValid) {
+      setResultStatusMessage(
+        validation.errors[0] ?? '手動割り当てを確認してください。'
+      )
+      return null
+    }
+
+    const arrangedPlayers: Player[] = []
+    for (const slot of MANUAL_SLOT_ORDER) {
+      const playerId = manualAssignments[slot]
+      if (!playerId) {
+        setResultStatusMessage(
+          '未配置のロールがあります。全ロールを埋めてください。'
+        )
+        return null
+      }
+
+      const player = participatingPlayersById.get(playerId)
+      if (!player) {
+        setResultStatusMessage(
+          '手動割り当てに無効なプレイヤーが含まれています。'
+        )
+        return null
+      }
+
+      arrangedPlayers.push(player)
+    }
+
+    return arrangedPlayers
+  }
+
+  const handleDragStart = (
+    e: React.DragEvent<HTMLDivElement>,
+    playerId: string
+  ) => {
+    e.dataTransfer.setData('text/plain', playerId)
+    e.dataTransfer.effectAllowed = 'move'
+    setDraggingPlayerId(playerId)
+  }
+
+  const handleDragEnd = () => {
+    setDraggingPlayerId(null)
+  }
+
+  const resolveDraggedPlayerId = (
+    e: React.DragEvent<HTMLDivElement>
+  ): string | null => {
+    const playerIdFromEvent = e.dataTransfer.getData('text/plain')
+    return playerIdFromEvent || draggingPlayerId
+  }
+
+  const handleDropToSlot = (
+    e: React.DragEvent<HTMLDivElement>,
+    slot: ManualTeamSlot
+  ) => {
+    e.preventDefault()
+    const playerId = resolveDraggedPlayerId(e)
+    if (!playerId || !participatingPlayersById.has(playerId)) {
+      setManualStatusMessage('有効なプレイヤーをドロップしてください。')
+      setDraggingPlayerId(null)
+      return
+    }
+
+    setManualAssignments((prev) => {
+      const next = { ...prev }
+      MANUAL_SLOT_ORDER.forEach((targetSlot) => {
+        if (next[targetSlot] === playerId) {
+          next[targetSlot] = null
+        }
+      })
+      next[slot] = playerId
+      return next
+    })
+
+    const playerName =
+      participatingPlayersById.get(playerId)?.name ?? 'プレイヤー'
+    setManualStatusMessage(`${playerName} を ${slot} に配置しました。`)
+    setDraggingPlayerId(null)
+  }
+
+  const handleDropToUnassigned = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    const playerId = resolveDraggedPlayerId(e)
+    if (!playerId) {
+      return
+    }
+
+    setManualAssignments((prev) => {
+      const next = { ...prev }
+      MANUAL_SLOT_ORDER.forEach((slot) => {
+        if (next[slot] === playerId) {
+          next[slot] = null
+        }
+      })
+      return next
+    })
+
+    const playerName =
+      participatingPlayersById.get(playerId)?.name ?? 'プレイヤー'
+    setManualStatusMessage(`${playerName} を未配置に戻しました。`)
+    setDraggingPlayerId(null)
   }
 
   const handleDivideTeams = async () => {
@@ -110,20 +286,19 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
   }
 
   const handleCopyToClipboard = () => {
-    if (activeBalancedTeam.players.length !== 10) {
+    const targetPlayers =
+      divisionMode === 'manual'
+        ? getManualArrangedPlayers()
+        : activeBalancedTeam.players
+
+    if (!targetPlayers || targetPlayers.length !== 10) {
       setResultStatusMessage('コピー対象の分割結果がありません。')
       return
     }
 
     const lanes = roleList
-    const blueTeamText = generateTeamText(
-      activeBalancedTeam.players.slice(0, 5),
-      lanes
-    )
-    const redTeamText = generateTeamText(
-      activeBalancedTeam.players.slice(5, 10),
-      lanes
-    )
+    const blueTeamText = generateTeamText(targetPlayers.slice(0, 5), lanes)
+    const redTeamText = generateTeamText(targetPlayers.slice(5, 10), lanes)
     const result = `青チーム\n${blueTeamText}\n\n赤チーム\n${redTeamText}`
     navigator.clipboard.writeText(result)
     setResultStatusMessage('チーム結果をクリップボードにコピーしました。')
@@ -135,7 +310,12 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
       return
     }
 
-    if (activeBalancedTeam.players.length !== 10) {
+    const targetPlayers =
+      divisionMode === 'manual'
+        ? getManualArrangedPlayers()
+        : activeBalancedTeam.players
+
+    if (!targetPlayers || targetPlayers.length !== 10) {
       setResultStatusMessage('確定対象の分割結果がありません。')
       return
     }
@@ -148,10 +328,15 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
     }
 
     try {
+      const mismatchCount =
+        divisionMode === 'manual'
+          ? countManualMismatch(targetPlayers)
+          : activeTab
+
       teamBalancer.finalizeMatchResult(
-        activeBalancedTeam.players,
+        targetPlayers,
         selectedWinner,
-        activeTab
+        mismatchCount
       )
       setResultStatusMessage('試合結果を確定し、履歴に保存しました。')
       setSelectedWinner(null)
@@ -219,6 +404,20 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
     ...activeBalancedTeam.players.map((p) => p.rating),
     1
   )
+  const assignedPlayerIds = new Set(
+    MANUAL_SLOT_ORDER.map((slot) => manualAssignments[slot]).filter(
+      (playerId): playerId is string => playerId !== null
+    )
+  )
+  const unassignedPlayers = participatingPlayers.filter(
+    (player) => !assignedPlayerIds.has(player.id)
+  )
+  const blueManualSlots = MANUAL_SLOT_ORDER.filter((slot) =>
+    slot.startsWith('blue-')
+  )
+  const redManualSlots = MANUAL_SLOT_ORDER.filter((slot) =>
+    slot.startsWith('red-')
+  )
 
   const handleContainerKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key !== 'Enter') {
@@ -259,14 +458,40 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
         </button>
         <button
           onClick={handleCopyToClipboard}
-          disabled={activeBalancedTeam.players.length === 0 || isDividing}
+          disabled={
+            (divisionMode === 'auto' &&
+              activeBalancedTeam.players.length === 0) ||
+            isDividing
+          }
           className={`rounded px-4 py-2 transition ${
-            activeBalancedTeam.players.length === 0 || isDividing
+            (divisionMode === 'auto' &&
+              activeBalancedTeam.players.length === 0) ||
+            isDividing
               ? 'cursor-not-allowed bg-slate-500 text-slate-300'
               : 'bg-[var(--tb-surface-muted)] text-[var(--tb-text-primary)] hover:brightness-110'
           }`}
         >
           クリップボードにコピー
+        </button>
+        <button
+          onClick={() => handleModeChange('auto')}
+          className={`rounded px-4 py-2 transition ${
+            divisionMode === 'auto'
+              ? 'bg-blue-600 text-white'
+              : 'bg-slate-700 text-slate-200 hover:bg-slate-600'
+          }`}
+        >
+          自動分割モード
+        </button>
+        <button
+          onClick={() => handleModeChange('manual')}
+          className={`rounded px-4 py-2 transition ${
+            divisionMode === 'manual'
+              ? 'bg-emerald-600 text-white'
+              : 'bg-slate-700 text-slate-200 hover:bg-slate-600'
+          }`}
+        >
+          手動分割モード
         </button>
       </div>
 
@@ -274,6 +499,12 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
         キーボード操作: 分割エリアにフォーカスして Enter
         を押すとチーム分けを実行します。
       </p>
+
+      {divisionMode === 'manual' && manualStatusMessage && (
+        <p className="mb-3 text-xs text-emerald-300" aria-live="polite">
+          {manualStatusMessage}
+        </p>
+      )}
 
       <div className="mb-3">
         <Tabs
@@ -284,235 +515,479 @@ const DividedTeamTable: React.FC<DividedTeamTableProps> = ({
       </div>
 
       <div className="min-h-[30rem] md:min-h-[38rem]">
-        {activeViewTab === 0 && (
-          <div className="flex flex-col gap-3 md:flex-row">
-            <div className="flex gap-2 overflow-x-auto pb-1 md:mr-2 md:flex-col md:gap-2 md:overflow-visible md:pb-0">
-              {scoreSummaries.length > 0 && (
-                <div className="mb-2 rounded border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200">
-                  <p className="font-semibold">ミスマッチ別最良スコア比較</p>
-                  <ul className="mt-1 list-disc pl-4">
-                    {scoreSummaries.map((summary) => (
-                      <li key={summary.mismatchCount}>
-                        {summary.mismatchCount}人:{' '}
-                        {summary.evaluationScore.toFixed(2)}
-                        {bestSummary?.mismatchCount === summary.mismatchCount &&
-                          ' ← 最小スコア'}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {Object.keys(balancedTeamsByMissMatch).map((key) => (
-                <button
-                  key={key}
-                  onClick={() => handleTabChange(Number(key))}
-                  disabled={
-                    balancedTeamsByMissMatch[Number(key)].players.length === 0
-                  }
-                  className={`${getButtonClass(
-                    balancedTeamsByMissMatch[Number(key)].players.length === 0,
-                    Number(key) === activeTab
-                  )} ${
-                    bestSummary?.mismatchCount === Number(key)
-                      ? 'ring-2 ring-emerald-500'
-                      : ''
-                  }`}
-                >
-                  {key}人ミスマッチ
-                  {balancedTeamsByMissMatch[Number(key)].players.length ===
-                    10 &&
-                    ` (${balancedTeamsByMissMatch[Number(key)].evaluationScore.toFixed(2)})`}
-                </button>
-              ))}
-            </div>
+        {activeViewTab === 0 &&
+          (divisionMode === 'auto' ? (
+            <div className="flex flex-col gap-3 md:flex-row">
+              <div className="flex gap-2 overflow-x-auto pb-1 md:mr-2 md:flex-col md:gap-2 md:overflow-visible md:pb-0">
+                {scoreSummaries.length > 0 && (
+                  <div className="mb-2 rounded border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200">
+                    <p className="font-semibold">ミスマッチ別最良スコア比較</p>
+                    <ul className="mt-1 list-disc pl-4">
+                      {scoreSummaries.map((summary) => (
+                        <li key={summary.mismatchCount}>
+                          {summary.mismatchCount}人:{' '}
+                          {summary.evaluationScore.toFixed(2)}
+                          {bestSummary?.mismatchCount ===
+                            summary.mismatchCount && ' ← 最小スコア'}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {Object.keys(balancedTeamsByMissMatch).map((key) => (
+                  <button
+                    key={key}
+                    onClick={() => handleTabChange(Number(key))}
+                    disabled={
+                      balancedTeamsByMissMatch[Number(key)].players.length === 0
+                    }
+                    className={`${getButtonClass(
+                      balancedTeamsByMissMatch[Number(key)].players.length ===
+                        0,
+                      Number(key) === activeTab
+                    )} ${
+                      bestSummary?.mismatchCount === Number(key)
+                        ? 'ring-2 ring-emerald-500'
+                        : ''
+                    }`}
+                  >
+                    {key}人ミスマッチ
+                    {balancedTeamsByMissMatch[Number(key)].players.length ===
+                      10 &&
+                      ` (${balancedTeamsByMissMatch[Number(key)].evaluationScore.toFixed(2)})`}
+                  </button>
+                ))}
+              </div>
 
-            <div className="flex-1 rounded-lg border border-[var(--tb-border)] bg-[var(--tb-surface)] p-4">
-              {isDividing ? (
-                <div className="rounded-lg border border-[var(--tb-border)] bg-[#0f1a34] px-4 py-10 text-center text-sm text-[var(--tb-text-secondary)]">
-                  新しいチームを計算中です。結果を更新しています...
-                </div>
-              ) : (
-                activeBalancedTeam.players.length === 10 && (
-                  <div>
-                    <div className="mb-3 flex flex-wrap gap-2">
-                      <p className="rounded-full border border-[var(--tb-border)] bg-[#0b1730] px-3 py-1 text-sm text-[var(--tb-text-secondary)]">
-                        評価スコア:{' '}
-                        <span className="font-semibold text-[var(--tb-text-primary)]">
-                          {activeBalancedTeam.evaluationScore.toFixed(2)}
-                        </span>
-                      </p>
-                      <p className="rounded-full border border-[var(--tb-border)] bg-[#0b1730] px-3 py-1 text-sm text-[var(--tb-text-secondary)]">
-                        チーム総レート差:{' '}
-                        <span className="font-semibold text-[var(--tb-text-primary)]">
-                          {Math.abs(blueTotalRating - redTotalRating)}
-                        </span>
-                      </p>
-                    </div>
-                    <div className="mb-3 rounded border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
-                      <p className="font-semibold text-amber-200">
-                        ミスマッチ内訳（
-                        {activeBalancedTeam.mismatchDetails.length}
-                        件）
-                      </p>
-                      {activeBalancedTeam.mismatchDetails.length === 0 ? (
-                        <p className="mt-1 text-amber-100">
-                          ミスマッチはありません（全員が希望ロールに配置されています）。
+              <div className="flex-1 rounded-lg border border-[var(--tb-border)] bg-[var(--tb-surface)] p-4">
+                {isDividing ? (
+                  <div className="rounded-lg border border-[var(--tb-border)] bg-[#0f1a34] px-4 py-10 text-center text-sm text-[var(--tb-text-secondary)]">
+                    新しいチームを計算中です。結果を更新しています...
+                  </div>
+                ) : (
+                  activeBalancedTeam.players.length === 10 && (
+                    <div>
+                      <div className="mb-3 flex flex-wrap gap-2">
+                        <p className="rounded-full border border-[var(--tb-border)] bg-[#0b1730] px-3 py-1 text-sm text-[var(--tb-text-secondary)]">
+                          評価スコア:{' '}
+                          <span className="font-semibold text-[var(--tb-text-primary)]">
+                            {activeBalancedTeam.evaluationScore.toFixed(2)}
+                          </span>
                         </p>
-                      ) : (
-                        <ul className="mt-2 list-disc space-y-1 pl-5 text-amber-100">
-                          {activeBalancedTeam.mismatchDetails.map((detail) => (
-                            <li
-                              key={`${detail.playerId}-${detail.assignedRole}`}
-                            >
-                              {detail.playerName}: 割当{' '}
-                              {getRoleLabel(detail.assignedRole)} / 希望{' '}
-                              {detail.desiredRoles.map(getRoleLabel).join(', ')}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                      <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-3">
-                        <div className="mb-3 border-b border-blue-500/20 pb-2">
-                          <p className="text-xl font-bold text-blue-300">
-                            青チーム
+                        <p className="rounded-full border border-[var(--tb-border)] bg-[#0b1730] px-3 py-1 text-sm text-[var(--tb-text-secondary)]">
+                          チーム総レート差:{' '}
+                          <span className="font-semibold text-[var(--tb-text-primary)]">
+                            {Math.abs(blueTotalRating - redTotalRating)}
+                          </span>
+                        </p>
+                      </div>
+                      <div className="mb-3 rounded border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
+                        <p className="font-semibold text-amber-200">
+                          ミスマッチ内訳（
+                          {activeBalancedTeam.mismatchDetails.length}
+                          件）
+                        </p>
+                        {activeBalancedTeam.mismatchDetails.length === 0 ? (
+                          <p className="mt-1 text-amber-100">
+                            ミスマッチはありません（全員が希望ロールに配置されています）。
                           </p>
-                          <p className="text-xs text-blue-100">
-                            総レート: {blueTotalRating}
-                          </p>
-                        </div>
-                        <div className="space-y-2">
-                          {roleList.map((lane, index) => (
-                            <div
-                              key={lane}
-                              className="rounded border border-blue-400/20 bg-[#0c1a35] p-2"
-                            >
-                              <div className="mb-1 flex items-center justify-between text-xs">
-                                <span className="font-semibold text-blue-200">
-                                  {lane}
-                                </span>
-                                <span className="text-blue-100">
-                                  {blueTeam[index]?.rating ?? 'N/A'}
-                                </span>
-                              </div>
-                              <p className="text-sm font-semibold text-[var(--tb-text-primary)]">
-                                {blueTeam[index]?.name || 'N/A'}
-                              </p>
-                              <div className="mt-1 h-1.5 rounded-full bg-blue-950/70">
-                                <div
-                                  className={`h-1.5 rounded-full bg-blue-400 ${getContributionWidthClass(
-                                    blueTeam[index]?.rating ?? 0,
-                                    maxRating
-                                  )}`}
-                                />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                        ) : (
+                          <ul className="mt-2 list-disc space-y-1 pl-5 text-amber-100">
+                            {activeBalancedTeam.mismatchDetails.map(
+                              (detail) => (
+                                <li
+                                  key={`${detail.playerId}-${detail.assignedRole}`}
+                                >
+                                  {detail.playerName}: 割当{' '}
+                                  {getRoleLabel(detail.assignedRole)} / 希望{' '}
+                                  {detail.desiredRoles
+                                    .map(getRoleLabel)
+                                    .join(', ')}
+                                </li>
+                              )
+                            )}
+                          </ul>
+                        )}
                       </div>
 
-                      <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3">
-                        <div className="mb-3 border-b border-red-500/20 pb-2">
-                          <p className="text-xl font-bold text-red-300">
-                            赤チーム
-                          </p>
-                          <p className="text-xs text-red-100">
-                            総レート: {redTotalRating}
-                          </p>
+                      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                        <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-3">
+                          <div className="mb-3 border-b border-blue-500/20 pb-2">
+                            <p className="text-xl font-bold text-blue-300">
+                              青チーム
+                            </p>
+                            <p className="text-xs text-blue-100">
+                              総レート: {blueTotalRating}
+                            </p>
+                          </div>
+                          <div className="space-y-2">
+                            {roleList.map((lane, index) => (
+                              <div
+                                key={lane}
+                                className="rounded border border-blue-400/20 bg-[#0c1a35] p-2"
+                              >
+                                <div className="mb-1 flex items-center justify-between text-xs">
+                                  <span className="font-semibold text-blue-200">
+                                    {lane}
+                                  </span>
+                                  <span className="text-blue-100">
+                                    {blueTeam[index]?.rating ?? 'N/A'}
+                                  </span>
+                                </div>
+                                <p className="text-sm font-semibold text-[var(--tb-text-primary)]">
+                                  {blueTeam[index]?.name || 'N/A'}
+                                </p>
+                                <div className="mt-1 h-1.5 rounded-full bg-blue-950/70">
+                                  <div
+                                    className={`h-1.5 rounded-full bg-blue-400 ${getContributionWidthClass(
+                                      blueTeam[index]?.rating ?? 0,
+                                      maxRating
+                                    )}`}
+                                  />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                        <div className="space-y-2">
-                          {roleList.map((lane, index) => (
-                            <div
-                              key={lane}
-                              className="rounded border border-red-400/20 bg-[#0c1a35] p-2"
-                            >
-                              <div className="mb-1 flex items-center justify-between text-xs">
-                                <span className="font-semibold text-red-200">
-                                  {lane}
-                                </span>
-                                <span className="text-red-100">
-                                  {redTeam[index]?.rating ?? 'N/A'}
-                                </span>
+
+                        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3">
+                          <div className="mb-3 border-b border-red-500/20 pb-2">
+                            <p className="text-xl font-bold text-red-300">
+                              赤チーム
+                            </p>
+                            <p className="text-xs text-red-100">
+                              総レート: {redTotalRating}
+                            </p>
+                          </div>
+                          <div className="space-y-2">
+                            {roleList.map((lane, index) => (
+                              <div
+                                key={lane}
+                                className="rounded border border-red-400/20 bg-[#0c1a35] p-2"
+                              >
+                                <div className="mb-1 flex items-center justify-between text-xs">
+                                  <span className="font-semibold text-red-200">
+                                    {lane}
+                                  </span>
+                                  <span className="text-red-100">
+                                    {redTeam[index]?.rating ?? 'N/A'}
+                                  </span>
+                                </div>
+                                <p className="text-sm font-semibold text-[var(--tb-text-primary)]">
+                                  {redTeam[index]?.name || 'N/A'}
+                                </p>
+                                <div className="mt-1 h-1.5 rounded-full bg-red-950/70">
+                                  <div
+                                    className={`h-1.5 rounded-full bg-red-400 ${getContributionWidthClass(
+                                      redTeam[index]?.rating ?? 0,
+                                      maxRating
+                                    )}`}
+                                  />
+                                </div>
                               </div>
-                              <p className="text-sm font-semibold text-[var(--tb-text-primary)]">
-                                {redTeam[index]?.name || 'N/A'}
-                              </p>
-                              <div className="mt-1 h-1.5 rounded-full bg-red-950/70">
-                                <div
-                                  className={`h-1.5 rounded-full bg-red-400 ${getContributionWidthClass(
-                                    redTeam[index]?.rating ?? 0,
-                                    maxRating
-                                  )}`}
-                                />
-                              </div>
-                            </div>
-                          ))}
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )
-              )}
+                  )
+                )}
 
-              {!isDividing && activeBalancedTeam.players.length !== 10 && (
-                <div className="rounded-lg border border-dashed border-[var(--tb-border)] bg-[#0f1a34] px-4 py-8 text-center text-sm text-[var(--tb-text-secondary)]">
-                  まだ分割結果がありません。10人揃えたうえで「チーム分け」を実行してください。
-                </div>
-              )}
-
-              {!isDividing && activeBalancedTeam.players.length === 10 && (
-                <div className="mt-4 rounded-lg border border-[var(--tb-border)] bg-[#0f1a34] p-3">
-                  <p className="mb-2 text-sm font-semibold text-[var(--tb-text-primary)]">
-                    試合結果の確定
-                  </p>
-                  <div className="mb-2 flex flex-wrap gap-2">
-                    <button
-                      className={`rounded px-3 py-1 text-sm ${
-                        selectedWinner === 'blue'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-blue-500/20 text-blue-200'
-                      }`}
-                      onClick={() => setSelectedWinner('blue')}
-                    >
-                      青チーム勝利
-                    </button>
-                    <button
-                      className={`rounded px-3 py-1 text-sm ${
-                        selectedWinner === 'red'
-                          ? 'bg-red-600 text-white'
-                          : 'bg-red-500/20 text-red-200'
-                      }`}
-                      onClick={() => setSelectedWinner('red')}
-                    >
-                      赤チーム勝利
-                    </button>
-                    <button
-                      className={`rounded px-3 py-1 text-sm ${
-                        selectedWinner
-                          ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                          : 'cursor-not-allowed bg-gray-400 text-gray-700'
-                      }`}
-                      onClick={handleConfirmResult}
-                      disabled={!selectedWinner}
-                    >
-                      結果を確定
-                    </button>
+                {!isDividing && activeBalancedTeam.players.length !== 10 && (
+                  <div className="rounded-lg border border-dashed border-[var(--tb-border)] bg-[#0f1a34] px-4 py-8 text-center text-sm text-[var(--tb-text-secondary)]">
+                    まだ分割結果がありません。10人揃えたうえで「チーム分け」を実行してください。
                   </div>
-                  {resultStatusMessage && (
-                    <p
-                      className="text-sm text-[var(--tb-text-secondary)]"
-                      aria-live="polite"
+                )}
+
+                {!isDividing && activeBalancedTeam.players.length === 10 && (
+                  <div className="mt-4 rounded-lg border border-[var(--tb-border)] bg-[#0f1a34] p-3">
+                    <p className="mb-2 text-sm font-semibold text-[var(--tb-text-primary)]">
+                      試合結果の確定
+                    </p>
+                    <div className="mb-2 flex flex-wrap gap-2">
+                      <button
+                        className={`rounded px-3 py-1 text-sm ${
+                          selectedWinner === 'blue'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-blue-500/20 text-blue-200'
+                        }`}
+                        onClick={() => setSelectedWinner('blue')}
+                      >
+                        青チーム勝利
+                      </button>
+                      <button
+                        className={`rounded px-3 py-1 text-sm ${
+                          selectedWinner === 'red'
+                            ? 'bg-red-600 text-white'
+                            : 'bg-red-500/20 text-red-200'
+                        }`}
+                        onClick={() => setSelectedWinner('red')}
+                      >
+                        赤チーム勝利
+                      </button>
+                      <button
+                        className={`rounded px-3 py-1 text-sm ${
+                          selectedWinner
+                            ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                            : 'cursor-not-allowed bg-gray-400 text-gray-700'
+                        }`}
+                        onClick={handleConfirmResult}
+                        disabled={!selectedWinner}
+                      >
+                        結果を確定
+                      </button>
+                    </div>
+                    {resultStatusMessage && (
+                      <p
+                        className="text-sm text-[var(--tb-text-secondary)]"
+                        aria-live="polite"
+                      >
+                        {resultStatusMessage}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+              <div
+                className="rounded-lg border border-[var(--tb-border)] bg-[#0f1a34] p-3"
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={handleDropToUnassigned}
+                data-testid="manual-unassigned-dropzone"
+              >
+                <p className="mb-2 text-sm font-semibold text-[var(--tb-text-primary)]">
+                  未配置プレイヤー ({unassignedPlayers.length})
+                </p>
+                <div className="space-y-2">
+                  {unassignedPlayers.map((player) => (
+                    <div
+                      key={player.id}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, player.id)}
+                      onDragEnd={handleDragEnd}
+                      className="cursor-move rounded border border-[var(--tb-border)] bg-[var(--tb-surface)] px-3 py-2 text-sm text-[var(--tb-text-primary)]"
+                      data-testid={`manual-card-${player.id}`}
                     >
-                      {resultStatusMessage}
+                      <p className="font-semibold">{player.name}</p>
+                      <p className="text-xs text-[var(--tb-text-secondary)]">
+                        {player.displayRank} / {player.rating}
+                      </p>
+                    </div>
+                  ))}
+                  {unassignedPlayers.length === 0 && (
+                    <p className="text-xs text-[var(--tb-text-secondary)]">
+                      未配置プレイヤーはいません。
                     </p>
                   )}
                 </div>
+              </div>
+
+              <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 p-3">
+                <p className="mb-2 text-base font-bold text-blue-300">
+                  青チーム
+                </p>
+                <div className="space-y-2">
+                  {blueManualSlots.map((slot) => {
+                    const assignedId = manualAssignments[slot]
+                    const assignedPlayer = assignedId
+                      ? participatingPlayersById.get(assignedId)
+                      : undefined
+
+                    return (
+                      <div
+                        key={slot}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => handleDropToSlot(e, slot)}
+                        className="rounded border border-blue-400/30 bg-[#0c1a35] p-2"
+                        data-testid={slotToTestId(slot)}
+                      >
+                        <p className="mb-1 text-xs font-semibold text-blue-200">
+                          {slotToRoleLabel(slot)}
+                        </p>
+                        {assignedPlayer ? (
+                          <div
+                            draggable
+                            onDragStart={(e) =>
+                              handleDragStart(e, assignedPlayer.id)
+                            }
+                            onDragEnd={handleDragEnd}
+                            className="cursor-move rounded border border-blue-500/30 bg-blue-950/40 px-2 py-1 text-sm text-[var(--tb-text-primary)]"
+                            data-testid={`manual-card-${assignedPlayer.id}`}
+                          >
+                            {assignedPlayer.name}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-blue-100/70">
+                            ここにドロップ
+                          </p>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3">
+                <p className="mb-2 text-base font-bold text-red-300">
+                  赤チーム
+                </p>
+                <div className="space-y-2">
+                  {redManualSlots.map((slot) => {
+                    const assignedId = manualAssignments[slot]
+                    const assignedPlayer = assignedId
+                      ? participatingPlayersById.get(assignedId)
+                      : undefined
+
+                    return (
+                      <div
+                        key={slot}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => handleDropToSlot(e, slot)}
+                        className="rounded border border-red-400/30 bg-[#0c1a35] p-2"
+                        data-testid={slotToTestId(slot)}
+                      >
+                        <p className="mb-1 text-xs font-semibold text-red-200">
+                          {slotToRoleLabel(slot)}
+                        </p>
+                        {assignedPlayer ? (
+                          <div
+                            draggable
+                            onDragStart={(e) =>
+                              handleDragStart(e, assignedPlayer.id)
+                            }
+                            onDragEnd={handleDragEnd}
+                            className="cursor-move rounded border border-red-500/30 bg-red-950/40 px-2 py-1 text-sm text-[var(--tb-text-primary)]"
+                            data-testid={`manual-card-${assignedPlayer.id}`}
+                          >
+                            {assignedPlayer.name}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-red-100/70">
+                            ここにドロップ
+                          </p>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {unassignedPlayers.length === 0 && (
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                  <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-3">
+                    <div className="mb-3 border-b border-blue-500/20 pb-2">
+                      <p className="text-lg font-bold text-blue-300">
+                        青チーム
+                      </p>
+                      <p className="text-xs text-blue-100">
+                        総レート:{' '}
+                        {blueTeam.reduce((sum, p) => sum + (p?.rating ?? 0), 0)}
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      {roleList.map((lane, index) => (
+                        <div
+                          key={lane}
+                          className="rounded border border-blue-400/20 bg-[#0c1a35] p-2"
+                        >
+                          <div className="mb-1 flex items-center justify-between text-xs">
+                            <span className="font-semibold text-blue-200">
+                              {lane}
+                            </span>
+                            <span className="text-blue-100">
+                              {blueTeam[index]?.rating ?? 'N/A'}
+                            </span>
+                          </div>
+                          <p className="text-sm font-semibold text-[var(--tb-text-primary)]">
+                            {blueTeam[index]?.name || 'N/A'}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3">
+                    <div className="mb-3 border-b border-red-500/20 pb-2">
+                      <p className="text-lg font-bold text-red-300">赤チーム</p>
+                      <p className="text-xs text-red-100">
+                        総レート:{' '}
+                        {redTeam.reduce((sum, p) => sum + (p?.rating ?? 0), 0)}
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      {roleList.map((lane, index) => (
+                        <div
+                          key={lane}
+                          className="rounded border border-red-400/20 bg-[#0c1a35] p-2"
+                        >
+                          <div className="mb-1 flex items-center justify-between text-xs">
+                            <span className="font-semibold text-red-200">
+                              {lane}
+                            </span>
+                            <span className="text-red-100">
+                              {redTeam[index]?.rating ?? 'N/A'}
+                            </span>
+                          </div>
+                          <p className="text-sm font-semibold text-[var(--tb-text-primary)]">
+                            {redTeam[index]?.name || 'N/A'}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               )}
+
+              <div className="rounded-lg border border-[var(--tb-border)] bg-[#0f1a34] p-3 lg:col-span-3">
+                <p className="mb-2 text-sm font-semibold text-[var(--tb-text-primary)]">
+                  手動分割の結果確定
+                </p>
+                <div className="mb-2 flex flex-wrap gap-2">
+                  <button
+                    className={`rounded px-3 py-1 text-sm ${
+                      selectedWinner === 'blue'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-blue-500/20 text-blue-200'
+                    }`}
+                    onClick={() => setSelectedWinner('blue')}
+                  >
+                    青チーム勝利
+                  </button>
+                  <button
+                    className={`rounded px-3 py-1 text-sm ${
+                      selectedWinner === 'red'
+                        ? 'bg-red-600 text-white'
+                        : 'bg-red-500/20 text-red-200'
+                    }`}
+                    onClick={() => setSelectedWinner('red')}
+                  >
+                    赤チーム勝利
+                  </button>
+                  <button
+                    className={`rounded px-3 py-1 text-sm ${
+                      selectedWinner
+                        ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                        : 'cursor-not-allowed bg-gray-400 text-gray-700'
+                    }`}
+                    onClick={handleConfirmResult}
+                    disabled={!selectedWinner}
+                  >
+                    結果を確定
+                  </button>
+                </div>
+                {resultStatusMessage && (
+                  <p
+                    className="text-sm text-[var(--tb-text-secondary)]"
+                    aria-live="polite"
+                  >
+                    {resultStatusMessage}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          ))}
 
         {activeViewTab === 1 && (
           <div className="mt-1 rounded-lg border border-[var(--tb-border)] bg-[var(--tb-surface)] p-4">

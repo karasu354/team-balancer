@@ -35,7 +35,7 @@ test('ID保存→読み込みでプレイヤー一覧が復元される', async 
   await loadButton.click()
 
   await expect(
-    page.locator('p.font-bold', { hasText: 'Player01' }).first()
+    page.locator('p.font-semibold', { hasText: 'Player01' }).first()
   ).toBeVisible({ timeout: 5000 })
 })
 
