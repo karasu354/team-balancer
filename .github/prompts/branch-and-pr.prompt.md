@@ -42,6 +42,7 @@ git status
 ```
 
 以下を確認：
+
 - `Changes not staged for commit` や `Untracked files` が存在するか
 - ステージ済み変更がある場合は、対象ファイルを明確にしてください
 
@@ -75,6 +76,7 @@ git diff develop --name-only
 ```
 
 **変更ファイルから以下を推測**:
+
 - 対象ファイルが `utils/` → scope は `teamBalancer`, `player`, `rank`, `role` など
 - 対象ファイルが `components/` → scope は `ui`, または コンポーネント名（`PlayerCard` など）
 - 対象ファイルが `pages/api/` → scope は `api`
@@ -88,6 +90,7 @@ git diff develop
 ```
 
 変更行数・追加・削除から以下を推測：
+
 - **小規模変更**（<50行）→ `fix` or `refactor` 候補
 - **中規模変更**（50-200行）→ `feat` or `refactor` 候補
 - **大規模変更**（>200行）→ `feat` 候補（複数ファイル跨る場合）
@@ -154,6 +157,7 @@ git checkout -b [自動提案のブランチ名 or ユーザーが修正した�
 ```
 
 例（自動提案の結果に従う場合）:
+
 ```bash
 git checkout develop
 git pull origin develop
@@ -177,11 +181,13 @@ type        scope  説明（72文字以内）
 ```
 
 例（自動提案の結果を使用）:
+
 ```
 feat(redis): add match history persistence with Redis
 ```
 
 **Type の種類**:
+
 - `feat`: 新機能
 - `fix`: バグ修正
 - `refactor`: リファクタリング
@@ -190,6 +196,7 @@ feat(redis): add match history persistence with Redis
 - `test`: テスト追加・修正
 
 **Scope の例**:
+
 - `player`, `team`, `api`, `ui`, `e2e` など対象領域を明記
 
 ### ステップ 3: リモートへプッシュ
@@ -212,21 +219,26 @@ git push origin [ステップ1で作成したブランチ名]
 
 ```markdown
 ## 背景・目的
+
 [自動提案の背景 + ユーザーが補足]
 
 ## 変更内容
+
 - [変更点1（自動抽出）]
 - [変更点2（自動抽出）]
 - [ユーザーが追加補足があれば記載]
 
 ## テスト方法
+
 実行済みテスト（要確認）:
+
 - [ ] npm run format — ✅ 成功 / ❌ 失敗
 - [ ] npm run typecheck — ✅ 成功 / ❌ 失敗
 - [ ] npm run test — ✅ 成功 / ❌ 失敗
 - [ ] npm run test:e2e — ✅ 成功 / ❌ 失敗
 
 ## チェックリスト
+
 - [ ] ローカルで `npm run format` / `npm run typecheck` / `npm run test` が成功
 - [ ] E2E テストが成功（`npm run test:e2e`）
 - [ ] PR タイトルが Conventional Commits 形式
@@ -293,4 +305,3 @@ E) その他（chore）
   - テストコードの追加・修正（これは `/implement` の責務）
   - ドキュメントの修正（これは `/implement` または `/requirements-update` の責務）
   - コミット前の `npm run format` / `npm run test` 実行（これはユーザーの責務）
-
