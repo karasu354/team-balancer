@@ -91,7 +91,7 @@ const MatchHistoryAccordion: React.FC<MatchHistoryAccordionProps> = ({
         </button>
       </div>
 
-      <div className="mb-3 grid gap-2 text-xs text-slate-600 md:grid-cols-3">
+      <div className="mb-3 grid gap-2 text-xs text-[var(--tb-text-secondary)] md:grid-cols-3">
         <p>
           勝利チーム: {history.winnerTeam === 'blue' ? '青チーム' : '赤チーム'}
         </p>
@@ -100,19 +100,19 @@ const MatchHistoryAccordion: React.FC<MatchHistoryAccordionProps> = ({
       </div>
 
       <div className="grid gap-3 md:grid-cols-2">
-        <div className="rounded border border-blue-200 bg-blue-50 p-3">
-          <p className="mb-2 font-semibold text-blue-700">青チーム</p>
+        <div className="rounded border border-blue-500/30 bg-blue-500/10 p-3">
+          <p className="mb-2 font-semibold text-blue-300">青チーム</p>
           <div className="space-y-2">
             {blueTeam.map((player) => (
               <div
                 key={player.playerId}
-                className="flex items-center justify-between rounded bg-white px-2 py-2 text-sm"
+                className="flex items-center justify-between rounded bg-[#0c1a35] px-2 py-2 text-sm"
               >
                 <div>
-                  <p className="font-medium text-slate-800">
+                  <p className="font-medium text-[var(--tb-text-primary)]">
                     {player.playerName}
                   </p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-[var(--tb-text-secondary)]">
                     {player.role} / {player.result}
                   </p>
                 </div>
@@ -128,19 +128,19 @@ const MatchHistoryAccordion: React.FC<MatchHistoryAccordionProps> = ({
           </div>
         </div>
 
-        <div className="rounded border border-red-200 bg-red-50 p-3">
-          <p className="mb-2 font-semibold text-red-700">赤チーム</p>
+        <div className="rounded border border-red-500/30 bg-red-500/10 p-3">
+          <p className="mb-2 font-semibold text-red-300">赤チーム</p>
           <div className="space-y-2">
             {redTeam.map((player) => (
               <div
                 key={player.playerId}
-                className="flex items-center justify-between rounded bg-white px-2 py-2 text-sm"
+                className="flex items-center justify-between rounded bg-[#0c1a35] px-2 py-2 text-sm"
               >
                 <div>
-                  <p className="font-medium text-slate-800">
+                  <p className="font-medium text-[var(--tb-text-primary)]">
                     {player.playerName}
                   </p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-[var(--tb-text-secondary)]">
                     {player.role} / {player.result}
                   </p>
                 </div>

@@ -36,23 +36,23 @@ const MatchHistoryPanel: React.FC<MatchHistoryPanelProps> = ({
 }) => {
   if (histories.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-600">
+      <div className="rounded-lg border border-dashed border-[var(--tb-border)] bg-[#0f1a34] px-4 py-6 text-sm text-[var(--tb-text-secondary)]">
         まだ試合履歴はありません。分割結果で勝敗を確定すると履歴が追加されます。
       </div>
     )
   }
 
   return (
-    <div className="overflow-hidden rounded-md border border-slate-300 bg-slate-100">
+    <div className="overflow-hidden rounded-md border border-[var(--tb-border)] bg-[#0f1a34]">
       <div
         data-testid="match-history-list"
-        className="max-h-80 divide-y divide-slate-200 overflow-y-auto"
+        className="max-h-80 divide-y divide-[var(--tb-border)] overflow-y-auto"
       >
         {histories.map((history) => {
           const rowToneClass =
             history.winnerTeam === 'blue'
-              ? 'border-l-blue-500 bg-blue-50/80 hover:bg-blue-100/70'
-              : 'border-l-rose-500 bg-rose-50/80 hover:bg-rose-100/70'
+              ? 'border-l-blue-500 bg-blue-950/40 hover:bg-blue-900/60'
+              : 'border-l-rose-500 bg-rose-950/40 hover:bg-rose-900/60'
           const badgeToneClass =
             history.winnerTeam === 'blue'
               ? 'bg-blue-600 text-white'
@@ -63,7 +63,7 @@ const MatchHistoryPanel: React.FC<MatchHistoryPanelProps> = ({
               <button
                 data-testid="match-history-row"
                 onClick={() => onToggleHistory(history.id)}
-                className={`block w-full border-l-4 px-3 py-2 text-left text-xs text-slate-700 transition-colors ${rowToneClass}`}
+                className={`block w-full border-l-4 px-3 py-2 text-left text-xs text-[var(--tb-text-primary)] transition-colors ${rowToneClass}`}
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
@@ -74,7 +74,7 @@ const MatchHistoryPanel: React.FC<MatchHistoryPanelProps> = ({
                         ? '青チーム勝利'
                         : '赤チーム勝利'}
                     </span>
-                    <span className="font-semibold text-slate-800">
+                    <span className="font-semibold text-[var(--tb-text-primary)]">
                       {formatPlayedAt(history.playedAt)}
                     </span>
                   </div>

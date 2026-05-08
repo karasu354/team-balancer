@@ -50,27 +50,6 @@ const PlayerInputForm: React.FC<PlayerInputFormProps> = ({
 
   return (
     <div className="w-full rounded-xl border border-[var(--tb-border)] bg-[#0f1a34] p-3">
-      <div className="mb-3 rounded-xl border border-[var(--tb-border)] bg-[var(--tb-surface)] p-3">
-        <p className="text-xs text-[var(--tb-text-secondary)]">
-          入力プレビュー
-        </p>
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          <span
-            className={`rounded-full border px-2 py-1 text-xs font-semibold ${
-              tierBadgeClassMap[preview.tier]
-            }`}
-          >
-            {preview.displayRank}
-          </span>
-          <span className="rounded-full border border-[var(--tb-border)] bg-[#0b1730] px-2 py-1 text-xs text-[var(--tb-text-primary)]">
-            レート予測: {preview.rating}
-          </span>
-          <span className="rounded-full border border-[var(--tb-border)] bg-[#0b1730] px-2 py-1 text-xs text-[var(--tb-text-secondary)]">
-            希望ロール: {preview.desiredRoles.join(', ')}
-          </span>
-        </div>
-      </div>
-
       <button
         type="button"
         onClick={() => setIsExpanded((prev) => !prev)}
@@ -105,6 +84,27 @@ const PlayerInputForm: React.FC<PlayerInputFormProps> = ({
                 onAppUpdate={onAppUpdate}
               />
             )}
+          </div>
+
+          <div className="mt-4 rounded-xl border border-[var(--tb-border)] bg-[var(--tb-surface)] p-3">
+            <p className="text-xs text-[var(--tb-text-secondary)]">
+              入力プレビュー
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <span
+                className={`rounded-full border px-2 py-1 text-xs font-semibold ${
+                  tierBadgeClassMap[preview.tier]
+                }`}
+              >
+                {preview.displayRank}
+              </span>
+              <span className="rounded-full border border-[var(--tb-border)] bg-[#0b1730] px-2 py-1 text-xs text-[var(--tb-text-primary)]">
+                レート予測: {preview.rating}
+              </span>
+              <span className="rounded-full border border-[var(--tb-border)] bg-[#0b1730] px-2 py-1 text-xs text-[var(--tb-text-secondary)]">
+                希望ロール: {preview.desiredRoles.join(', ')}
+              </span>
+            </div>
           </div>
         </>
       ) : (
